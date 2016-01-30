@@ -10,13 +10,9 @@ let main argv =
     SDL.init(SDL.SDL_INIT_VIDEO ||| SDL.SDL_INIT_EVENTS)
     |> printfn "Init Result = %b"
 
-    let error = SDLError.get()
+    let mainWindow = SDLWindow.create "test" 0 0 640 480 (4 |> uint32)
 
-    SDLError.set "test"
-    let error2 = SDLError.get()
-
-    SDLError.clear()
-    let error3 = SDLError.get()
+    SDLWindow.destroy mainWindow
 
     SDL.quit()
 
