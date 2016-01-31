@@ -4,11 +4,8 @@ open System
 let rec eventPump window renderer =
     let event = SDLEvent.waitEvent()
     match event with
-    | Some x -> 
-        if x.[0] = 2uy && x.[1] = 4uy then
-            ()
-        else
-            eventPump window renderer
+    | Some (SDLEvent.MouseButtonUp x) -> ()
+    | Some _ -> eventPump window renderer
     | None -> ()
 
 [<EntryPoint>]
