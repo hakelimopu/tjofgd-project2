@@ -83,8 +83,8 @@
     <Compile Include="SDL\SDLVersion.fs" />
     <Compile Include="SDL\SDLError.fs" />
     <Compile Include="SDL\SDLEvent.fs" />
-    <Compile Include="SDL\SDLRender.fs" />
     <Compile Include="SDL\SDLWindow.fs" />
+    <Compile Include="SDL\SDLRender.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="README-SDL.txt">
