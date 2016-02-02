@@ -84,6 +84,8 @@
     <Compile Include="SDL\SDLError.fs" />
     <Compile Include="SDL\SDLEvent.fs" />
     <Compile Include="SDL\SDLWindow.fs" />
+    <Compile Include="SDL\SDLPixel.fs" />
+    <Compile Include="SDL\SDLTexture.fs" />
     <Compile Include="SDL\SDLRender.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
