@@ -2,6 +2,7 @@
 
 open System.Runtime.InteropServices
 open System
+open SDLUtility
 
 let SDL_WINDOW_FULLSCREEN         = 0x00000001u      (* fullscreen window *)
 let SDL_WINDOW_OPENGL             = 0x00000002u      (* window usable with OpenGL context *)
@@ -27,9 +28,9 @@ module private SDLWindowNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_DestroyWindow(Window window);
 
-let create (title:string) (x:int) (y:int) (w:int) (h:int) (flags:uint32) :Window =
+let create (title:string) (x:int<px>) (y:int<px>) (w:int<px>) (h:int<px>) (flags:uint32) :Window =
     title
-    |> SDLUtility.withUtf8String (fun ptr -> SDLWindowNative.SDL_CreateWindow(ptr, x, y, w, h, flags))
+    |> SDLUtility.withUtf8String (fun ptr -> SDLWindowNative.SDL_CreateWindow(ptr, x |> int, y |> int, w |> int, h |> int, flags))
     
 let destroy (window:Window) =
     SDLWindowNative.SDL_DestroyWindow(window)

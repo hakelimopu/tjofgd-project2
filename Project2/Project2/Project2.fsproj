@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SDL\SDLUtility.fs" />
+    <Compile Include="SDL\SDLGeometry.fs" />
     <Compile Include="SDL\SDL.fs" />
     <Compile Include="SDL\SDLVersion.fs" />
     <Compile Include="SDL\SDLError.fs" />

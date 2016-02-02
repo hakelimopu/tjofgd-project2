@@ -1,24 +1,44 @@
 ﻿module SDL
 
 open System.Runtime.InteropServices
+open System
 
 module private SDLInitNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_Init(uint32 flags)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_Quit()
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_InitSubSystem(uint32 flags)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_QuitSubSystem(uint32 flags)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern uint32 SDL_WasInit(uint32 flags)
 
-let SDL_INIT_TIMER          = 0x00000001u
-let SDL_INIT_AUDIO          = 0x00000010u
-let SDL_INIT_VIDEO          = 0x00000020u  (* SDL_INIT_VIDEO implies SDL_INIT_EVENTS *)
-let SDL_INIT_JOYSTICK       = 0x00000200u  (*  SDL_INIT_JOYSTICK implies SDL_INIT_EVENTS *)
-let SDL_INIT_HAPTIC         = 0x00001000u
-let SDL_INIT_GAMECONTROLLER = 0x00002000u  (*  SDL_INIT_GAMECONTROLLER implies SDL_INIT_JOYSTICK *)
-let SDL_INIT_EVENTS         = 0x00004000u
-let SDL_INIT_EVERYTHING     = (SDL_INIT_TIMER ||| SDL_INIT_AUDIO ||| SDL_INIT_VIDEO ||| SDL_INIT_EVENTS ||| SDL_INIT_JOYSTICK ||| SDL_INIT_HAPTIC ||| SDL_INIT_GAMECONTROLLER)
 
-let init (flags: uint32) :bool=
-    SDLInitNative.SDL_Init(flags) = 0
+[<Flags>]
+type Init =
+    | Timer          = 0x00000001
+    | Audio          = 0x00000010
+    | Video          = 0x00000020
+    | Joystick       = 0x00000200
+    | Haptic         = 0x00001000
+    | GameController = 0x00002000
+    | Events         = 0x00004000
+    | Everything     = 0x00007231
 
-let quit () =
+let wasInit (flags:Init) :Init =
+    SDLInitNative.SDL_WasInit(flags |> uint32) |> int |> enum<Init>
+
+let init (flags: Init) :bool =
+    0 = SDLInitNative.SDL_Init(flags |> uint32)
+
+let initSubSystem (flags: Init) :bool =
+    0 = SDLInitNative.SDL_InitSubSystem(flags |> uint32)
+
+let quitSubSystem (flags: Init) :unit =
+    SDLInitNative.SDL_QuitSubSystem(flags |> uint32)
+
+let quit () : unit=
     SDLInitNative.SDL_Quit()
+

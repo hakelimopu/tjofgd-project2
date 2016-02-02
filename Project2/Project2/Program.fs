@@ -1,5 +1,6 @@
 ﻿open System.Runtime.InteropServices
 open System
+open SDLUtility
 
 let rec eventPump window renderer texture =
     renderer |> SDLRender.setDrawColor (255uy,0uy,255uy,255uy) |> ignore
@@ -19,10 +20,13 @@ let main argv =
     (version.Major, version.Minor, version.Patch)
     |||> printfn "SDL Version = %i.%i.%i"
 
-    SDL.init(SDL.SDL_INIT_VIDEO ||| SDL.SDL_INIT_EVENTS)
+    (SDLVersion.getRevision(),SDLVersion.getRevisionNumber())
+    ||> printfn "Revision = '%s'\r\nRevision Number = %i"
+
+    SDL.init(SDL.Init.Video ||| SDL.Init.Events)
     |> printfn "Init Result = %b"
 
-    let mainWindow = SDLWindow.create "test" 0 0 640 480 0u
+    let mainWindow = SDLWindow.create "test" 100<px> 100<px> 640<px> 480<px> 0u
 
     let mainRenderer = SDLRender.create mainWindow -1 SDLRender.SDL_RENDERER_ACCELERATED
 
@@ -41,7 +45,7 @@ let main argv =
     SDL.quit()
 
     printfn "All done! Press any key."
-    Console.ReadKey()
-    |> ignore
+//    Console.ReadKey()
+//    |> ignore
 
     0

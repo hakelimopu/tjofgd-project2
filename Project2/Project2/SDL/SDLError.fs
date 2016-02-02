@@ -16,20 +16,6 @@ module private SDLErrorNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
     extern int SDL_SetError(IntPtr fmt)
 
-let private intPtrToStringUtf8 (ptr:IntPtr): string =
-    if ptr = IntPtr.Zero then
-        null
-    else
-        let mutable bytePtr = 
-            ptr
-            |> nativeint
-            |> NativePtr.ofNativeInt<byte>
-        let mutable byteSequence = Seq.empty<byte>
-        while (bytePtr |> NativePtr.read) <> 0uy do
-            byteSequence <- [bytePtr |> NativePtr.read] |> Seq.append byteSequence
-            bytePtr <- 1 |> NativePtr.add bytePtr
-        Encoding.UTF8.GetString(byteSequence |> Seq.toArray)
-
 let set (errorString:string) =
     errorString
     |> SDLUtility.withUtf8String (fun ptr -> SDLErrorNative.SDL_SetError(ptr) |> ignore)
