@@ -32,14 +32,15 @@ module private SDLSurfaceNative =
     extern Surface SDL_CreateRGBSurface(uint32 flags, int width, int height, int depth, uint32 Rmask, uint32 Gmask, uint32 Bmask, uint32 Amask)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_FreeSurface(Surface surface);    
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_FillRect(Surface dst, SDL_Rect& rect, uint32 color)
 
 let createRGB (width:int<px>,height:int<px>,depth:int<bit/px>) (rmask:uint32,gmask:uint32,bmask:uint32,amask:uint32) =
-    let ptr = SDLSurfaceNative.SDL_CreateRGBSurface(0u,width/1<px>,height/1<px>,depth/1<bit/px>,rmask,gmask,bmask,amask)
-    let psurf = ptr |> NativePtr.ofNativeInt<SDL_Surface>
-    let surf = psurf |> NativePtr.read
-    let ppixels = surf.pixels |> NativePtr.ofNativeInt<uint32>
-    0xFFFFFFFFu |> NativePtr.write ppixels
-    ptr
+    SDLSurfaceNative.SDL_CreateRGBSurface(0u,width/1<px>,height/1<px>,depth/1<bit/px>,rmask,gmask,bmask,amask)
 
 let free (surface:Surface) :unit =
     SDLSurfaceNative.SDL_FreeSurface(surface)
+
+let fillRect (rect:Rectangle) (color:uint32) (surface:Surface) :bool =
+    let mutable r = rect |> rectangleToSDL_Rect
+    0 = SDLSurfaceNative.SDL_FillRect(surface,&r,color)
