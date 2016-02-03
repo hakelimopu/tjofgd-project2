@@ -1,5 +1,6 @@
 ﻿open SDLUtility
 open SDLGeometry
+open System
 
 let rec eventPump window renderer texture =
     let screenSpace = {X=0<px>;Y=0<px>;Width=80<px>;Height=120<px>}
@@ -31,7 +32,7 @@ let main argv =
 
     let mainRenderer = SDLRender.create mainWindow -1 SDLRender.SDL_RENDERER_ACCELERATED
 
-    let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.SDL_PIXELFORMAT_ARGB8888 SDLTexture.SDL_TEXTUREACCESS_STREAMING (160<px>,120<px>)
+    let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.ARGB8888 SDLTexture.SDL_TEXTUREACCESS_STREAMING (160<px>,120<px>)
 
     mainRenderer |> SDLRender.setLogicalSize (160<px>,120<px>) |> ignore
 
@@ -46,7 +47,7 @@ let main argv =
     SDL.quit()
 
     printfn "All done! Press any key."
-//    Console.ReadKey()
-//    |> ignore
+    Console.ReadKey()
+    |> ignore
 
     0

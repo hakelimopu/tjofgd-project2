@@ -1,6 +1,6 @@
 ﻿module SDLVersion
 
-#nowarn "9" //Dear Compiler, Quiet you! Love, Me.
+#nowarn "9" 
 
 open System.Runtime.InteropServices
 open System

@@ -1,43 +1,95 @@
 ﻿module SDLPixel
 
-let SDL_PIXELTYPE_UNKNOWN=0
-let SDL_PIXELTYPE_INDEX1=1
-let SDL_PIXELTYPE_INDEX4=2
-let SDL_PIXELTYPE_INDEX8=3
-let SDL_PIXELTYPE_PACKED8=4
-let SDL_PIXELTYPE_PACKED16=5
-let SDL_PIXELTYPE_PACKED32=6
-let SDL_PIXELTYPE_ARRAYU8=7
-let SDL_PIXELTYPE_ARRAYU16=8
-let SDL_PIXELTYPE_ARRAYU32=9
-let SDL_PIXELTYPE_ARRAYF16=10
-let SDL_PIXELTYPE_ARRAYF32=11
+open System.Runtime.InteropServices
+open System
 
-let SDL_PACKEDORDER_NONE=0
-let SDL_PACKEDORDER_XRGB=1
-let SDL_PACKEDORDER_RGBX=2
-let SDL_PACKEDORDER_ARGB=3
-let SDL_PACKEDORDER_RGBA=4
-let SDL_PACKEDORDER_XBGR=5
-let SDL_PACKEDORDER_BGRX=6
-let SDL_PACKEDORDER_ABGR=7
-let SDL_PACKEDORDER_BGRA=8
+#nowarn "9"
 
-let SDL_PACKEDLAYOUT_NONE=0
-let SDL_PACKEDLAYOUT_332=1
-let SDL_PACKEDLAYOUT_4444=2
-let SDL_PACKEDLAYOUT_1555=3
-let SDL_PACKEDLAYOUT_5551=4
-let SDL_PACKEDLAYOUT_565=5
-let SDL_PACKEDLAYOUT_8888=6
-let SDL_PACKEDLAYOUT_2101010=7
-let SDL_PACKEDLAYOUT_1010102=9
+type PixelType =
+    | Unknown=0
+    | Index1=1
+    | Index4=2
+    | Index8=3
+    | Packed8=4
+    | Packed16=5
+    | Packed32=6
+    | ArrayU8=7
+    | ArrayU16=8
+    | ArrayU32=9
+    | ArrayF16=10
+    | ArrayF32=11
 
-let SDL_DEFINE_PIXELFORMAT (typ, order, layout, bits, bytes) =
+type PackedOrder =
+    | None=0
+    | XRGB=1
+    | RGBX=2
+    | ARGB=3
+    | RGBA=4
+    | XBGR=5
+    | BGRX=6
+    | ABGR=7
+    | BGRA=8
+
+type PackedLayout =
+    | None=0
+    | _332=1
+    | _4444=2
+    | _1555=3
+    | _5551=4
+    | _565=5
+    | _8888=6
+    | _2101010=7
+    | _1010102=9
+
+let private DefinePixelFormat (typ, order, layout, bits, bytes) =
     ((1 <<< 28) ||| ((typ) <<< 24) ||| ((order) <<< 20) ||| ((layout) <<< 16) ||| ((bits) <<< 8) ||| ((bytes) <<< 0)) |> uint32
 
-let SDL_PIXELFORMAT_ARGB8888 =
-    SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ARGB, SDL_PACKEDLAYOUT_8888, 32, 4)
+let ARGB8888 =
+    DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.ARGB |> int, PackedLayout._8888 |> int, 32, 4)
+
+[<StructLayout(LayoutKind.Sequential)>]
+type SDL_Color =
+    struct
+        val r: uint8
+        val g: uint8
+        val b: uint8
+        val a: uint8
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type SDL_Palette =
+    struct
+        val ncolors: int
+        val colors: IntPtr //SDL_Color*
+        val version: uint32;
+        val refcount: int;
+    end
+
+
+[<StructLayout(LayoutKind.Sequential)>]
+type SDL_PixelFormat =
+    struct
+        val format: uint32
+        val palette: IntPtr//SDL_Palette*
+        val BitsPerPixel: uint8
+        val BytesPerPixel: uint8
+        val padding: uint16
+        val Rmask: uint32
+        val Gmask: uint32
+        val Bmask: uint32
+        val Amask: uint32
+        val Rloss: uint8
+        val Gloss: uint8
+        val Bloss: uint8
+        val Aloss: uint8
+        val Rshift: uint8
+        val Gshift: uint8
+        val Bshift: uint8
+        val Ashift: uint8
+        val refcount: int
+        val next: IntPtr;//SDL_PixelFormat*
+    end
+
 
 
 
