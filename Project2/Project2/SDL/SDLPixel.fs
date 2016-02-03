@@ -19,6 +19,11 @@ type PixelType =
     | ArrayF16=10
     | ArrayF32=11
 
+type BitmapOrder =
+    | None=0
+    | _4321=1
+    | _1234=2
+
 type PackedOrder =
     | None=0
     | XRGB=1
@@ -29,6 +34,16 @@ type PackedOrder =
     | BGRX=6
     | ABGR=7
     | BGRA=8
+
+type ArrayOrder =
+    | None=0
+    | RGB=1
+    | RGBA=2
+    | ARGB=3
+    | BGR=4
+    | BGRA=5
+    | ABGR=6
+
 
 type PackedLayout =
     | None=0
@@ -44,8 +59,38 @@ type PackedLayout =
 let private DefinePixelFormat (typ, order, layout, bits, bytes) =
     ((1 <<< 28) ||| ((typ) <<< 24) ||| ((order) <<< 20) ||| ((layout) <<< 16) ||| ((bits) <<< 8) ||| ((bytes) <<< 0)) |> uint32
 
-let ARGB8888 =
-    DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.ARGB |> int, PackedLayout._8888 |> int, 32, 4)
+
+let UnknownFormat     = 0
+let Index1LSBFormat   = DefinePixelFormat(PixelType.Index1   |> int, BitmapOrder._4321  |> int, 0                     |> int,  1, 0)
+let Index1MSBFormat   = DefinePixelFormat(PixelType.Index1   |> int, BitmapOrder._1234  |> int, 0                     |> int,  1, 0)
+let Index4LSBFormat   = DefinePixelFormat(PixelType.Index4   |> int, BitmapOrder._4321  |> int, 0                     |> int,  4, 0)
+let Index4MSBFormat   = DefinePixelFormat(PixelType.Index4   |> int, BitmapOrder._1234  |> int, 0                     |> int,  4, 0)
+let Index8Format      = DefinePixelFormat(PixelType.Index8   |> int, 0                  |> int, 0                     |> int,  8, 1)
+let RGB332Format      = DefinePixelFormat(PixelType.Packed8  |> int, PackedOrder.XRGB   |> int, PackedLayout._332     |> int,  8, 1)
+let RGB444Format      = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.XRGB   |> int, PackedLayout._4444    |> int, 12, 2)
+let RGB555Format      = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.XRGB   |> int, PackedLayout._1555    |> int, 15, 2)
+let BGR555Format      = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.XBGR   |> int, PackedLayout._1555    |> int, 15, 2)
+let ARGB4444Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.ARGB   |> int, PackedLayout._4444    |> int, 16, 2)
+let RGBA4444Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.RGBA   |> int, PackedLayout._4444    |> int, 16, 2)
+let ABGR4444Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.ABGR   |> int, PackedLayout._4444    |> int, 16, 2)
+let BGRA4444Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.BGRA   |> int, PackedLayout._4444    |> int, 16, 2)
+let ARGB1555Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.ARGB   |> int, PackedLayout._1555    |> int, 16, 2)
+let RGBA5551Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.RGBA   |> int, PackedLayout._5551    |> int, 16, 2)
+let ABGR1555Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.ABGR   |> int, PackedLayout._1555    |> int, 16, 2)
+let BGRA5551Format    = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.BGRA   |> int, PackedLayout._5551    |> int, 16, 2)
+let RGB565Format      = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.XRGB   |> int, PackedLayout._565     |> int, 16, 2)
+let BGR565Format      = DefinePixelFormat(PixelType.Packed16 |> int, PackedOrder.XBGR   |> int, PackedLayout._565     |> int, 16, 2)
+let RGB24Format       = DefinePixelFormat(PixelType.ArrayU8  |> int, ArrayOrder.RGB     |> int, 0                     |> int, 24, 3)
+let BGR24Format       = DefinePixelFormat(PixelType.ArrayU8  |> int, ArrayOrder.BGR     |> int, 0                     |> int, 24, 3)
+let RGB888Format      = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.XRGB   |> int, PackedLayout._8888    |> int, 24, 4)
+let RGBX8888Format    = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.RGBX   |> int, PackedLayout._8888    |> int, 24, 4)
+let BGR888Format      = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.XBGR   |> int, PackedLayout._8888    |> int, 24, 4)
+let BGRX8888Format    = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.BGRX   |> int, PackedLayout._8888    |> int, 24, 4)
+let ARGB8888Format    = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.ARGB   |> int, PackedLayout._8888    |> int, 32, 4)
+let RGBA8888Format    = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.RGBA   |> int, PackedLayout._8888    |> int, 32, 4)
+let ABGR8888Format    = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.ABGR   |> int, PackedLayout._8888    |> int, 32, 4)
+let BGRA8888Format    = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.BGRA   |> int, PackedLayout._8888    |> int, 32, 4)
+let ARGB2101010Format = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.ARGB   |> int, PackedLayout._2101010 |> int, 32, 4)
 
 [<StructLayout(LayoutKind.Sequential)>]
 type SDL_Color =
@@ -60,9 +105,9 @@ type SDL_Color =
 type SDL_Palette =
     struct
         val ncolors: int
-        val colors: IntPtr //SDL_Color*
-        val version: uint32;
-        val refcount: int;
+        val colors: IntPtr
+        val version: uint32
+        val refcount: int
     end
 
 

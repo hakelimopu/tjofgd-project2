@@ -9,6 +9,7 @@ open Microsoft.FSharp.NativeInterop
 
 
 [<Measure>] type px
+[<Measure>] type bit
 
 let withUtf8String (func: IntPtr->'T) (text:string) =
     let bytes = Encoding.UTF8.GetBytes(text)

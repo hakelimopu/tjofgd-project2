@@ -7,13 +7,13 @@ open System
 open SDLUtility
 open SDLGeometry
 
-let SDL_RENDERER_SOFTWARE      = 0x00000001u     (* The renderer is a software fallback *)
-let SDL_RENDERER_ACCELERATED   = 0x00000002u     (* The renderer uses hardware
-                                                    acceleration *)
-let SDL_RENDERER_PRESENTVSYNC  = 0x00000004u     (* Present is synchronized
-                                                    with the refresh rate *)
-let SDL_RENDERER_TARGETTEXTURE = 0x00000008u     (* The renderer supports
-                                                    rendering to texture *)
+[<Flags>]
+type Flags = 
+    | Software      = 0x00000001
+    | Accelerated   = 0x00000002
+    | PresentVSync  = 0x00000004
+    | TargetTexture = 0x00000008
+                                           
 type Renderer = IntPtr
 
 module private SDLRenderNative =
@@ -32,8 +32,8 @@ module private SDLRenderNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_RenderCopy(Renderer renderer, SDLTexture.Texture texture, SDL_Rect& srcrect, SDL_Rect& dstrect);
 
-let create (window:SDLWindow.Window) (index:int) (flags:uint32) :Renderer =
-    SDLRenderNative.SDL_CreateRenderer(window, index, flags)
+let create (window:SDLWindow.Window) (index:int) (flags:Flags) :Renderer =
+    SDLRenderNative.SDL_CreateRenderer(window, index, flags |> uint32)
 
 let destroy (renderer:Renderer) :unit =
     SDLRenderNative.SDL_DestroyRenderer(renderer)

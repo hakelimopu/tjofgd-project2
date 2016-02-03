@@ -30,9 +30,14 @@ let main argv =
 
     let mainWindow = SDLWindow.create "test" 100<px> 100<px> 640<px> 480<px> 0u
 
-    let mainRenderer = SDLRender.create mainWindow -1 SDLRender.SDL_RENDERER_ACCELERATED
+    let mainRenderer = SDLRender.create mainWindow -1 SDLRender.Flags.Accelerated
 
-    let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.ARGB8888 SDLTexture.SDL_TEXTUREACCESS_STREAMING (160<px>,120<px>)
+    let surface = SDLSurface.createRGB (160<px>,120<px>,32<bit/px>) (0x00FF0000u,0x0000FF00u,0x000000FFu,0xFF000000u)
+   
+    //let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.ARGB8888Format SDLTexture.Access.Streaming (160<px>,120<px>)
+    let mainTexture = surface |> SDLTexture.fromSurface mainRenderer
+
+    surface |> SDLSurface.free
 
     mainRenderer |> SDLRender.setLogicalSize (160<px>,120<px>) |> ignore
 
