@@ -1,14 +1,15 @@
-﻿open System.Runtime.InteropServices
-open System
-open SDLUtility
+﻿open SDLUtility
+open SDLGeometry
 
 let rec eventPump window renderer texture =
+    let screenSpace = {X=0<px>;Y=0<px>;Width=80<px>;Height=120<px>}
+
     renderer |> SDLRender.setDrawColor (255uy,0uy,255uy,255uy) |> ignore
     renderer |> SDLRender.clear |> ignore
-    renderer |> SDLRender.copy texture IntPtr.Zero IntPtr.Zero |> ignore
+    renderer |> SDLRender.copy texture screenSpace screenSpace |> ignore
     renderer |> SDLRender.present 
-    let event = SDLEvent.waitEvent()
-    match event with
+
+    match SDLEvent.waitEvent() with
     | Some (SDLEvent.MouseButtonUp x) -> ()
     | Some _ -> eventPump window renderer texture
     | None -> ()
@@ -30,9 +31,9 @@ let main argv =
 
     let mainRenderer = SDLRender.create mainWindow -1 SDLRender.SDL_RENDERER_ACCELERATED
 
-    let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.SDL_PIXELFORMAT_ARGB8888 SDLTexture.SDL_TEXTUREACCESS_STREAMING (160,120)
+    let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.SDL_PIXELFORMAT_ARGB8888 SDLTexture.SDL_TEXTUREACCESS_STREAMING (160<px>,120<px>)
 
-    mainRenderer |> SDLRender.setLogicalSize (160,120) |> ignore
+    mainRenderer |> SDLRender.setLogicalSize (160<px>,120<px>) |> ignore
 
     eventPump mainWindow mainRenderer mainTexture
 

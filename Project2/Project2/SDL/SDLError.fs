@@ -4,8 +4,6 @@
 
 open System.Runtime.InteropServices
 open System
-open Microsoft.FSharp.NativeInterop
-open System.Text
 open SDLUtility
 
 module private SDLErrorNative = 
