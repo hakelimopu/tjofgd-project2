@@ -6,7 +6,7 @@ open System.Runtime.InteropServices
 open System
 
 [<StructLayout(LayoutKind.Sequential)>]
-type private SDL_version =
+type internal SDL_version =
     struct
         val major: uint8
         val minor: uint8

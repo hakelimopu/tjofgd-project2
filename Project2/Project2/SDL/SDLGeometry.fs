@@ -6,7 +6,7 @@ open System.Runtime.InteropServices
 open SDLUtility
 
 [<StructLayout(LayoutKind.Sequential)>]
-type private SDL_Point =
+type internal SDL_Point =
     struct
         val mutable x: int
         val mutable y: int
@@ -14,7 +14,7 @@ type private SDL_Point =
 
 //needed elsewhere, so not private
 [<StructLayout(LayoutKind.Sequential)>]
-type SDL_Rect = 
+type internal SDL_Rect = 
     struct
         val mutable x :int
         val mutable y :int
@@ -38,7 +38,7 @@ type Point = {X: int<px>; Y: int<px>}
 
 type Rectangle = {X: int<px>; Y: int<px>; Width: int<px>; Height: int<px>}
 
-let rectangleToSDL_Rect (r:Rectangle) :SDL_Rect =
+let internal rectangleToSDL_Rect (r:Rectangle) :SDL_Rect =
     let mutable result = new SDL_Rect()
     result.x <- r.X |> int
     result.y <- r.Y |> int
@@ -52,7 +52,7 @@ let private pointToSDL_Point (p:Point) :SDL_Point =
     result.y <- p.Y |> int
     result
 
-let sdl_RectToRectangle (r:SDL_Rect) :Rectangle =
+let internal sdl_RectToRectangle (r:SDL_Rect) :Rectangle =
     {X = r.x * 1<px>; Y=r.y * 1<px>; Width=r.w * 1<px>; Height=r.h * 1<px>}
 
 let private sdl_PointToPoint (p:SDL_Point) :Point =

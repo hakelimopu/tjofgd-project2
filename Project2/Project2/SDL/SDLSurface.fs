@@ -9,7 +9,7 @@ open Microsoft.FSharp.NativeInterop
 #nowarn "9"
 
 [<StructLayout(LayoutKind.Sequential)>]
-type SDL_Surface =
+type internal SDL_Surface =
     struct
         val flags :uint32
         val format: IntPtr//SDL_PixelFormat*

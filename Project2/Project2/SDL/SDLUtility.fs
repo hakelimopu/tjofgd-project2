@@ -11,7 +11,7 @@ open Microsoft.FSharp.NativeInterop
 [<Measure>] type px
 [<Measure>] type bit
 
-let withUtf8String (func: IntPtr->'T) (text:string) =
+let internal withUtf8String (func: IntPtr->'T) (text:string) =
     let bytes = Encoding.UTF8.GetBytes(text)
     let pinnedArray = GCHandle.Alloc(bytes, GCHandleType.Pinned)
     let result = pinnedArray.AddrOfPinnedObject() |> func
@@ -19,7 +19,7 @@ let withUtf8String (func: IntPtr->'T) (text:string) =
     result
 
 
-let intPtrToStringUtf8 (ptr:IntPtr): string =
+let internal intPtrToStringUtf8 (ptr:IntPtr): string =
     if ptr = IntPtr.Zero then
         null
     else

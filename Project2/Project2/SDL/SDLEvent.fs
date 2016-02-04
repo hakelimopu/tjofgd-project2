@@ -6,14 +6,14 @@ open System.Runtime.InteropServices
 open System
 
 [<StructLayout(LayoutKind.Sequential)>]
-type private SDL_QuitEvent =
+type internal SDL_QuitEvent =
     struct
         val Type: uint32
         val Timestamp: uint32
     end
 
 [<StructLayout(LayoutKind.Sequential)>]
-type private SDL_Keysym = 
+type internal SDL_Keysym = 
     struct
         val Scancode: int32
         val Sym: int32
@@ -22,7 +22,7 @@ type private SDL_Keysym =
     end
 
 [<StructLayout(LayoutKind.Sequential)>]
-type private SDL_KeyboardEvent =
+type internal SDL_KeyboardEvent =
     struct
         val Type: uint32
         val Timestamp: uint32
@@ -34,7 +34,7 @@ type private SDL_KeyboardEvent =
         val Keysym: SDL_Keysym
     end
 
-type private SDL_MouseMotionEvent =
+type internal SDL_MouseMotionEvent =
     struct
         val Type: uint32
         val Timestamp: uint32
@@ -47,7 +47,7 @@ type private SDL_MouseMotionEvent =
         val Yrel: int32
     end
 
-type private SDL_MouseButtonEvent =
+type internal SDL_MouseButtonEvent =
     struct
         val Type: uint32
         val Timestamp: uint32
@@ -63,7 +63,7 @@ type private SDL_MouseButtonEvent =
 
 
 [<StructLayout(LayoutKind.Explicit, Size=56)>]
-type private SDL_Event =
+type internal SDL_Event =
     struct
         [<FieldOffset(0)>]
         val Type: uint32

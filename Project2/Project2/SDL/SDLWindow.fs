@@ -4,21 +4,22 @@ open System.Runtime.InteropServices
 open System
 open SDLUtility
 
-let SDL_WINDOW_FULLSCREEN         = 0x00000001u      (* fullscreen window *)
-let SDL_WINDOW_OPENGL             = 0x00000002u      (* window usable with OpenGL context *)
-let SDL_WINDOW_SHOWN              = 0x00000004u      (* window is visible *)
-let SDL_WINDOW_HIDDEN             = 0x00000008u      (* window is not visible *)
-let SDL_WINDOW_BORDERLESS         = 0x00000010u      (* no window decoration *)
-let SDL_WINDOW_RESIZABLE          = 0x00000020u      (* window can be resized *)
-let SDL_WINDOW_MINIMIZED          = 0x00000040u      (* window is minimized *)
-let SDL_WINDOW_MAXIMIZED          = 0x00000080u      (* window is maximized *)
-let SDL_WINDOW_INPUT_GRABBED      = 0x00000100u      (* window has grabbed input focus *)
-let SDL_WINDOW_INPUT_FOCUS        = 0x00000200u      (* window has input focus *)
-let SDL_WINDOW_MOUSE_FOCUS        = 0x00000400u      (* window has mouse focus *)
-let SDL_WINDOW_FULLSCREEN_DESKTOP = ( SDL_WINDOW_FULLSCREEN ||| 0x00001000u )
-let SDL_WINDOW_FOREIGN            = 0x00000800u      (* window not created by SDL *)
-let SDL_WINDOW_ALLOW_HIGHDPI      = 0x00002000u      (* window should be created in high-DPI mode if supported *)
-let SDL_WINDOW_MOUSE_CAPTURE      = 0x00004000u      (* window has mouse captured (unrelated to INPUT_GRABBED) *)
+type Flags = 
+    | FullScreen         = 0x00000001
+    | OpenGL             = 0x00000002
+    | Shown              = 0x00000004
+    | Hidden             = 0x00000008
+    | Borderless         = 0x00000010
+    | Resizable          = 0x00000020
+    | Minimized          = 0x00000040
+    | Maximized          = 0x00000080
+    | InputGrabbed       = 0x00000100
+    | InputFocus         = 0x00000200
+    | MouseFocus         = 0x00000400
+    | FullScreenDesktop  = 0x00001001
+    | Foreign            = 0x00000800
+    | AllowHighDPI       = 0x00002000
+    | MouseCapture       = 0x00004000
 
 type Window = IntPtr
 
