@@ -2,6 +2,8 @@
 
 open System.Runtime.InteropServices
 open System
+open SDLUtility
+open Microsoft.FSharp.NativeInterop
 
 #nowarn "9"
 
@@ -93,16 +95,16 @@ let BGRA8888Format    = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder
 let ARGB2101010Format = DefinePixelFormat(PixelType.Packed32 |> int, PackedOrder.ARGB   |> int, PackedLayout._2101010 |> int, 32, 4)
 
 [<StructLayout(LayoutKind.Sequential)>]
-type SDL_Color =
+type internal SDL_Color =
     struct
-        val r: uint8
-        val g: uint8
-        val b: uint8
-        val a: uint8
+        val mutable r: uint8
+        val mutable g: uint8
+        val mutable b: uint8
+        val mutable a: uint8
     end
 
 [<StructLayout(LayoutKind.Sequential)>]
-type SDL_Palette =
+type internal SDL_Palette =
     struct
         val ncolors: int
         val colors: IntPtr
@@ -112,7 +114,7 @@ type SDL_Palette =
 
 
 [<StructLayout(LayoutKind.Sequential)>]
-type SDL_PixelFormat =
+type internal SDL_PixelFormat =
     struct
         val format: uint32
         val palette: IntPtr//SDL_Palette*
@@ -135,7 +137,113 @@ type SDL_PixelFormat =
         val next: IntPtr;//SDL_PixelFormat*
     end
 
+module private SDLPixelNative =
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern IntPtr SDL_GetPixelFormatName(uint32 formatEnum)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_PixelFormatEnumToMasks(uint32 formatEnum,int* bpp,uint32* Rmask,uint32* Gmask,uint32* Bmask,uint32* Amask)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern uint32 SDL_MasksToPixelFormatEnum(int bpp,uint32 Rmask,uint32 Gmask,uint32 Bmask,uint32 Amask)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern IntPtr SDL_AllocFormat(uint32 formatEnum)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_FreeFormat(IntPtr format)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern IntPtr SDL_AllocPalette(int ncolors)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_SetPixelFormatPalette(IntPtr format,IntPtr palette)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_SetPaletteColors(IntPtr palette,SDL_Color* colors,int firstcolor, int ncolors)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_FreePalette(IntPtr palette)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern uint32 SDL_MapRGB(IntPtr format,uint8 r, uint8 g, uint8 b)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern uint32 SDL_MapRGBA(IntPtr format,uint8 r, uint8 g, uint8 b,uint8 a)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_GetRGB(uint32 pixel,IntPtr format,IntPtr r, IntPtr g, IntPtr b)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_GetRGBA(uint32 pixel,IntPtr format,IntPtr r, IntPtr g, IntPtr b,IntPtr a)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_CalculateGammaRamp(float gamma, IntPtr ramp)
 
+type Color =
+    {Red: uint8;Green: uint8;Blue :uint8; Alpha: uint8}
 
+type Palette = IntPtr
 
+type PixelFormat = IntPtr
 
+type PixelFormatInfo =
+    {Format: uint32;
+    Palette: Palette;
+    BitsPerPixel: int<bit/px>;
+    BytesPerPixel: int<bytes/px>}
+
+let formatEnumName (format:uint32) :string = 
+    SDLPixelNative.SDL_GetPixelFormatName(format)
+    |> intPtrToStringUtf8
+
+let formatEnumToMasks (formatEnum: uint32) : (int<bit/px>*uint32*uint32*uint32*uint32) option =
+    let mutable bpp=0
+    let mutable rmask=0u
+    let mutable gmask=0u
+    let mutable bmask=0u
+    let mutable amask=0u
+    if SDLPixelNative.SDL_PixelFormatEnumToMasks(formatEnum,&&bpp,&&rmask,&&gmask,&&bmask,&&amask) <> 0 then
+        Some (bpp*1<bit/px>,rmask,gmask,bmask,amask)
+    else
+        None
+
+let masksToFormatEnum (bpp:int<bit/px>,rmask:uint32,gmask:uint32,bmask:uint32,amask:uint32) :uint32 =
+    SDLPixelNative.SDL_MasksToPixelFormatEnum(bpp/1<bit/px>,rmask,gmask,bmask,amask)
+
+let alloc (formatEnum: uint32) :PixelFormat =
+    SDLPixelNative.SDL_AllocFormat formatEnum
+
+let free format =
+    SDLPixelNative.SDL_FreeFormat format
+
+let allocPalette colorCount =
+    SDLPixelNative.SDL_AllocPalette(colorCount)
+
+let freePalette palette =
+    SDLPixelNative.SDL_FreePalette(palette)
+
+let setPalette palette format =
+    0 = SDLPixelNative.SDL_SetPixelFormatPalette(format,palette)
+
+let setColor index (color:Color) palette =
+    let mutable c = new SDL_Color()
+    c.r <- color.Red
+    c.g <- color.Green
+    c.b <- color.Blue
+    c.a <- color.Alpha
+    0 = SDLPixelNative.SDL_SetPaletteColors(palette,&&c,index,1)
+
+let getColorCount (palette:IntPtr) : int=
+    if palette=IntPtr.Zero then
+        0
+    else
+        let pal = 
+            palette
+            |> NativePtr.ofNativeInt<SDL_Palette>
+            |> NativePtr.read
+        pal.ncolors
+
+let getColor (index:int) palette :Color option=
+    if palette = IntPtr.Zero || index<0 || index>= (palette |> getColorCount) then
+        None
+    else
+        let pal = 
+            palette
+            |> NativePtr.ofNativeInt<SDL_Palette>
+            |> NativePtr.read
+        let colors :nativeptr<SDL_Color> =
+            pal.colors
+            |> NativePtr.ofNativeInt<SDL_Color>
+        let color = 
+            NativePtr.add colors index
+            |> NativePtr.read
+        Some {Red=color.r;Green=color.g;Blue=color.b;Alpha=color.a}
+    

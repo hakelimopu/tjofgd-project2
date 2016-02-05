@@ -28,6 +28,10 @@ let main argv =
     SDL.init(SDL.Init.Video ||| SDL.Init.Events)
     |> printfn "Init Result = %b"
 
+    SDLPixel.RGBA8888Format 
+    |> SDLPixel.formatEnumName
+    |> printfn "Format Name = %s"
+
     let mainWindow = SDLWindow.create "test" 100<px> 100<px> 640<px> 480<px> 0u
 
     let mainRenderer = SDLRender.create mainWindow -1 SDLRender.Flags.Accelerated
@@ -37,8 +41,7 @@ let main argv =
     surface |> SDLSurface.fillRect {X=0<px>;Y=0<px>;Width=160<px>;Height=120<px>} 0xFF000000u |> ignore
     surface |> SDLSurface.fillRect {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>} 0xFFFFFFFFu |> ignore
    
-    //let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.ARGB8888Format SDLTexture.Access.Streaming (160<px>,120<px>)
-    let mainTexture = surface |> SDLTexture.fromSurface mainRenderer
+    let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.ARGB8888Format SDLTexture.Access.Streaming (160<px>,120<px>)
 
     surface |> SDLSurface.free
 
