@@ -140,30 +140,36 @@ type internal SDL_PixelFormat =
 module private SDLPixelNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_GetPixelFormatName(uint32 formatEnum)
+
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_PixelFormatEnumToMasks(uint32 formatEnum,int* bpp,uint32* Rmask,uint32* Gmask,uint32* Bmask,uint32* Amask)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern uint32 SDL_MasksToPixelFormatEnum(int bpp,uint32 Rmask,uint32 Gmask,uint32 Bmask,uint32 Amask)
+
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_AllocFormat(uint32 formatEnum)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_FreeFormat(IntPtr format)
+
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_AllocPalette(int ncolors)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_FreePalette(IntPtr palette)
+
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_SetPixelFormatPalette(IntPtr format,IntPtr palette)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_SetPaletteColors(IntPtr palette,SDL_Color* colors,int firstcolor, int ncolors)
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_FreePalette(IntPtr palette)
+
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern uint32 SDL_MapRGB(IntPtr format,uint8 r, uint8 g, uint8 b)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern uint32 SDL_MapRGBA(IntPtr format,uint8 r, uint8 g, uint8 b,uint8 a)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_GetRGB(uint32 pixel,IntPtr format,IntPtr r, IntPtr g, IntPtr b)
+
+    extern void SDL_GetRGB(uint32 pixel,IntPtr format,uint8* r, uint8* g, uint8* b)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_GetRGBA(uint32 pixel,IntPtr format,IntPtr r, IntPtr g, IntPtr b,IntPtr a)
+    extern void SDL_GetRGBA(uint32 pixel,IntPtr format,uint8* r, uint8* g, uint8* b,uint8* a)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_CalculateGammaRamp(float gamma, IntPtr ramp)
 
@@ -213,7 +219,7 @@ let freePalette palette =
 let setPalette palette format =
     0 = SDLPixelNative.SDL_SetPixelFormatPalette(format,palette)
 
-let setColor index (color:Color) palette =
+let setPaletteColor index (color:Color) palette =
     let mutable c = new SDL_Color()
     c.r <- color.Red
     c.g <- color.Green
@@ -221,7 +227,7 @@ let setColor index (color:Color) palette =
     c.a <- color.Alpha
     0 = SDLPixelNative.SDL_SetPaletteColors(palette,&&c,index,1)
 
-let getColorCount (palette:IntPtr) : int=
+let getPaletteColorCount (palette:IntPtr) : int=
     if palette=IntPtr.Zero then
         0
     else
@@ -231,8 +237,8 @@ let getColorCount (palette:IntPtr) : int=
             |> NativePtr.read
         pal.ncolors
 
-let getColor (index:int) palette :Color option=
-    if palette = IntPtr.Zero || index<0 || index>= (palette |> getColorCount) then
+let getPaletteColor (index:int) palette :Color option=
+    if palette = IntPtr.Zero || index<0 || index>= (palette |> getPaletteColorCount) then
         None
     else
         let pal = 
@@ -247,3 +253,13 @@ let getColor (index:int) palette :Color option=
             |> NativePtr.read
         Some {Red=color.r;Green=color.g;Blue=color.b;Alpha=color.a}
     
+let mapColor (format:PixelFormat) (color: Color) :uint32 = 
+    SDLPixelNative.SDL_MapRGBA(format,color.Red,color.Green,color.Blue,color.Alpha)
+
+let getColor (format:PixelFormat) (value:uint32) :Color =
+    let mutable r=0uy
+    let mutable g=0uy
+    let mutable b=0uy
+    let mutable a=0uy
+    SDLPixelNative.SDL_GetRGBA(value,format,&&r,&&g,&&b,&&a)
+    {Red=r;Green=g;Blue=b;Alpha=a}
