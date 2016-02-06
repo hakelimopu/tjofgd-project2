@@ -15,7 +15,6 @@ module private SDLInitNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern uint32 SDL_WasInit(uint32 flags)
 
-
 [<Flags>]
 type Init =
     | Timer          = 0x00000001

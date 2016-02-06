@@ -38,7 +38,7 @@ module private SDLRenderNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_RenderSetLogicalSize(Renderer renderer, int w, int h)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_RenderCopy(Renderer renderer, SDLTexture.Texture texture, SDL_Rect& srcrect, SDL_Rect& dstrect)
+    extern int SDL_RenderCopy(Renderer renderer, SDLTexture.Texture texture, SDL_Rect* srcrect, SDL_Rect* dstrect)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_GetNumRenderDrivers()
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -58,7 +58,7 @@ module private SDLRenderNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_SetRenderTarget(Renderer renderer, Texture texture)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern Texture  SDL_GetRenderTarget(Renderer renderer)
+    extern Texture SDL_GetRenderTarget(Renderer renderer)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_RenderGetLogicalSize(Renderer renderer, IntPtr w, IntPtr h)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -128,4 +128,4 @@ let setLogicalSize (w:int<px>,h:int<px>) (renderer:Renderer) =
 let copy texture (srcrect:Rectangle) (dstrect:Rectangle) (renderer:Renderer) =
     let mutable src = rectangleToSDL_Rect srcrect
     let mutable dst = rectangleToSDL_Rect dstrect
-    0 = SDLRenderNative.SDL_RenderCopy(renderer,texture,&src,&dst)
+    0 = SDLRenderNative.SDL_RenderCopy(renderer,texture,&&src,&&dst)

@@ -77,20 +77,59 @@ type internal SDL_Event =
         val Button: SDL_MouseButtonEvent
     end
 
-let SDL_QUIT            = 0x100u
-let SDL_KEYDOWN         = 0x300u
-let SDL_KEYUP           = 0x301u
-let SDL_TEXTEDITING     = 0x302u
-let SDL_TEXTINPUT       = 0x303u
-let SDL_KEYMAPCHANGED   = 0x304u
-let SDL_MOUSEMOTION     = 0x400u
-let SDL_MOUSEBUTTONDOWN = 0x401u
-let SDL_MOUSEBUTTONUP   = 0x402u
-let SDL_MOUSEWHEEL      = 0x403u
+type EventType =
+    | Quit                     = 0x100
+    | AppTerminating           = 0x101
+    | AppLowmemory             = 0x102
+    | AppWillEnterBackground   = 0x103
+    | AppDidEnterBackground    = 0x104
+    | AppWillEnterForeground   = 0x105
+    | AppDidEnterForeground    = 0x106
+    | WindowEvent              = 0x200
+    | SysWMEvent               = 0x201
+    | KeyDown                  = 0x300
+    | KeyUp                    = 0x301
+    | TextEditing              = 0x302
+    | TextInput                = 0x303
+    | KeyMapChanged            = 0x304
+    | MouseMotion              = 0x400
+    | MouseButtonDown          = 0x401
+    | MouseButtonUp            = 0x402
+    | MouseWheel               = 0x403
+    | JoyAxisMotion            = 0x600
+    | JoyBallMotion            = 0x601
+    | JoyHatMotion             = 0x602
+    | JoyButtonDown            = 0x603
+    | JoyButtonUp              = 0x604
+    | JoyDeviceAdded           = 0x605
+    | JoyDeviceRemoved         = 0x606
+    | ControllerAxisMotion     = 0x650 
+    | ControllerButtonDown     = 0x651   
+    | ControllerButtonUp       = 0x652
+    | ControllerDeviceAdded    = 0x653
+    | ControllerDeviceRemoved  = 0x654
+    | ControllerDeviceRemapped = 0x655
+    | FingerDown               = 0x700
+    | FingerUp                 = 0x701
+    | FingerMotion             = 0x702
+    | DollarGesture            = 0x800
+    | DollarRecord             = 0x801
+    | MultiGesture             = 0x802
+    | ClipboardUpdate          = 0x900 
+    | DropFile                 = 0x1000
+    | AudioDeviceAdded         = 0x1100
+    | AudioDeviceRemoved       = 0x1101      
+    | RenderTargetsReset       = 0x2000
+    | RenderDeviceReset        = 0x2001
+    | UserEvent                = 0x8000
+    | LastEvent                = 0xFFFF
 
 module private SDLEventNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_WaitEvent(SDL_Event& event);
+
+type QuitEvent =
+    {Timestamp:uint32}
 
 type Keysym =
     {Scancode: int32;
@@ -125,12 +164,16 @@ type MouseButtonEvent =
     Y: int32}
 
 type Event = 
+    | Quit of QuitEvent
     | KeyDown of KeyboardEvent
     | KeyUp of KeyboardEvent
     | MouseMotion of MouseMotionEvent
     | MouseButtonDown of MouseButtonEvent
     | MouseButtonUp of MouseButtonEvent
     | Other of uint32
+
+let private toQuitEvent (event:SDL_QuitEvent) :QuitEvent =
+    {Timestamp = event.Timestamp}
 
 let private toKeyboardEvent (event:SDL_KeyboardEvent) : KeyboardEvent =
     {Timestamp = event.Timestamp;
@@ -161,24 +204,14 @@ let private toMouseButtonEvent (event:SDL_MouseButtonEvent) :MouseButtonEvent =
     
 let waitEvent () =
     let mutable event = new SDL_Event()
-    let result = SDLEventNative.SDL_WaitEvent(&event)
-    if result = 1 then
-        if event.Type = SDL_KEYDOWN then
-            event.Key |> toKeyboardEvent |> KeyDown |> Some
+    let result = SDLEventNative.SDL_WaitEvent(&event) = 1
+    match result, (event.Type |> int |> enum<EventType>) with
+    | true, EventType.Quit -> event.Quit |> toQuitEvent |> Quit |> Some
+    | true, EventType.KeyDown -> event.Key |> toKeyboardEvent |> KeyDown |> Some
+    | true, EventType.KeyUp -> event.Key |> toKeyboardEvent |> KeyUp |> Some
+    | true, EventType.MouseMotion -> event.Motion |> toMouseMotionEvent |> MouseMotion |> Some
+    | true, EventType.MouseButtonDown -> event.Button |> toMouseButtonEvent |> MouseButtonDown |> Some
+    | true, EventType.MouseButtonUp -> event.Button |> toMouseButtonEvent |> MouseButtonUp |> Some
+    | true, _ -> event.Type |> Other |> Some
+    | _, _ -> None
 
-        elif event.Type = SDL_KEYUP then
-            event.Key |> toKeyboardEvent |> KeyUp |> Some
-
-        elif event.Type = SDL_MOUSEMOTION then
-            event.Motion |> toMouseMotionEvent |> MouseMotion |> Some
-
-        elif event.Type = SDL_MOUSEBUTTONDOWN then
-            event.Button |> toMouseButtonEvent |> MouseButtonDown |> Some
-
-        elif event.Type = SDL_MOUSEBUTTONUP then
-            event.Button |> toMouseButtonEvent |> MouseButtonUp |> Some
-
-        else
-            event.Type |> Other |> Some
-    else
-        None

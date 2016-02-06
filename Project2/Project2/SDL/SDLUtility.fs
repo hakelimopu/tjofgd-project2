@@ -7,7 +7,6 @@ open System.Runtime.InteropServices
 open System
 open Microsoft.FSharp.NativeInterop
 
-
 [<Measure>] type px
 [<Measure>] type bit
 [<Measure>] type bytes
@@ -26,7 +25,6 @@ let internal intPtrToStringUtf8 (ptr:IntPtr): string =
     else
         let mutable bytePtr = 
             ptr
-            |> nativeint
             |> NativePtr.ofNativeInt<byte>
         let mutable byteSequence = Seq.empty<byte>
         while (bytePtr |> NativePtr.read) <> 0uy do

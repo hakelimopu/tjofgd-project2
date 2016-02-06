@@ -7,8 +7,8 @@ open System.Runtime.InteropServices
 
 type RWops = IntPtr
 
-module private SDLRWopsNative =
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern RWops SDL_RWFromFile(IntPtr file, IntPtr mode)
+module internal SDLRWopsNative =
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
+    extern RWops SDL_RWFromFile(IntPtr file, string mode)
     
 

@@ -46,7 +46,6 @@ type ArrayOrder =
     | BGRA=5
     | ABGR=6
 
-
 type PackedLayout =
     | None=0
     | _332=1
@@ -184,7 +183,11 @@ type PixelFormatInfo =
     {Format: uint32;
     Palette: Palette;
     BitsPerPixel: int<bit/px>;
-    BytesPerPixel: int<bytes/px>}
+    BytesPerPixel: int<bytes/px>;
+    RMask: uint32;
+    GMask: uint32;
+    BMask: uint32;
+    AMask: uint32}
 
 let formatEnumName (format:uint32) :string = 
     SDLPixelNative.SDL_GetPixelFormatName(format)

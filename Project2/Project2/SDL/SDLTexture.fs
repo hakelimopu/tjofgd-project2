@@ -1,8 +1,11 @@
 ﻿module SDLTexture
 
+#nowarn "9"
+
 open System.Runtime.InteropServices
 open System
 open SDLUtility
+open Microsoft.FSharp.NativeInterop
 
 type Access =
     | Static    = 0
@@ -55,3 +58,19 @@ let fromSurface renderer surface =
 
 let destroy texture =
     SDLTextureNative.SDL_DestroyTexture(texture)
+
+let update (dstrect:SDLGeometry.Rectangle option) (src:SDLSurface.Surface) (texture:Texture) : bool =
+    let mutable sdlRect = 
+        dstrect
+        |> Option.map SDLGeometry.rectangleToSDL_Rect
+    let rectptr =
+        if sdlRect.IsNone then
+            IntPtr.Zero
+        else
+            let mutable temp = sdlRect.Value
+            NativePtr.toNativeInt &&temp
+    let surf =
+        src
+        |> NativePtr.ofNativeInt<SDLSurface.SDL_Surface>
+        |> NativePtr.read
+    0 = SDLTextureNative.SDL_UpdateTexture(texture,rectptr,surf.pixels,surf.pitch)

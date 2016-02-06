@@ -128,3 +128,6 @@ let free (surface:Surface) :unit =
 let fillRect (rect:Rectangle) (color:uint32) (surface:Surface) :bool =
     let mutable r = rect |> rectangleToSDL_Rect
     0 = SDLSurfaceNative.SDL_FillRect(surface,&r,color)
+
+let loadBmp (fileName:string) : Surface =
+    SDLSurfaceNative.SDL_LoadBMP_RW(SDLUtility.withUtf8String (fun ptr->SDLRWops.SDLRWopsNative.SDL_RWFromFile(ptr,"rb")) fileName, 1)
