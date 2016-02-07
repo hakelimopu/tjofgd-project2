@@ -55,28 +55,37 @@ type internal SDL_KeyboardEvent =
         val Keysym: SDL_Keysym
     end
 
-[<StructLayout(LayoutKind.Sequential)>]
+[<StructLayout(LayoutKind.Explicit, Size=52)>]
 type internal SDL_TextEditingEvent =
     struct
+        [<FieldOffset(0)>]
         val Type: uint32
+        [<FieldOffset(4)>]
         val Timestamp: uint32
+        [<FieldOffset(8)>]
         val WindowID: uint32                            
-        [<MarshalAs(UnmanagedType.ByValArray, SizeConst=32)>]
-        val Text: sbyte array
+        [<FieldOffset(12)>]
+        val Text: byte//really a byte[32]
+        [<FieldOffset(44)>]
         val Start: int32                               
+        [<FieldOffset(48)>]
         val Length: int32                              
     end
 
-[<StructLayout(LayoutKind.Sequential)>]
+[<StructLayout(LayoutKind.Explicit, Size=44)>]
 type internal SDL_TextInputEvent =
     struct
+        [<FieldOffset(0)>]
         val Type: uint32
+        [<FieldOffset(4)>]
         val Timestamp: uint32
+        [<FieldOffset(8)>]
         val WindowID: uint32                            
-        [<MarshalAs(UnmanagedType.ByValArray, SizeConst=32)>]
-        val Text: sbyte array
+        [<FieldOffset(12)>]
+        val Text: byte//really a byte[32]
     end
 
+[<StructLayout(LayoutKind.Sequential)>]
 type internal SDL_MouseMotionEvent =
     struct
         val Type: uint32
@@ -90,6 +99,7 @@ type internal SDL_MouseMotionEvent =
         val Yrel: int32
     end
 
+[<StructLayout(LayoutKind.Sequential)>]
 type internal SDL_MouseButtonEvent =
     struct
         val Type: uint32
@@ -104,24 +114,252 @@ type internal SDL_MouseButtonEvent =
         val Y: int32
     end
 
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_MouseWheelEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val WindowID:uint32
+        val Which:uint32
+        val X:int32
+        val Y:int32
+        val Direction:uint32
+    end
 
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_JoyAxisEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+        val Axis:uint8
+        val Padding1:uint8
+        val Padding2:uint8
+        val Padding3:uint8
+        val Value:int16
+        val Padding4:uint16
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_JoyBallEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+        val Ball:uint8
+        val Padding1:uint8
+        val Padding2:uint8
+        val Padding3:uint8
+        val Xrel:int16
+        val Yrel:int16
+    end 
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_JoyHatEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+        val Hat:uint8
+        val Value:uint8
+        val Padding1:uint8
+        val Padding2:uint8
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_JoyButtonEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+        val Button:uint8
+        val State:uint8
+        val Padding1:uint8
+        val Padding2:uint8
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_JoyDeviceEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_ControllerAxisEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+        val Axis:uint8
+        val Padding1:uint8
+        val Padding2:uint8
+        val Padding3:uint8
+        val Value:int16
+        val Padding4:uint16
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_ControllerButtonEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+        val Button:uint8
+        val State:uint8
+        val Padding1:uint8
+        val Padding2:uint8
+    end 
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_ControllerDeviceEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:int32
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_AudioDeviceEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Which:uint32
+        val Iscapture:uint8
+        val Padding1:uint8
+        val Padding2:uint8
+        val Padding3:uint8
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_TouchFingerEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val TouchId:int64
+        val FingerId:int64
+        val X:float
+        val Y:float
+        val Dx:float
+        val Dy:float
+        val Pressure:float
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_MultiGestureEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val TouchId:int64
+        val DTheta:float
+        val DDist:float
+        val X:float
+        val Y:float
+        val NumFingers:uint16
+        val Padding:uint16
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_DollarGestureEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val TouchId:int64
+        val GestureId:int64
+        val NumFingers:uint32
+        val Error:float
+        val X:float
+        val Y:float
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_DropEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val File:IntPtr
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_OSEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_UserEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val WindowID:uint32
+        val Code:int32
+        val Data1:IntPtr
+        val Data2:IntPtr
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_SysWMEvent=
+    struct
+        val Type:uint32
+        val Timestamp:uint32
+        val Msg:IntPtr
+    end
+    
 [<StructLayout(LayoutKind.Explicit, Size=56)>]
 type internal SDL_Event =
     struct
         [<FieldOffset(0)>]
         val Type: uint32
         [<FieldOffset(0)>]
-        val Quit: SDL_QuitEvent
+        val Common:SDL_CommonEvent
         [<FieldOffset(0)>]
-        val Key: SDL_KeyboardEvent
+        val Window:SDL_WindowEvent
         [<FieldOffset(0)>]
-        val Motion: SDL_MouseMotionEvent
+        val Key:SDL_KeyboardEvent
         [<FieldOffset(0)>]
-        val Button: SDL_MouseButtonEvent
+        val Edit:SDL_TextEditingEvent
         [<FieldOffset(0)>]
-        val Common: SDL_CommonEvent
+        val Text:SDL_TextInputEvent
         [<FieldOffset(0)>]
-        val Window: SDL_WindowEvent
+        val Motion:SDL_MouseMotionEvent
+        [<FieldOffset(0)>]
+        val Button:SDL_MouseButtonEvent
+        [<FieldOffset(0)>]
+        val Wheel:SDL_MouseWheelEvent
+        [<FieldOffset(0)>]
+        val Jaxis:SDL_JoyAxisEvent
+        [<FieldOffset(0)>]
+        val Jball:SDL_JoyBallEvent
+        [<FieldOffset(0)>]
+        val Jhat:SDL_JoyHatEvent
+        [<FieldOffset(0)>]
+        val Jbutton:SDL_JoyButtonEvent
+        [<FieldOffset(0)>]
+        val Jdevice:SDL_JoyDeviceEvent
+        [<FieldOffset(0)>]
+        val Caxis:SDL_ControllerAxisEvent
+        [<FieldOffset(0)>]
+        val Cbutton:SDL_ControllerButtonEvent
+        [<FieldOffset(0)>]
+        val Cdevice:SDL_ControllerDeviceEvent
+        [<FieldOffset(0)>]
+        val Adevice:SDL_AudioDeviceEvent
+        [<FieldOffset(0)>]
+        val Quit:SDL_QuitEvent
+        [<FieldOffset(0)>]
+        val User:SDL_UserEvent
+        [<FieldOffset(0)>]
+        val Syswm:SDL_SysWMEvent
+        [<FieldOffset(0)>]
+        val Tfinger:SDL_TouchFingerEvent
+        [<FieldOffset(0)>]
+        val Mgesture:SDL_MultiGestureEvent
+        [<FieldOffset(0)>]
+        val Dgesture:SDL_DollarGestureEvent
+        [<FieldOffset(0)>]
+        val Drop:SDL_DropEvent
     end
 
 type EventType =
@@ -171,11 +409,52 @@ type EventType =
     | UserEvent                = 0x8000
     | LastEvent                = 0xFFFF
 
+type EventAction =
+    | AddEvent=0
+    | PeekEvent=1
+    | GetEvent=2
+
+type EventState =
+    | Query  = -1
+    | Ignore = 0
+    | Disable= 0
+    | Enable = 1
+
 module private SDLEventNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_WaitEvent(SDL_Event* event);
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_PollEvent(SDL_Event* event);
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_PumpEvents()
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_PeepEvents(SDL_Event* events, int numevents,int action,uint32 minType, uint32 maxType)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_HasEvent(uint32 eventType)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_HasEvents(uint32 minType, uint32 maxType)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_FlushEvent(uint32 eventType)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_FlushEvents(uint32 minType, uint32 maxType)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_WaitEventTimeout(SDL_Event& event,int timeout)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_PushEvent(SDL_Event& event)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_SetEventFilter(IntPtr filter,IntPtr userdata)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_GetEventFilter(IntPtr filter,IntPtr userdata)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_AddEventWatch(IntPtr filter,IntPtr userdata)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_DelEventWatch(IntPtr filter,IntPtr userdata)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_FilterEvents(IntPtr filter,IntPtr userdata)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern uint8 SDL_EventState(uint32 eventType, int state)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern uint32 SDL_RegisterEvents(int numevents)
 
 type QuitEvent =
     {Timestamp:uint32}
