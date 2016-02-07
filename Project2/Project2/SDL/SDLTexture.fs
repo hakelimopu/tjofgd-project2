@@ -60,9 +60,10 @@ let destroy texture =
     SDLTextureNative.SDL_DestroyTexture(texture)
 
 let update (dstrect:SDLGeometry.Rectangle option) (src:SDLSurface.Surface) (texture:Texture) : bool =
-    SDLGeometry.withSDLRectPointer (fun rectptr->
+    dstrect
+    |> SDLGeometry.withSDLRectPointer (fun rectptr->
         let surf =
             src
             |> NativePtr.ofNativeInt<SDLSurface.SDL_Surface>
             |> NativePtr.read
-        0 = SDLTextureNative.SDL_UpdateTexture(texture,rectptr,surf.pixels,surf.pitch)) dstrect
+        0 = SDLTextureNative.SDL_UpdateTexture(texture,rectptr,surf.pixels,surf.pitch)) 

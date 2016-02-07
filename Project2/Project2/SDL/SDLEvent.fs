@@ -126,7 +126,9 @@ type EventType =
 
 module private SDLEventNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_WaitEvent(SDL_Event& event);
+    extern int SDL_WaitEvent(SDL_Event* event);
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_PollEvent(SDL_Event* event);
 
 type QuitEvent =
     {Timestamp:uint32}
@@ -201,10 +203,8 @@ let private toMouseButtonEvent (event:SDL_MouseButtonEvent) :MouseButtonEvent =
     Clicks = event.Clicks;
     X = event.X;
     Y = event.Y}
-    
-let waitEvent () =
-    let mutable event = new SDL_Event()
-    let result = SDLEventNative.SDL_WaitEvent(&event) = 1
+
+let private convertEvent (result: bool, event:SDL_Event) =
     match result, (event.Type |> int |> enum<EventType>) with
     | true, EventType.Quit -> event.Quit |> toQuitEvent |> Quit |> Some
     | true, EventType.KeyDown -> event.Key |> toKeyboardEvent |> KeyDown |> Some
@@ -214,4 +214,14 @@ let waitEvent () =
     | true, EventType.MouseButtonUp -> event.Button |> toMouseButtonEvent |> MouseButtonUp |> Some
     | true, _ -> event.Type |> Other |> Some
     | _, _ -> None
+    
+let waitEvent () =
+    let mutable event = new SDL_Event()
+    let result = SDLEventNative.SDL_WaitEvent(&&event) = 1
+    convertEvent (result,event)
+    
+let pollEvent () =
+    let mutable event = new SDL_Event()
+    let result = SDLEventNative.SDL_PollEvent(&&event) = 1
+    convertEvent (result,event)
 

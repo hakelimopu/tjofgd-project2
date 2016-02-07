@@ -2,21 +2,24 @@
 open SDLGeometry
 open System
 
-let rec eventPump window renderer texture surface bitmap =
+type GameState =
+    {X:int<px>;Y:int<px>}
+
+let renderHandler (renderer:SDLRender.Renderer) (texture:SDLTexture.Texture) (surface:SDLSurface.Surface) (bitmap:SDLSurface.Surface) (state:GameState) :unit =
     let screenSpace = {X=0<px>;Y=0<px>;Width=160<px>;Height=120<px>}
     renderer |> SDLRender.setDrawColor (255uy,0uy,255uy,255uy) |> ignore
     renderer |> SDLRender.clear |> ignore
 
     surface
-    |> SDLSurface.fillRect (Some {X=0<px>;Y=0<px>;Width=10<px>;Height=10<px>}) 0xFFFF0000u
+    |> SDLSurface.upperBlit None bitmap None
+    |> ignore
+
+    surface
+    |> SDLSurface.fillRect (Some {X=state.X;Y=state.Y;Width=10<px>;Height=10<px>}) 0xFFFF0000u
     |> ignore
 
     surface
     |> SDLSurface.fillRect (Some {X=10<px>;Y=10<px>;Width=10<px>;Height=10<px>}) 0xFF0000FFu
-    |> ignore
-
-    surface
-    |> SDLSurface.upperBlit None bitmap None
     |> ignore
 
     texture
@@ -26,11 +29,29 @@ let rec eventPump window renderer texture surface bitmap =
     renderer |> SDLRender.copy texture screenSpace screenSpace |> ignore
     renderer |> SDLRender.present 
 
-    match SDLEvent.waitEvent() with
-    | Some (SDLEvent.Quit x) -> ()
-    | Some (SDLEvent.KeyDown x) -> if x.Keysym.Sym = 0x1B then () else eventPump window renderer texture surface bitmap
-    | Some _ -> eventPump window renderer texture surface bitmap
-    | None -> ()
+let eventHandler (event:SDLEvent.Event) (state:GameState) : GameState option =
+    match event with
+    | SDLEvent.Quit x -> None
+    | SDLEvent.KeyDown x -> 
+        match x.Keysym.Sym with
+        | 0x1B -> None
+        | 0x4000004F -> Some {state with X=state.X+5<px>} //right
+        | 0x40000050 -> Some {state with X=state.X-5<px>} //left
+        | 0x40000051 -> Some {state with Y=state.Y+5<px>} //down
+        | 0x40000052 -> Some {state with Y=state.Y-5<px>} //up
+        | _ -> Some state
+    | _ -> Some state
+
+let rec eventPump (renderHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TState->'TState option) (state:'TState) : unit =
+    match SDLEvent.pollEvent() with
+    | Some event ->
+        match state |> eventHandler event with
+        | Some newState -> eventPump renderHandler eventHandler newState
+        | None -> ()
+    | None -> 
+        state
+        |> renderHandler
+        eventPump renderHandler eventHandler state
 
 [<EntryPoint>]
 let main argv = 
@@ -55,7 +76,7 @@ let main argv =
 
     let surface = SDLSurface.createRGB (160<px>,120<px>,32<bit/px>) (0x00FF0000u,0x0000FF00u,0x000000FFu,0xFF000000u)
 
-    let bitmap = SDLSurface.loadBmp "Content/smile.bmp"
+    let bitmap = SDLSurface.loadBmp SDLPixel.ARGB8888Format "Content/smile.bmp"
 
     surface |> SDLSurface.fillRect (Some {X=0<px>;Y=0<px>;Width=160<px>;Height=120<px>}) 0xFF000000u |> ignore
     surface |> SDLSurface.fillRect (Some {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>}) 0xFFFFFFFFu |> ignore
@@ -64,7 +85,7 @@ let main argv =
 
     mainRenderer |> SDLRender.setLogicalSize (160<px>,120<px>) |> ignore
 
-    eventPump mainWindow mainRenderer mainTexture surface bitmap
+    eventPump (renderHandler mainRenderer mainTexture surface bitmap) eventHandler {X=0<px>;Y=0<px>}
 
     surface |> SDLSurface.free
 

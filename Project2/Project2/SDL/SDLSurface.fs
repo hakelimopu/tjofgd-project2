@@ -129,8 +129,11 @@ let fillRect (rect:Rectangle option) (color:uint32) (surface:Surface) :bool =
     SDLGeometry.withSDLRectPointer (fun r->0 = SDLSurfaceNative.SDL_FillRect(surface, r, color)) rect
     
 
-let loadBmp (fileName:string) : Surface =
-    SDLSurfaceNative.SDL_LoadBMP_RW(SDLUtility.withUtf8String (fun ptr->SDLRWops.SDLRWopsNative.SDL_RWFromFile(ptr,"rb")) fileName, 1)
+let loadBmp (pixelFormat: uint32) (fileName:string) : Surface =
+    let bitmapSurface = SDLSurfaceNative.SDL_LoadBMP_RW(SDLUtility.withUtf8String (fun ptr->SDLRWops.SDLRWopsNative.SDL_RWFromFile(ptr,"rb")) fileName, 1)
+    let convertedSurface = SDLSurfaceNative.SDL_ConvertSurfaceFormat(bitmapSurface,pixelFormat,0u)
+    SDLSurfaceNative.SDL_FreeSurface bitmapSurface
+    convertedSurface
 
 let upperBlit (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
     SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_UpperBlit(src,srcptr,dst,dstptr)) dstrect) srcrect
