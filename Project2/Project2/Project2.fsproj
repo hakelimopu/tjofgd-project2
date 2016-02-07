@@ -83,6 +83,7 @@
     <Compile Include="SDL\SDL.fs" />
     <Compile Include="SDL\SDLVersion.fs" />
     <Compile Include="SDL\SDLError.fs" />
+    <Compile Include="SDL\SDLKeyboard.fs" />
     <Compile Include="SDL\SDLEvent.fs" />
     <Compile Include="SDL\SDLWindow.fs" />
     <Compile Include="SDL\SDLPixel.fs" />

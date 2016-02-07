@@ -22,6 +22,27 @@ type internal SDL_Keysym =
     end
 
 [<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_CommonEvent =
+    struct
+        val Type: uint32
+        val Timestamp: uint32
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_WindowEvent =
+    struct
+        val Type: uint32
+        val Timestamp: uint32
+        val WindowID: uint32
+        val Event: uint8     
+        val Padding1: uint8
+        val Padding2: uint8
+        val Padding3: uint8
+        val Data1: int32  
+        val Data2: int32   
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
 type internal SDL_KeyboardEvent =
     struct
         val Type: uint32
@@ -32,6 +53,28 @@ type internal SDL_KeyboardEvent =
         val Padding2: uint8
         val Padding3: uint8
         val Keysym: SDL_Keysym
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_TextEditingEvent =
+    struct
+        val Type: uint32
+        val Timestamp: uint32
+        val WindowID: uint32                            
+        [<MarshalAs(UnmanagedType.ByValArray, SizeConst=32)>]
+        val Text: sbyte array
+        val Start: int32                               
+        val Length: int32                              
+    end
+
+[<StructLayout(LayoutKind.Sequential)>]
+type internal SDL_TextInputEvent =
+    struct
+        val Type: uint32
+        val Timestamp: uint32
+        val WindowID: uint32                            
+        [<MarshalAs(UnmanagedType.ByValArray, SizeConst=32)>]
+        val Text: sbyte array
     end
 
 type internal SDL_MouseMotionEvent =
@@ -75,6 +118,10 @@ type internal SDL_Event =
         val Motion: SDL_MouseMotionEvent
         [<FieldOffset(0)>]
         val Button: SDL_MouseButtonEvent
+        [<FieldOffset(0)>]
+        val Common: SDL_CommonEvent
+        [<FieldOffset(0)>]
+        val Window: SDL_WindowEvent
     end
 
 type EventType =
@@ -134,7 +181,7 @@ type QuitEvent =
     {Timestamp:uint32}
 
 type Keysym =
-    {Scancode: int32;
+    {Scancode: SDLKeyboard.ScanCode;
     Sym: int32;
     Mod: uint16}
 
@@ -182,7 +229,7 @@ let private toKeyboardEvent (event:SDL_KeyboardEvent) : KeyboardEvent =
     WindowID = event.WindowID;
     State = event.State;
     Repeat = event.Repeat;
-    Keysym = {Scancode = event.Keysym.Scancode; Sym=event.Keysym.Sym;Mod=event.Keysym.Mod}}
+    Keysym = {Scancode = event.Keysym.Scancode |> enum<SDLKeyboard.ScanCode>; Sym=event.Keysym.Sym;Mod=event.Keysym.Mod}}
 
 let private toMouseMotionEvent (event: SDL_MouseMotionEvent) :MouseMotionEvent =
     {Timestamp=event.Timestamp;
