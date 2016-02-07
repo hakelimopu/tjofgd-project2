@@ -4,6 +4,8 @@
 
 open System.Runtime.InteropServices
 open SDLUtility
+open System
+open Microsoft.FSharp.NativeInterop
 
 [<StructLayout(LayoutKind.Sequential)>]
 type internal SDL_Point =
@@ -44,6 +46,17 @@ let internal rectangleToSDL_Rect (r:Rectangle) :SDL_Rect =
     result.w <- r.Width |> int
     result.h <- r.Height |> int
     result
+
+let internal withSDLRectPointer (func:IntPtr->'T) (rectangle:Rectangle option)=
+    let mutable sdlrect = new SDL_Rect()
+    let rectptr =
+        if rectangle.IsNone then
+            IntPtr.Zero
+        else
+            sdlrect <- (rectangle.Value |> rectangleToSDL_Rect)
+            NativePtr.toNativeInt &&sdlrect
+    func rectptr
+
 
 let internal pointToSDL_Point (p:Point) :SDL_Point =
     let mutable result = new SDL_Point()

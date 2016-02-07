@@ -98,7 +98,7 @@ module private SDLSurfaceNative =
 
     //filling rectangles
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_FillRect(Surface dst, SDL_Rect& rect, uint32 color)
+    extern int SDL_FillRect(Surface dst, IntPtr rect, uint32 color)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_FillRects(Surface dst, IntPtr rects, int count, uint32 color)
 
@@ -125,9 +125,28 @@ let createRGB (width:int<px>,height:int<px>,depth:int<bit/px>) (rmask:uint32,gma
 let free (surface:Surface) :unit =
     SDLSurfaceNative.SDL_FreeSurface(surface)
 
-let fillRect (rect:Rectangle) (color:uint32) (surface:Surface) :bool =
-    let mutable r = rect |> rectangleToSDL_Rect
-    0 = SDLSurfaceNative.SDL_FillRect(surface,&r,color)
+let fillRect (rect:Rectangle option) (color:uint32) (surface:Surface) :bool =
+    SDLGeometry.withSDLRectPointer (fun r->0 = SDLSurfaceNative.SDL_FillRect(surface, r, color)) rect
+    
 
 let loadBmp (fileName:string) : Surface =
     SDLSurfaceNative.SDL_LoadBMP_RW(SDLUtility.withUtf8String (fun ptr->SDLRWops.SDLRWopsNative.SDL_RWFromFile(ptr,"rb")) fileName, 1)
+
+let upperBlit (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
+    SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_UpperBlit(src,srcptr,dst,dstptr)) dstrect) srcrect
+
+let blit = upperBlit
+
+let lowerBlit (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
+    SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_LowerBlit(src,srcptr,dst,dstptr)) dstrect) srcrect
+
+let upperBlitScaled (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
+    SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_UpperBlitScaled(src,srcptr,dst,dstptr)) dstrect) srcrect
+
+let lowerBlitScaled (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
+    SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_LowerBlitScaled(src,srcptr,dst,dstptr)) dstrect) srcrect
+
+let softStretch (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
+    SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_SoftStretch(src,srcptr,dst,dstptr)) dstrect) srcrect
+
+    

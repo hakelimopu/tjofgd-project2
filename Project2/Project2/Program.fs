@@ -8,15 +8,19 @@ let rec eventPump window renderer texture surface bitmap =
     renderer |> SDLRender.clear |> ignore
 
     surface
-    |> SDLSurface.fillRect {X=0<px>;Y=0<px>;Width=10<px>;Height=10<px>} 0xFFFF0000u
+    |> SDLSurface.fillRect (Some {X=0<px>;Y=0<px>;Width=10<px>;Height=10<px>}) 0xFFFF0000u
     |> ignore
 
     surface
-    |> SDLSurface.fillRect {X=10<px>;Y=10<px>;Width=10<px>;Height=10<px>} 0xFF0000FFu
+    |> SDLSurface.fillRect (Some {X=10<px>;Y=10<px>;Width=10<px>;Height=10<px>}) 0xFF0000FFu
+    |> ignore
+
+    surface
+    |> SDLSurface.upperBlit None bitmap None
     |> ignore
 
     texture
-    |> SDLTexture.update None bitmap
+    |> SDLTexture.update None surface
     |> ignore
 
     renderer |> SDLRender.copy texture screenSpace screenSpace |> ignore
@@ -53,8 +57,8 @@ let main argv =
 
     let bitmap = SDLSurface.loadBmp "Content/smile.bmp"
 
-    surface |> SDLSurface.fillRect {X=0<px>;Y=0<px>;Width=160<px>;Height=120<px>} 0xFF000000u |> ignore
-    surface |> SDLSurface.fillRect {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>} 0xFFFFFFFFu |> ignore
+    surface |> SDLSurface.fillRect (Some {X=0<px>;Y=0<px>;Width=160<px>;Height=120<px>}) 0xFF000000u |> ignore
+    surface |> SDLSurface.fillRect (Some {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>}) 0xFFFFFFFFu |> ignore
    
     let mainTexture = mainRenderer |> SDLTexture.create SDLPixel.ARGB8888Format SDLTexture.Access.Streaming (160<px>,120<px>)
 
