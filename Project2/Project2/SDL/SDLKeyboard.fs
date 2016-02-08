@@ -1,7 +1,10 @@
 ﻿module SDLKeyboard
 
+#nowarn "9"
+
 open System.Runtime.InteropServices
 open System
+open Microsoft.FSharp.NativeInterop
 
 type ScanCode =
     | Unknown = 0
@@ -247,7 +250,7 @@ type ScanCode =
     | App2 = 284
 
 [<Flags>]
-type KeyMod =
+type KeyModifier =
     | None = 0x0000
     | LShift = 0x0001
     | RShift = 0x0002
@@ -263,26 +266,35 @@ type KeyMod =
     | Reserved = 0x8000
 
 module private SDLKeyboardNative =
+    //keyboard focus
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_GetKeyboardFocus()
+
+    //key state
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_GetKeyboardState(IntPtr numkeys)
+
+    //modifier state
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_GetModState()
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_SetModState(int modstate)
+
+    //conversions
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_GetKeyFromScancode(int scancode)
+    extern int SDL_GetKeyFromScancode(int scancode)//TODO
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_GetScancodeFromKey(int key)
+    extern int SDL_GetScancodeFromKey(int key)//TODO
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern IntPtr SDL_GetScancodeName(int scancode)
+    extern IntPtr SDL_GetScancodeName(int scancode)//TODO
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_GetScancodeFromName(IntPtr name)
+    extern int SDL_GetScancodeFromName(IntPtr name)//TODO
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern IntPtr SDL_GetKeyName(int key)
+    extern IntPtr SDL_GetKeyName(int key)//TODO
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_GetKeyFromName(IntPtr name)
+    extern int SDL_GetKeyFromName(IntPtr name)//TODO
+
+    //text input
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_StartTextInput()
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -291,7 +303,292 @@ module private SDLKeyboardNative =
     extern void SDL_StopTextInput()
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_SetTextInputRect(IntPtr rect)
+
+    //screen keyboard
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_HasScreenKeyboardSupport()
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_IsScreenKeyboardShown(IntPtr window)
+
+let getFocus () :IntPtr =
+    SDLKeyboardNative.SDL_GetKeyboardFocus()
+
+let private scanCodes = 
+    [ScanCode.A;
+    ScanCode.B;
+    ScanCode.C;
+    ScanCode.D;
+    ScanCode.E;
+    ScanCode.F;
+    ScanCode.G;
+    ScanCode.H;
+    ScanCode.I;
+    ScanCode.J;
+    ScanCode.K;
+    ScanCode.L;
+    ScanCode.M;
+    ScanCode.N;
+    ScanCode.O;
+    ScanCode.P;
+    ScanCode.Q;
+    ScanCode.R;
+    ScanCode.S;
+    ScanCode.T;
+    ScanCode.U;
+    ScanCode.V;
+    ScanCode.W;
+    ScanCode.X;
+    ScanCode.Y;
+    ScanCode.Z;
+    ScanCode._1;
+    ScanCode._2;
+    ScanCode._3;
+    ScanCode._4;
+    ScanCode._5;
+    ScanCode._6;
+    ScanCode._7;
+    ScanCode._8;
+    ScanCode._9;
+    ScanCode._0;
+    ScanCode.Return;
+    ScanCode.Escape;
+    ScanCode.Backspace;
+    ScanCode.Tab;
+    ScanCode.Space;
+    ScanCode.Minus;
+    ScanCode.Equals;
+    ScanCode.LeftBracket;
+    ScanCode.RightBracket;
+    ScanCode.Backslash;
+    ScanCode.NonUSHash;
+    ScanCode.Semicolon;
+    ScanCode.Apostrophe;
+    ScanCode.Grave;
+    ScanCode.Comma;
+    ScanCode.Period;
+    ScanCode.Slash;
+    ScanCode.CapsLock;
+    ScanCode.F1;
+    ScanCode.F2;
+    ScanCode.F3;
+    ScanCode.F4;
+    ScanCode.F5;
+    ScanCode.F6;
+    ScanCode.F7;
+    ScanCode.F8;
+    ScanCode.F9;
+    ScanCode.F10;
+    ScanCode.F11;
+    ScanCode.F12;
+    ScanCode.PrintScreen;
+    ScanCode.ScrollLock;
+    ScanCode.Pause;
+    ScanCode.Insert;
+    ScanCode.Home;
+    ScanCode.PageUp;
+    ScanCode.Delete;
+    ScanCode.End;
+    ScanCode.PageDown;
+    ScanCode.Right;
+    ScanCode.Left;
+    ScanCode.Down;
+    ScanCode.Up;
+    ScanCode.NumLockClear;
+    ScanCode.KeyPadDivide;
+    ScanCode.KeyPadMultiply;
+    ScanCode.KeyPadMinus;
+    ScanCode.KeyPadPlus;
+    ScanCode.KeyPadEnter;
+    ScanCode.KeyPad1;
+    ScanCode.KeyPad2;
+    ScanCode.KeyPad3;
+    ScanCode.KeyPad4;
+    ScanCode.KeyPad5;
+    ScanCode.KeyPad6;
+    ScanCode.KeyPad7;
+    ScanCode.KeyPad8;
+    ScanCode.KeyPad9;
+    ScanCode.KeyPad0;
+    ScanCode.KeyPadPeriod;
+    ScanCode.NonUSBackslash;
+    ScanCode.Application;
+    ScanCode.Power;
+    ScanCode.KeyPadEquals;
+    ScanCode.F13;
+    ScanCode.F14;
+    ScanCode.F15;
+    ScanCode.F16;
+    ScanCode.F17;
+    ScanCode.F18;
+    ScanCode.F19;
+    ScanCode.F20;
+    ScanCode.F21;
+    ScanCode.F22;
+    ScanCode.F23;
+    ScanCode.F24;
+    ScanCode.Execute;
+    ScanCode.Help;
+    ScanCode.Menu;
+    ScanCode.Select;
+    ScanCode.Stop;
+    ScanCode.Again;
+    ScanCode.Undo;
+    ScanCode.Cut;
+    ScanCode.Copy;
+    ScanCode.Paste;
+    ScanCode.Find;
+    ScanCode.Mute;
+    ScanCode.VolumeUp;
+    ScanCode.VolumeDown;
+    ScanCode.KeyPadComma;
+    ScanCode.KeyPadEqualsAS400;
+    ScanCode.International1;
+    ScanCode.International2;
+    ScanCode.International3;
+    ScanCode.International4;
+    ScanCode.International5;
+    ScanCode.International6;
+    ScanCode.International7;
+    ScanCode.International8;
+    ScanCode.International9;
+    ScanCode.Lang1;
+    ScanCode.Lang2;
+    ScanCode.Lang3;
+    ScanCode.Lang4;
+    ScanCode.Lang5;
+    ScanCode.Lang6;
+    ScanCode.Lang7;
+    ScanCode.Lang8;
+    ScanCode.Lang9;
+    ScanCode.AltErase;
+    ScanCode.SysReq;
+    ScanCode.Cancel;
+    ScanCode.Clear;
+    ScanCode.Prior;
+    ScanCode.Return2;
+    ScanCode.Separator;
+    ScanCode.Out;
+    ScanCode.Oper;
+    ScanCode.ClearAgain;
+    ScanCode.CRSEL;
+    ScanCode.EXSEL;
+    ScanCode.KeyPad00;
+    ScanCode.KeyPad000;
+    ScanCode.THOUSANDSSEPARATOR;
+    ScanCode.DECIMALSEPARATOR;
+    ScanCode.CURRENCYUNIT;
+    ScanCode.CURRENCYSUBUNIT;
+    ScanCode.KeyPadLeftParen;
+    ScanCode.KeyPadRightParen;
+    ScanCode.KeyPadLeftBrace;
+    ScanCode.KeyPadRightBrace;
+    ScanCode.KeyPadTab;
+    ScanCode.KeyPadBackspace;
+    ScanCode.KeyPadA;
+    ScanCode.KeyPadB;
+    ScanCode.KeyPadC;
+    ScanCode.KeyPadD;
+    ScanCode.KeyPadE;
+    ScanCode.KeyPadF;
+    ScanCode.KeyPadXor;
+    ScanCode.KeyPadPower;
+    ScanCode.KeyPadPercent;
+    ScanCode.KeyPadLess;
+    ScanCode.KeyPadGreater;
+    ScanCode.KeyPadAmpersand;
+    ScanCode.KeyPadDblAmpersand;
+    ScanCode.KeyPadVerticalBar;
+    ScanCode.KeyPadDblVerticalBar;
+    ScanCode.KeyPadColon;
+    ScanCode.KeyPadHash;
+    ScanCode.KeyPadSpace;
+    ScanCode.KeyPadAt;
+    ScanCode.KeyPadExclam;
+    ScanCode.KeyPadMemStore;
+    ScanCode.KeyPadMemRecall;
+    ScanCode.KeyPadMemClear;
+    ScanCode.KeyPadMemAdd;
+    ScanCode.KeyPadMemSubtract;
+    ScanCode.KeyPadMemMultiply;
+    ScanCode.KeyPadMemDivide;
+    ScanCode.KeyPadPlusMinus;
+    ScanCode.KeyPadClear;
+    ScanCode.KeyPadClearEntry;
+    ScanCode.KeyPadBinary;
+    ScanCode.KeyPadOctal;
+    ScanCode.KeyPadDecimal;
+    ScanCode.KeyPadHexadecimal;
+    ScanCode.LCtrl;
+    ScanCode.LShift;
+    ScanCode.LAlt;
+    ScanCode.LGui;
+    ScanCode.RCtrl;
+    ScanCode.RShift;
+    ScanCode.RAlt;
+    ScanCode.RGui;
+    ScanCode.Mode;
+    ScanCode.AudioNext;
+    ScanCode.AudioPrev;
+    ScanCode.AudioStop;
+    ScanCode.AudioPlay;
+    ScanCode.AudioMute;
+    ScanCode.MediaSelect;
+    ScanCode.WWW;
+    ScanCode.Mail;
+    ScanCode.Calculator;
+    ScanCode.Computer;
+    ScanCode.AcSearch;
+    ScanCode.AcHome;
+    ScanCode.AcBack;
+    ScanCode.AcForward;
+    ScanCode.AcStop;
+    ScanCode.AcRefresh;
+    ScanCode.AcBookmarks;
+    ScanCode.BrightnessDown;
+    ScanCode.BrightnessUp;
+    ScanCode.DisplaySwitch;
+    ScanCode.KbDillumToggle;
+    ScanCode.KbDillumDown;
+    ScanCode.KbDillumUp;
+    ScanCode.Eject;
+    ScanCode.Sleep;
+    ScanCode.App1;
+    ScanCode.App2]
+
+let getState () : Map<ScanCode,bool> =
+    let kbState = 
+        SDLKeyboardNative.SDL_GetKeyboardState(IntPtr.Zero)
+        |> NativePtr.ofNativeInt<uint8>
+    let getStatus (code:ScanCode) :bool=
+        NativePtr.add kbState (code |> int)
+        |> NativePtr.read
+        |> (=) 1uy
+    scanCodes
+    |> Seq.map (fun code->(code,code|>getStatus))
+    |> Map.ofSeq
+
+let getModifierState () : KeyModifier =
+    SDLKeyboardNative.SDL_GetModState()
+    |> enum<KeyModifier>
+
+let setModifierState (state:KeyModifier) :unit =
+    SDLKeyboardNative.SDL_SetModState(state|>int)
+
+let startTextInput () :unit =
+    SDLKeyboardNative.SDL_StartTextInput()
+
+let isTextInputActive (): bool = 
+    0 <> SDLKeyboardNative.SDL_IsTextInputActive()
+
+let stopTextInput () :unit =
+    SDLKeyboardNative.SDL_StopTextInput()
+
+let setTextInputRectangle (rectangle: SDLGeometry.Rectangle option) :unit = 
+    rectangle
+    |> SDLGeometry.withSDLRectPointer (fun rect->SDLKeyboardNative.SDL_SetTextInputRect(rect))
+
+let hasScreenKeyboardSupport () :bool =    
+    0 <> SDLKeyboardNative.SDL_HasScreenKeyboardSupport()
+
+let isScreenKeyboardShown (window:IntPtr) :bool =
+    0 <> SDLKeyboardNative.SDL_IsScreenKeyboardShown(window)

@@ -4,6 +4,7 @@
 
 open System.Runtime.InteropServices
 open System
+open SDLUtility
 
 [<StructLayout(LayoutKind.Sequential)>]
 type internal SDL_QuitEvent =
@@ -420,41 +421,61 @@ type EventState =
     | Disable= 0
     | Enable = 1
 
+type internal SDL_EventFilter = delegate of nativeint * nativeptr<SDL_Event> -> int
+
 module private SDLEventNative =
+    //pump
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_PumpEvents()
+
+    //wait
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_WaitEvent(SDL_Event* event);
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_PollEvent(SDL_Event* event);
+    extern int SDL_WaitEventTimeout(SDL_Event* event,int timeout)
+
+    //poll
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_PumpEvents()
+    extern int SDL_PollEvent(SDL_Event* event);
+
+    //peep
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_PeepEvents(SDL_Event* events, int numevents,int action,uint32 minType, uint32 maxType)
+
+    //pushing
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_PushEvent(SDL_Event* event)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern uint32 SDL_RegisterEvents(int numevents)
+
+    //query
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_HasEvent(uint32 eventType)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_HasEvents(uint32 minType, uint32 maxType)
+
+    //flush
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_FlushEvent(uint32 eventType)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_FlushEvents(uint32 minType, uint32 maxType)
+
+    //filter - dunno how I'll be able to do these in F#.
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_WaitEventTimeout(SDL_Event& event,int timeout)
+    extern void SDL_SetEventFilter(SDL_EventFilter filter,nativeint userdata)//how to pass NULL?
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_PushEvent(SDL_Event& event)
+    extern int SDL_GetEventFilter(SDL_EventFilter& filter,nativeint* userdata)//cant use SDL_EventFilter*, which may make this unusable...
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_SetEventFilter(IntPtr filter,IntPtr userdata)
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_GetEventFilter(IntPtr filter,IntPtr userdata)
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_AddEventWatch(IntPtr filter,IntPtr userdata)
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_DelEventWatch(IntPtr filter,IntPtr userdata)
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_FilterEvents(IntPtr filter,IntPtr userdata)
+    extern void SDL_FilterEvents(SDL_EventFilter filter,nativeint userdata)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern uint8 SDL_EventState(uint32 eventType, int state)
+
+    //watch - dunno how I'll be able to do these in F#.
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern uint32 SDL_RegisterEvents(int numevents)
+    extern void SDL_AddEventWatch(SDL_EventFilter filter,nativeint userdata)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_DelEventWatch(SDL_EventFilter filter,nativeint userdata)
+
 
 type QuitEvent =
     {Timestamp:uint32}
@@ -541,9 +562,12 @@ let private convertEvent (result: bool, event:SDL_Event) =
     | true, _ -> event.Type |> Other |> Some
     | _, _ -> None
     
-let waitEvent () =
+let waitEvent (timeout:int<ms> option) =
     let mutable event = new SDL_Event()
-    let result = SDLEventNative.SDL_WaitEvent(&&event) = 1
+    let result = 
+        match timeout with
+        | None -> SDLEventNative.SDL_WaitEvent(&&event) = 1 
+        | Some x -> SDLEventNative.SDL_WaitEventTimeout(&&event,x/1<ms>) = 1
     convertEvent (result,event)
     
 let pollEvent () =
