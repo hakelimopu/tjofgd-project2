@@ -168,10 +168,10 @@ type ScanCode =
     | EXSEL = 164
     | KeyPad00 = 176
     | KeyPad000 = 177
-    | THOUSANDSSEPARATOR = 178
-    | DECIMALSEPARATOR = 179
-    | CURRENCYUNIT = 180
-    | CURRENCYSUBUNIT = 181
+    | ThousandsSeparator = 178
+    | DecimalSeparator = 179
+    | CurrencyUnit = 180
+    | CurrencySubunit = 181
     | KeyPadLeftParen = 182
     | KeyPadRightParen = 183
     | KeyPadLeftBrace = 184
@@ -474,10 +474,10 @@ let private scanCodes =
     ScanCode.EXSEL;
     ScanCode.KeyPad00;
     ScanCode.KeyPad000;
-    ScanCode.THOUSANDSSEPARATOR;
-    ScanCode.DECIMALSEPARATOR;
-    ScanCode.CURRENCYUNIT;
-    ScanCode.CURRENCYSUBUNIT;
+    ScanCode.ThousandsSeparator;
+    ScanCode.DecimalSeparator;
+    ScanCode.CurrencyUnit;
+    ScanCode.CurrencySubunit;
     ScanCode.KeyPadLeftParen;
     ScanCode.KeyPadRightParen;
     ScanCode.KeyPadLeftBrace;

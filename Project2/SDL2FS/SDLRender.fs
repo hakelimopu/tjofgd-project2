@@ -26,7 +26,7 @@ type Renderer = IntPtr
 
 module private SDLRenderNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern Renderer SDL_CreateRenderer(SDLWindow.Window window, int index, uint32 flags)
+    extern Renderer SDL_CreateRenderer(SDLWindow.WindowPointer window, int index, uint32 flags)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_DestroyRenderer(Renderer renderer)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -106,7 +106,7 @@ module private SDLRenderNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_GL_UnbindTexture(Texture texture)
 
-let create (window:SDLWindow.Window) (index:int) (flags:Flags) :Renderer =
+let create (window:SDLWindow.WindowPointer) (index:int) (flags:Flags) :Renderer =
     SDLRenderNative.SDL_CreateRenderer(window, index, flags |> uint32)
 
 let destroy (renderer:Renderer) :unit =

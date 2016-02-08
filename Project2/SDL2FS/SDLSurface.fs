@@ -125,9 +125,16 @@ let createRGB (width:int<px>,height:int<px>,depth:int<bit/px>) (rmask:uint32,gma
 let free (surface:Surface) :unit =
     SDLSurfaceNative.SDL_FreeSurface(surface)
 
-let fillRect (rect:Rectangle option) (color:uint32) (surface:Surface) :bool =
-    SDLGeometry.withSDLRectPointer (fun r->0 = SDLSurfaceNative.SDL_FillRect(surface, r, color)) rect
-    
+let private getFormat (surface:Surface) :IntPtr =
+    let sdlSurface = 
+        surface
+        |> NativePtr.ofNativeInt<SDL_Surface>
+        |> NativePtr.read
+    sdlSurface.format
+
+let fillRect (rect:Rectangle option) (color:SDLPixel.Color) (surface:Surface) :bool =
+    let format = surface |> getFormat
+    SDLGeometry.withSDLRectPointer (fun r->0 = SDLSurfaceNative.SDL_FillRect(surface, r, color |> SDLPixel.mapColor format)) rect
 
 let loadBmp (pixelFormat: uint32) (fileName:string) : Surface =
     let bitmapSurface = SDLSurfaceNative.SDL_LoadBMP_RW(SDLUtility.withUtf8String (fun ptr->SDLRWops.SDLRWopsNative.SDL_RWFromFile(ptr,"rb")) fileName, 1)
