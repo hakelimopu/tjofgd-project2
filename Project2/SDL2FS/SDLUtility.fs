@@ -32,3 +32,18 @@ let internal intPtrToStringUtf8 (ptr:IntPtr): string =
             byteSequence <- [bytePtr |> NativePtr.read] |> Seq.append byteSequence
             bytePtr <- 1 |> NativePtr.add bytePtr
         Encoding.UTF8.GetString(byteSequence |> Seq.toArray)
+
+
+type Pointer(ptr:IntPtr, destroyFunc: IntPtr->unit) =
+    let mutable windowPointer = ptr
+    member this.Pointer
+        with get() = windowPointer
+    member this.Destroy() =
+        if ptr = IntPtr.Zero then
+            ()
+        else
+            destroyFunc(ptr)
+            windowPointer <- IntPtr.Zero
+    interface IDisposable with
+        member this.Dispose()=
+            this.Destroy()

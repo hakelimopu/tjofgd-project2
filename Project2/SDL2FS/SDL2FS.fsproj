@@ -57,7 +57,9 @@
     <Compile Include="SDLVersion.fs" />
     <Compile Include="SDLError.fs" />
     <Compile Include="SDLKeyboard.fs" />
+    <Compile Include="SDLMouse.fs" />
     <Compile Include="SDLEvent.fs" />
+    <Compile Include="SDLCursor.fs" />
     <Compile Include="SDLWindow.fs" />
     <Compile Include="SDLPixel.fs" />
     <Compile Include="SDLRWops.fs" />

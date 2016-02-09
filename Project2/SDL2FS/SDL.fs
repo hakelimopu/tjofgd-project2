@@ -26,18 +26,15 @@ type Init =
     | Events         = 0x00004000
     | Everything     = 0x00007231
 
-let wasInit (flags:Init) :Init =
-    SDLInitNative.SDL_WasInit(flags |> uint32) |> int |> enum<Init>
-
-let init (flags: Init) :bool =
-    0 = SDLInitNative.SDL_Init(flags |> uint32)
-
-let initSubSystem (flags: Init) :bool =
-    0 = SDLInitNative.SDL_InitSubSystem(flags |> uint32)
-
-let quitSubSystem (flags: Init) :unit =
-    SDLInitNative.SDL_QuitSubSystem(flags |> uint32)
-
-let quit () : unit=
-    SDLInitNative.SDL_Quit()
-
+type System(flags:Init) =
+    do
+        SDLInitNative.SDL_Init(flags |> uint32) |> ignore
+    member this.initSubSystem (flags: Init) :bool =
+        0 = SDLInitNative.SDL_InitSubSystem(flags |> uint32)
+    member this.quitSubSystem (flags: Init) :unit =
+        SDLInitNative.SDL_QuitSubSystem(flags |> uint32)
+    member this.wasInit (flags:Init) :bool =
+        flags = (SDLInitNative.SDL_WasInit(flags |> uint32) |> int |> enum<Init>)
+    interface IDisposable with
+        member this.Dispose() =
+            SDLInitNative.SDL_Quit()

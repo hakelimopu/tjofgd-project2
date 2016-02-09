@@ -10,12 +10,11 @@ type RenderingContext =
     Surface:SDLSurface.Surface}
 
 let draw (context:RenderingContext) (state:GameState) :unit =
-    let screenSpace = {X=0<px>;Y=0<px>;Width=160<px>;Height=120<px>}
     context.Renderer |> SDLRender.setDrawColor (255uy,0uy,255uy,255uy) |> ignore
     context.Renderer |> SDLRender.clear |> ignore
 
     context.Surface
-    |> SDLSurface.fillRect (Some screenSpace) {Red=0uy;Green=0uy;Blue=0uy;Alpha=255uy}
+    |> SDLSurface.fillRect None {Red=0uy;Green=0uy;Blue=0uy;Alpha=255uy}
     |> ignore
 
     context.Surface
@@ -30,5 +29,5 @@ let draw (context:RenderingContext) (state:GameState) :unit =
     |> SDLTexture.update None context.Surface
     |> ignore
 
-    context.Renderer |> SDLRender.copy context.Texture screenSpace screenSpace |> ignore
+    context.Renderer |> SDLRender.copy context.Texture None None |> ignore
     context.Renderer |> SDLRender.present 

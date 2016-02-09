@@ -38,16 +38,16 @@ type WindowEvent =
     | FocusLost   = 13
     | Close       = 14
 
-type WindowPointer = IntPtr
+type Window = SDLUtility.Pointer
 
 module private SDLWindowNative =
     //create and destroy
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern WindowPointer SDL_CreateWindow(IntPtr title, int x, int y, int w, int h, uint32 flags)
+    extern IntPtr SDL_CreateWindow(IntPtr title, int x, int y, int w, int h, uint32 flags)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_CreateWindowFrom(IntPtr data)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_DestroyWindow(WindowPointer window)
+    extern void SDL_DestroyWindow(IntPtr window)
 
     //video drivers
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -203,23 +203,8 @@ module private SDLWindowNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_GetWindowFromID(uint32 id)
 
-type Window(ptr:WindowPointer) =
-    let mutable windowPointer = ptr
-    member this.Pointer
-        with get() = ptr
-    member this.Destroy() =
-        if ptr = IntPtr.Zero then
-            ()
-        else
-            SDLWindowNative.SDL_DestroyWindow(ptr)
-            windowPointer <- IntPtr.Zero
-    interface IDisposable with
-        member this.Dispose()=
-            this.Destroy()
-
-
 let create (title:string) (x:int<px>) (y:int<px>) (w:int<px>) (h:int<px>) (flags:uint32) :Window =
     let ptr = 
         title
         |> SDLUtility.withUtf8String (fun ptr -> SDLWindowNative.SDL_CreateWindow(ptr, x /1<px>, y /1<px>, w /1<px>, h /1<px>, flags))
-    new Window(ptr)
+    new SDLUtility.Pointer(ptr, SDLWindowNative.SDL_DestroyWindow)
