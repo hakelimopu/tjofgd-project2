@@ -30,10 +30,10 @@ module private SDLRectNative =
     extern int SDL_IntersectRect(SDL_Rect* A, SDL_Rect* B, SDL_Rect* result)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void SDL_UnionRect(SDL_Rect* A, SDL_Rect* B, SDL_Rect* result)
-    //[<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    //extern int SDL_EnclosePoints(SDL_Point& points, int count, SDL_Rect& clip, SDL_Rect& result);
-    //[<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    //extern int SDL_IntersectRectAndLine(SDL_Rect& rect, int& X1, int& Y1, int& X2, int& Y2);
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_EnclosePoints(SDL_Point* points, int count, SDL_Rect* clip, SDL_Rect* result);
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern int SDL_IntersectRectAndLine(SDL_Rect* rect, int* X1, int* Y1, int* X2, int* Y2);
 
 type Point = {X: int<px>; Y: int<px>}
 
