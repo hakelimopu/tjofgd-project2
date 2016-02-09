@@ -4,10 +4,19 @@ open GameState
 open SDLUtility
 open SDLGeometry
 
+type Sprite =
+    {Surface:SDLSurface.Surface;
+    Bounds:SDLGeometry.Rectangle option}
+
+let createSprite surface bounds =
+    {Surface=surface;Bounds=bounds}
+
 type RenderingContext =
     {Renderer:SDLRender.Renderer;
     Texture:SDLTexture.Texture;
-    Surface:SDLSurface.Surface}
+    Surface:SDLSurface.Surface;
+    Sprites:Map<int,Sprite>;
+    Random:System.Random}
 
 let draw (context:RenderingContext) (state:GameState) :unit =
     context.Renderer |> SDLRender.setDrawColor (255uy,0uy,255uy,255uy) |> ignore
@@ -17,13 +26,12 @@ let draw (context:RenderingContext) (state:GameState) :unit =
     |> SDLSurface.fillRect None {Red=0uy;Green=0uy;Blue=0uy;Alpha=255uy}
     |> ignore
 
-    context.Surface
-    |> SDLSurface.fillRect (Some {X=state.X;Y=state.Y;Width=10<px>;Height=10<px>}) {Red=255uy;Green=0uy;Blue=0uy;Alpha=255uy}
-    |> ignore
-
-    context.Surface
-    |> SDLSurface.fillRect (Some {X=10<px>;Y=10<px>;Width=10<px>;Height=10<px>}) {Red=0uy;Green=0uy;Blue=255uy;Alpha=255uy}
-    |> ignore
+    for x in [0..39] do
+        for y in [0..29] do
+            let sprite = context.Sprites.[context.Random.Next(256)]
+            context.Surface
+            |> SDLSurface.blit sprite.Bounds sprite.Surface  (Some {X=x * 8<px>;Y=y * 8<px>;Width=8<px>;Height=8<px>})
+            |> ignore
 
     context.Texture
     |> SDLTexture.update None context.Surface

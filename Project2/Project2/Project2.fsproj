@@ -84,6 +84,9 @@
     <Compile Include="EventHandler.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <Content Include="Content\romfont8x8.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -93,8 +96,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\SDL2FS\SDL2FS.fsproj">
       <Name>SDL2FS</Name>
       <Project>{2b0de73d-f6d4-47b9-960a-367e3f541fda}</Project>

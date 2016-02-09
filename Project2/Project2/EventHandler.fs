@@ -9,10 +9,6 @@ let private handleQuitEvent (quitEvent:SDLEvent.QuitEvent) (state:GameState) :Ga
 let private handleKeyDownEvent (keyboardEvent:SDLEvent.KeyboardEvent) (state:GameState) :GameState option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.Escape -> None
-    | SDLKeyboard.ScanCode.Right  -> Some {state with X=state.X+5<px>} //right
-    | SDLKeyboard.ScanCode.Left   -> Some {state with X=state.X-5<px>} //left
-    | SDLKeyboard.ScanCode.Down   -> Some {state with Y=state.Y+5<px>} //down
-    | SDLKeyboard.ScanCode.Up     -> Some {state with Y=state.Y-5<px>} //up
     | _ -> Some state
 
 let handleEvent (event:SDLEvent.Event) (state:GameState) : GameState option =
