@@ -157,4 +157,11 @@ let lowerBlitScaled (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle 
 let softStretch (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
     SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_SoftStretch(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
 
-    
+let setColorKey (color:SDLPixel.Color option) (surface:Surface) =
+    let fmt = 
+        (surface |> getFormat)
+    let key = 
+        if color.IsSome then SDLPixel.mapColor fmt color.Value else 0u
+    let flag = 
+        if color.IsSome then 1 else 0
+    0 = SDLSurfaceNative.SDL_SetColorKey(surface.Pointer, flag, key)
