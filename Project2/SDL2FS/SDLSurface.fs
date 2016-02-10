@@ -5,6 +5,7 @@ open SDLGeometry
 open System.Runtime.InteropServices
 open SDLUtility
 open Microsoft.FSharp.NativeInterop
+open SDLPixel
 
 #nowarn "9"
 
@@ -40,7 +41,7 @@ module private SDLSurfaceNative =
 
     //Palette
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern  int SDL_SetSurfacePalette(IntPtr surface, IntPtr palette)
+    extern  int SDL_SetSurfacePalette(IntPtr surface, IntPtr palette)//TODO
 
     //Locking
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -80,13 +81,13 @@ module private SDLSurfaceNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_SetSurfaceBlendMode(IntPtr surface, int blendMode)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_GetSurfaceBlendMode(IntPtr surface, IntPtr blendMode)
+    extern int SDL_GetSurfaceBlendMode(IntPtr surface, int* blendMode)
 
     //Clip Rect
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int  SDL_SetClipRect(IntPtr surface, IntPtr rect)
+    extern int  SDL_SetClipRect(IntPtr surface, SDL_Rect* rect)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void  SDL_GetClipRect(IntPtr surface, SDL_Rect * rect)
+    extern void  SDL_GetClipRect(IntPtr surface, SDL_Rect* rect)
 
     //Conversions
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -100,7 +101,7 @@ module private SDLSurfaceNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_FillRect(IntPtr dst, IntPtr rect, uint32 color)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern int SDL_FillRects(IntPtr dst, IntPtr rects, int count, uint32 color)
+    extern int SDL_FillRects(IntPtr dst, IntPtr rects, int count, uint32 color)//TODO
 
     //blitting
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -140,6 +141,9 @@ let loadBmp (pixelFormat: uint32) (fileName:string) : Surface =
     SDLSurfaceNative.SDL_FreeSurface bitmapSurface
     new SDLUtility.Pointer(convertedSurface, SDLSurfaceNative.SDL_FreeSurface)
 
+let saveBmp (fileName:string) (surface:Surface) :bool =
+    0 = SDLSurfaceNative.SDL_SaveBMP_RW(surface.Pointer, SDLUtility.withUtf8String (fun ptr->SDLRWops.SDLRWopsNative.SDL_RWFromFile(ptr,"wb")) fileName, 1)
+
 let upperBlit (srcrect:Rectangle option) (src:Surface) (dstrect:Rectangle option) (dst:Surface) =
     SDLGeometry.withSDLRectPointer (fun srcptr -> SDLGeometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_UpperBlit(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
 
@@ -165,3 +169,37 @@ let setColorKey (color:SDLPixel.Color option) (surface:Surface) =
     let flag = 
         if color.IsSome then 1 else 0
     0 = SDLSurfaceNative.SDL_SetColorKey(surface.Pointer, flag, key)
+
+let getColorKey (surface:Surface) :SDLPixel.Color option =
+    let mutable key: uint32 = 0u
+    match SDLSurfaceNative.SDL_GetColorKey(surface.Pointer,&&key) with
+    | 0 ->
+        let fmt = 
+            (surface |> getFormat)
+        key |> SDLPixel.getColor fmt |> Some
+    | _ -> None
+
+let lockBind (surface:Surface) (func: unit -> unit) :bool =
+    if 0 = SDLSurfaceNative.SDL_LockSurface surface.Pointer then
+        func()
+        SDLSurfaceNative.SDL_UnlockSurface surface.Pointer
+        true
+    else
+        false
+
+let setRLE (surface:Surface) (flag:bool) :bool =
+    0 = SDLSurfaceNative.SDL_SetSurfaceRLE(surface.Pointer,(if flag then 1 else 0))
+
+
+let setModulation (color:SDLPixel.Color) (surface:Surface) :bool = 
+    (0 = SDLSurfaceNative.SDL_SetSurfaceColorMod(surface.Pointer, color.Red, color.Green, color.Blue)) && (0 = SDLSurfaceNative.SDL_SetSurfaceAlphaMod(surface.Pointer, color.Alpha))
+    
+let getModulation (surface:Surface) :SDLPixel.Color option =
+    let mutable r : uint8 = 0uy
+    let mutable g : uint8 = 0uy
+    let mutable b : uint8 = 0uy
+    let mutable a : uint8 = 0uy
+    let result = SDLSurfaceNative.SDL_GetSurfaceColorMod(surface.Pointer,&&r,&&g,&&b), SDLSurfaceNative.SDL_GetSurfaceAlphaMod(surface.Pointer,&&a)
+    match result with
+    | (0,0) -> {Red=r;Green=g;Blue=b;Alpha=a} |> Some
+    | _ -> None
