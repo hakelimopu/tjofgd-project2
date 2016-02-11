@@ -32,10 +32,23 @@ let main argv =
     mainRenderer |> SDLRender.setLogicalSize (320<px>,240<px>) |> ignore
 
     let sprites = 
-        [0..255]
-        |> Seq.map(fun index-> (index, (Render.createSprite bitmap {X=8<px>*(index % 16);Y=8<px>*(index / 16);Width=8<px>;Height=8<px>})))
+        [0uy..255uy]
+        |> Seq.map(fun index-> (index, (Render.createSprite bitmap {X=8<px>*((index |> int) % 16);Y=8<px>*((index |> int) / 16);Width=8<px>;Height=8<px>})))
         |> Map.ofSeq
 
-    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;Random = new Random();WorkSurface=workSurface}) EventHandler.handleEvent {X=0<px>;Y=0<px>}
+    let initialGrid = 
+        [0..15]
+        |> Seq.fold(fun outerState column -> 
+            [0..15]
+            |> Seq.fold(fun innerState row-> 
+                let location = {Column=column * 1<cell>;Row=row * 1<cell>}
+                let cell = 
+                    {Character = (column + row * 16) |> byte;
+                    Foreground = column |> enum<CellColor>;
+                    Background = row |> enum<CellColor>}
+                innerState
+                |> Map.add location cell) outerState) Map.empty<CellLocation,Cell>
+
+    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) EventHandler.handleEvent ({PlayState.Grid = initialGrid} |> PlayState)
 
     0
