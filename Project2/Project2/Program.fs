@@ -39,19 +39,7 @@ let main argv =
     let random = new System.Random()
 
     let initialMap =
-        [0..(MapColumns/1<cell>)-1]
-        |> Seq.fold(fun outerMap column -> 
-            [0..(MapRows/1<cell>)-1]
-            |> Seq.fold(fun innerMap row -> 
-                let terrain = 
-                    match random.Next(10) with
-                    | 0 -> MapTerrain.DeepWater
-                    | _ -> MapTerrain.Water
-                innerMap
-                |> Map.add {Column=column * 1<cell>;Row=row * 1<cell>} {Terrain=terrain;Object=None}
-                ) outerMap
-            ) Map.empty<CellLocation,MapCell>
-        |> setObject {Column = random.Next(MapColumns / 1<cell>) * 1<cell>;Row=random.Next(MapRows / 1<cell>)*1<cell>} (Some MapObject.Boat)
+        createWorld random
 
     EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) EventHandler.handleEvent ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap} |> PlayState)
 

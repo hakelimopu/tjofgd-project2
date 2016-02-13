@@ -37,22 +37,28 @@ let MapViewY = 1<cell>
 let MapViewWidth = 28<cell>
 let MapViewHeight = 28<cell>
 
+let mapViewCells =
+    [0 .. (MapViewWidth/1<cell>)-1]
+    |> Seq.map(fun column-> 
+        [0 .. (MapViewHeight / 1<cell>)-1]
+        |> Seq.map(fun row-> 
+            ({Column=MapViewX + column * 1<cell>;Row=MapViewY + row * 1<cell>},{Column=column * 1<cell> - MapViewWidth / 2;Row=row * 1<cell> - MapViewHeight / 2})))
+    |> Seq.reduce (Seq.append)
+    |> Map.ofSeq
+
+
 let private onIdlePlayState (state:PlayState) :GameState option =
     let playerLocation = 
         state.MapGrid
         |> getPlayerLocation
         |> Option.get
     let renderGrid = 
-        [0 .. (MapViewWidth/1<cell>)-1]
-        |> Seq.fold (fun outerRenderGrid mapColumn -> 
-            [0 .. (MapViewHeight / 1<cell>)-1]
-            |> Seq.fold(fun innerRenderGrid mapRow -> 
-                let mapLocation = {Column=playerLocation.Column - MapViewWidth / 2  + mapColumn * 1<cell>;Row=playerLocation.Row - MapViewHeight/2  + mapRow * 1<cell>}
-                let renderLocation = {Column=MapViewX + mapColumn * 1<cell>;Row=MapViewY + mapRow * 1<cell>}
-                let mapCell = state.MapGrid.TryFind mapLocation
-                innerRenderGrid
-                |> Map.add renderLocation (mapCell |> renderCellForMapCell)
-                ) outerRenderGrid) Map.empty<CellLocation,RenderCell>
+        mapViewCells
+        |> Map.fold(fun renderGrid renderLocation mapDelta -> 
+            let mapLocation = {Column=playerLocation.Column + mapDelta.Column;Row=playerLocation.Row + mapDelta.Row}
+            let mapCell = state.MapGrid.TryFind mapLocation
+            renderGrid
+            |> Map.add renderLocation (mapCell |> renderCellForMapCell)) Map.empty<CellLocation,RenderCell>
     {state with RenderGrid = renderGrid} |> PlayState |> Some
 
 let private onIdle (state:GameState): GameState option =
