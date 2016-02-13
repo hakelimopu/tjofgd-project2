@@ -24,22 +24,22 @@ type RenderingContext =
     WorkSurface:SDLSurface.Surface}
 
 let private palette = 
-    [(CellColor.Black        ,{Red=0x01uy;Green=0x01uy;Blue=0x01uy;Alpha=0x00uy});
-    (CellColor.Blue         ,{Red=0x00uy;Green=0x00uy;Blue=0xAAuy;Alpha=0x00uy});
-    (CellColor.Green        ,{Red=0x00uy;Green=0xAAuy;Blue=0x00uy;Alpha=0x00uy});
-    (CellColor.Cyan         ,{Red=0x00uy;Green=0xAAuy;Blue=0xAAuy;Alpha=0x00uy});
-    (CellColor.Red          ,{Red=0xAAuy;Green=0x00uy;Blue=0x00uy;Alpha=0x00uy});
-    (CellColor.Magenta      ,{Red=0xAAuy;Green=0x00uy;Blue=0xAAuy;Alpha=0x00uy});
-    (CellColor.Brown        ,{Red=0xAAuy;Green=0x55uy;Blue=0x00uy;Alpha=0x00uy});
-    (CellColor.White        ,{Red=0xAAuy;Green=0xAAuy;Blue=0xAAuy;Alpha=0x00uy});
-    (CellColor.DarkGray     ,{Red=0x55uy;Green=0x55uy;Blue=0x55uy;Alpha=0x00uy});
-    (CellColor.BrightBlue   ,{Red=0x55uy;Green=0x55uy;Blue=0xFFuy;Alpha=0x00uy});
-    (CellColor.BrightGreen  ,{Red=0x55uy;Green=0xFFuy;Blue=0x55uy;Alpha=0x00uy});
-    (CellColor.BrightCyan   ,{Red=0x55uy;Green=0xFFuy;Blue=0xFFuy;Alpha=0x00uy});
-    (CellColor.BrightRed    ,{Red=0xFFuy;Green=0x55uy;Blue=0x55uy;Alpha=0x00uy});
-    (CellColor.BrightMagenta,{Red=0xFFuy;Green=0x55uy;Blue=0xFFuy;Alpha=0x00uy});
-    (CellColor.BrightYellow ,{Red=0xFFuy;Green=0xFFuy;Blue=0x55uy;Alpha=0x00uy});
-    (CellColor.BrightWhite  ,{Red=0xFFuy;Green=0xFFuy;Blue=0xFFuy;Alpha=0x00uy})]
+    [(RenderCellColor.Black        ,{Red=0x01uy;Green=0x01uy;Blue=0x01uy;Alpha=0x00uy});
+    (RenderCellColor.Blue         ,{Red=0x00uy;Green=0x00uy;Blue=0xAAuy;Alpha=0x00uy});
+    (RenderCellColor.Green        ,{Red=0x00uy;Green=0xAAuy;Blue=0x00uy;Alpha=0x00uy});
+    (RenderCellColor.Cyan         ,{Red=0x00uy;Green=0xAAuy;Blue=0xAAuy;Alpha=0x00uy});
+    (RenderCellColor.Red          ,{Red=0xAAuy;Green=0x00uy;Blue=0x00uy;Alpha=0x00uy});
+    (RenderCellColor.Magenta      ,{Red=0xAAuy;Green=0x00uy;Blue=0xAAuy;Alpha=0x00uy});
+    (RenderCellColor.Brown        ,{Red=0xAAuy;Green=0x55uy;Blue=0x00uy;Alpha=0x00uy});
+    (RenderCellColor.White        ,{Red=0xAAuy;Green=0xAAuy;Blue=0xAAuy;Alpha=0x00uy});
+    (RenderCellColor.DarkGray     ,{Red=0x55uy;Green=0x55uy;Blue=0x55uy;Alpha=0x00uy});
+    (RenderCellColor.BrightBlue   ,{Red=0x55uy;Green=0x55uy;Blue=0xFFuy;Alpha=0x00uy});
+    (RenderCellColor.BrightGreen  ,{Red=0x55uy;Green=0xFFuy;Blue=0x55uy;Alpha=0x00uy});
+    (RenderCellColor.BrightCyan   ,{Red=0x55uy;Green=0xFFuy;Blue=0xFFuy;Alpha=0x00uy});
+    (RenderCellColor.BrightRed    ,{Red=0xFFuy;Green=0x55uy;Blue=0x55uy;Alpha=0x00uy});
+    (RenderCellColor.BrightMagenta,{Red=0xFFuy;Green=0x55uy;Blue=0xFFuy;Alpha=0x00uy});
+    (RenderCellColor.BrightYellow ,{Red=0xFFuy;Green=0xFFuy;Blue=0x55uy;Alpha=0x00uy});
+    (RenderCellColor.BrightWhite  ,{Red=0xFFuy;Green=0xFFuy;Blue=0xFFuy;Alpha=0x00uy})]
     |> Map.ofSeq
 
 let draw (context:RenderingContext) (state:GameState) :unit =
@@ -52,7 +52,7 @@ let draw (context:RenderingContext) (state:GameState) :unit =
 
     match state with
     | PlayState state ->
-        state.Grid
+        state.RenderGrid
         |> Map.iter(fun location cell -> 
             let foreground = palette.[cell.Foreground]
             let background = palette.[cell.Background]

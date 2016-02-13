@@ -35,20 +35,24 @@ let main argv =
         [0uy..255uy]
         |> Seq.map(fun index-> (index, (Render.createSprite bitmap {X=8<px>*((index |> int) % 16);Y=8<px>*((index |> int) / 16);Width=8<px>;Height=8<px>})))
         |> Map.ofSeq
+    
+    let random = new System.Random()
 
-    let initialGrid = 
-        [0..15]
-        |> Seq.fold(fun outerState column -> 
-            [0..15]
-            |> Seq.fold(fun innerState row-> 
-                let location = {Column=column * 1<cell>;Row=row * 1<cell>}
-                let cell = 
-                    {Character = (column + row * 16) |> byte;
-                    Foreground = column |> enum<CellColor>;
-                    Background = row |> enum<CellColor>}
-                innerState
-                |> Map.add location cell) outerState) Map.empty<CellLocation,Cell>
+    let initialMap =
+        [0..(MapColumns/1<cell>)-1]
+        |> Seq.fold(fun outerMap column -> 
+            [0..(MapRows/1<cell>)-1]
+            |> Seq.fold(fun innerMap row -> 
+                let terrain = 
+                    match random.Next(10) with
+                    | 0 -> MapTerrain.DeepWater
+                    | _ -> MapTerrain.Water
+                innerMap
+                |> Map.add {Column=column * 1<cell>;Row=row * 1<cell>} {Terrain=terrain;Object=None}
+                ) outerMap
+            ) Map.empty<CellLocation,MapCell>
+        |> setObject {Column = random.Next(MapColumns / 1<cell>) * 1<cell>;Row=random.Next(MapRows / 1<cell>)*1<cell>} (Some MapObject.Boat)
 
-    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) EventHandler.handleEvent ({PlayState.Grid = initialGrid} |> PlayState)
+    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) EventHandler.handleEvent ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap} |> PlayState)
 
     0
