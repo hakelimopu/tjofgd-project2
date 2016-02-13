@@ -53,10 +53,13 @@ type MapCell =
     {Terrain:MapTerrain;
     Object:MapObject option}
 
-let renderCellForMapCell (mapCell:MapCell) :RenderCell =
-    match mapCell.Object with
-    | Some x -> ObjectRenderCells.[x]
-    | None -> TerrainRenderCells.[mapCell.Terrain]
+let renderCellForMapCell (mapCell:MapCell option) :RenderCell =
+    if mapCell.IsSome then
+        match mapCell.Value.Object with
+        | Some x -> ObjectRenderCells.[x]
+        | None -> TerrainRenderCells.[mapCell.Value.Terrain]
+    else
+        TerrainRenderCells.[MapTerrain.DeepWater]
 
 let setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
     let originalCell = 
@@ -78,8 +81,16 @@ let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:
     |> Map.add cellLocation newCell
 
 
-let MapColumns = 30<cell>
-let MapRows = 30<cell>
+let MapColumns = 256<cell>
+let MapRows = 256<cell>
+
+let getPlayerLocation (mapGrid:CellMap<MapCell>) = 
+    mapGrid
+    |> Map.tryPick (fun location cell -> 
+        match cell.Object with
+        | Some MapObject.Boat -> location |> Some
+        | _ -> None)
+
 
 type PlayState =
     {RenderGrid:CellMap<RenderCell>;
