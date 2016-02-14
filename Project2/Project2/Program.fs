@@ -1,8 +1,10 @@
 ﻿open SDLUtility
 open SDLGeometry
 open SDLPixel
-open System
 open GameState
+open CellLocation
+open RenderCell
+open MapCell
 
 
 [<EntryPoint>]

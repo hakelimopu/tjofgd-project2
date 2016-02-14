@@ -4,6 +4,9 @@ open GameState
 open SDLUtility
 open SDLGeometry
 open SDLPixel
+open CellLocation
+open RenderCell
+
 
 type Sprite =
     {Surface:SDLSurface.Surface;

@@ -1,6 +1,9 @@
 ﻿module EventHandler
 
 open GameState
+open CellLocation
+open RenderCell
+open MapCell
 
 let private handleQuitEvent (quitEvent:SDLEvent.QuitEvent) (state:GameState) :GameState option =
     None
@@ -9,11 +12,15 @@ let moveBoat (delta:CellLocation) (state:PlayState) :GameState option =
     let playerLocation = state.MapGrid |> getPlayerLocation 
     match playerLocation with
     | Some cellLocation -> 
-        let nextLocation = {Column=cellLocation.Column+delta.Column;Row=cellLocation.Row+delta.Row}
+        let nextLocation = delta |> sumLocations cellLocation
         let mapGrid =
-            state.MapGrid
-            |> setObject cellLocation None
-            |> setObject nextLocation (Some MapObject.Boat)
+            if state.MapGrid.ContainsKey nextLocation then
+                state.MapGrid
+                |> setObject cellLocation None
+                |> setObject nextLocation (Some MapObject.Boat)
+                |> updateVisibleFlags
+            else
+                state.MapGrid
         {state with MapGrid = mapGrid} |> PlayState |> Some
     | None -> state |> PlayState |> Some
     

@@ -79,6 +79,9 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="EventPump.fs" />
+    <Compile Include="CellLocation.fs" />
+    <Compile Include="RenderCell.fs" />
+    <Compile Include="MapCell.fs" />
     <Compile Include="GameState.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="EventHandler.fs" />
