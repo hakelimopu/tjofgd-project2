@@ -4,6 +4,7 @@ open CellLocation
 
 let MapColumns = 256<cell>
 let MapRows = 256<cell>
+let WorldSize = {Column=MapColumns;Row=MapRows}
 let IslandDistance = 20<cell>
 
 type MapTerrain =
@@ -31,12 +32,18 @@ let setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:Cell
     cellMap
     |> Map.add cellLocation newCell
 
+let setTerrainWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
+    setTerrain (cellLocation |> wrapLocation worldSize) mapTerrain cellMap
+
 let setVisible (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<MapCell> = 
     match cellMap.TryFind(cellLocation) with
     | None -> cellMap
     | Some mapCell -> 
         cellMap
         |> Map.add cellLocation {mapCell with Visible=true}
+
+let setVisibleWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<MapCell> = 
+    setVisible (cellLocation |> wrapLocation worldSize) cellMap
 
 
 let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
@@ -46,6 +53,10 @@ let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:
         {originalCell with Object = mapObject}
     cellMap
     |> Map.add cellLocation newCell
+
+let setObjectWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
+    setObject (cellLocation |> wrapLocation worldSize) mapObject cellMap
+    
 
 let getPlayerLocation (mapGrid:CellMap<MapCell>) = 
     mapGrid
@@ -121,17 +132,37 @@ let islandTemplate =
     |> List.map (fun (x,y,t) -> ({Column=x * 1<cell>;Row=y * 1<cell>},t))
     |> Map.ofList
 
-let placeIsland (location:CellLocation) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+let placeIsland (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
     islandTemplate
     |> Map.fold(fun map delta terrain ->
-        let mapLocation = {Column=location.Column+delta.Column;Row=location.Row+delta.Row}
+        let mapLocation = sumLocationsFunc location delta
         if map.ContainsKey mapLocation then
             map
-            |> setTerrain mapLocation terrain
+            |> setTerrainFunc mapLocation terrain
         else
             map) map
 
-let generateIslands (random:System.Random) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+let distanceFormulaTest (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
+    let deltaX = second.Column - first.Column
+    let deltaY = second.Row - first.Row
+    (deltaX*deltaX+deltaY*deltaY) > maximum * maximum
+
+let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
+    let locations = 
+        [second;
+        {second with Column=second.Column+worldSize.Column};
+        {second with Row=second.Row+worldSize.Row};
+        {Column=second.Column+worldSize.Column;Row=second.Row+worldSize.Row}]
+    locations
+    |> Seq.fold (fun failures location->
+        if distanceFormulaTest maximum first second then
+            failures + 1
+        else
+            failures) 0
+    |> (=) locations.Length
+
+
+let generateIslands (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
     let mutable islandLocations = List<CellLocation>.Empty
     let mutable validLocations = mapLocations |> Array.ofSeq
     while validLocations |> Array.isEmpty |> not do
@@ -140,14 +171,11 @@ let generateIslands (random:System.Random) (map:Map<CellLocation,MapCell>) :Map<
         islandLocations <- islandLocation :: islandLocations
         validLocations <-
             validLocations
-            |> Array.filter (fun cellLocation -> 
-                let deltaX = cellLocation.Column - islandLocation.Column
-                let deltaY = cellLocation.Row - islandLocation.Row
-                (deltaX*deltaX+deltaY*deltaY) > IslandDistance * IslandDistance)
+            |> Array.filter (distanceFormulaTestFunc IslandDistance islandLocation)
     islandLocations
     |> List.fold(fun map location -> 
         map
-        |> placeIsland location) map
+        |> placeIsland sumLocationsFunc setTerrainFunc location) map
 
 let private visibilityTemplate = 
     [(-2,-1);
@@ -173,7 +201,7 @@ let private visibilityTemplate =
     ( 2, 1)]
     |> Seq.map(fun (x,y) -> {Column=x*1<cell>;Row=y*1<cell>})
 
-let updateVisibleFlags (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+let updateVisibleFlags (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
     let playerLocation = map |> getPlayerLocation
     match playerLocation with
     | None -> map
@@ -182,18 +210,18 @@ let updateVisibleFlags (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell
         |> Seq.fold(fun map delta -> 
             let visibleLocation = delta |> sumLocations location
             map
-            |> setVisible visibleLocation
+            |> setVisibleFunc visibleLocation
             ) map
 
-let createWorld (random:System.Random) = 
+let createWorld (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) = 
     mapLocations
     |> Seq.fold(fun map cellLocation -> 
         map
         |> Map.add cellLocation {Terrain=MapTerrain.DeepWater;Object=None;Visible=false}
         ) Map.empty<CellLocation,MapCell>
-    |> generateIslands random
-    |> setObject {Column = random.Next(MapColumns / 1<cell>) * 1<cell>;Row=random.Next(MapRows / 1<cell>)*1<cell>} (Some MapObject.Boat)
-    |> updateVisibleFlags
+    |> generateIslands sumLocationsFunc distanceFormulaTestFunc setTerrainFunc random
+    |> setObject {Column = random.Next(MapColumns / 1<cell>) * 1<cell>;Row=random.Next(MapRows / 1<cell>) * 1<cell>} (Some MapObject.Boat)
+    |> updateVisibleFlags setVisibleFunc
 
 
 

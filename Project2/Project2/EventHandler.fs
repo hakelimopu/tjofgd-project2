@@ -8,36 +8,35 @@ open MapCell
 let private handleQuitEvent (quitEvent:SDLEvent.QuitEvent) (state:GameState) :GameState option =
     None
 
-let moveBoat (delta:CellLocation) (state:PlayState) :GameState option =
+let moveBoat (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (delta:CellLocation) (state:PlayState) :GameState option =
     let playerLocation = state.MapGrid |> getPlayerLocation 
     match playerLocation with
     | Some cellLocation -> 
-        let nextLocation = delta |> sumLocations cellLocation
+        let nextLocation = delta |> sumLocationsFunc cellLocation
         let mapGrid =
             if state.MapGrid.ContainsKey nextLocation then
                 state.MapGrid
                 |> setObject cellLocation None
                 |> setObject nextLocation (Some MapObject.Boat)
-                |> updateVisibleFlags
+                |> updateVisibleFlags setVisibleFunc
             else
                 state.MapGrid
         {state with MapGrid = mapGrid} |> PlayState |> Some
     | None -> state |> PlayState |> Some
     
-
-let private handleKeyDownEventPlayState (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
+let private handleKeyDownEventPlayState (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.Escape -> None
-    | SDLKeyboard.ScanCode.Left -> state |> moveBoat {Column= -1<cell>; Row=0<cell>}
-    | SDLKeyboard.ScanCode.Right -> state |> moveBoat {Column= 1<cell>; Row=0<cell>}
-    | SDLKeyboard.ScanCode.Up -> state |> moveBoat {Column= 0<cell>; Row= -1<cell>}
-    | SDLKeyboard.ScanCode.Down -> state |> moveBoat {Column= 0<cell>; Row= 1<cell>}
-    | _ -> state |> PlayState |> Some
+    | SDLKeyboard.ScanCode.Left   -> state |> moveBoat sumLocationsFunc setVisibleFunc {Column= -1<cell>; Row=0<cell>}
+    | SDLKeyboard.ScanCode.Right  -> state |> moveBoat sumLocationsFunc setVisibleFunc {Column= 1<cell>; Row=0<cell>}
+    | SDLKeyboard.ScanCode.Up     -> state |> moveBoat sumLocationsFunc setVisibleFunc {Column= 0<cell>; Row= -1<cell>}
+    | SDLKeyboard.ScanCode.Down   -> state |> moveBoat sumLocationsFunc setVisibleFunc {Column= 0<cell>; Row= 1<cell>}
+    | _                           -> state |> PlayState |> Some
 
 
-let private handleKeyDownEvent (keyboardEvent:SDLEvent.KeyboardEvent) (state:GameState) :GameState option =
+let private handleKeyDownEvent (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:GameState) :GameState option =
     match state with
-    | PlayState x -> x |> handleKeyDownEventPlayState keyboardEvent
+    | PlayState x -> x |> handleKeyDownEventPlayState sumLocationsFunc setVisibleFunc keyboardEvent
 
 let MapViewX = 1<cell>
 let MapViewY = 1<cell>
@@ -54,7 +53,7 @@ let mapViewCells =
     |> Map.ofSeq
 
 
-let private onIdlePlayState (state:PlayState) :GameState option =
+let private onIdlePlayState (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:PlayState) :GameState option =
     let playerLocation = 
         state.MapGrid
         |> getPlayerLocation
@@ -62,20 +61,20 @@ let private onIdlePlayState (state:PlayState) :GameState option =
     let renderGrid = 
         mapViewCells
         |> Map.fold(fun renderGrid renderLocation mapDelta -> 
-            let mapLocation = {Column=playerLocation.Column + mapDelta.Column;Row=playerLocation.Row + mapDelta.Row}
+            let mapLocation = playerLocation |> sumLocationsFunc mapDelta
             let mapCell = state.MapGrid.TryFind mapLocation
             renderGrid
             |> Map.add renderLocation (mapCell |> renderCellForMapCell)) Map.empty<CellLocation,RenderCell>
     {state with RenderGrid = renderGrid} |> PlayState |> Some
 
-let private onIdle (state:GameState): GameState option =
+let private onIdle (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:GameState): GameState option =
     match state with
-    | PlayState x -> x |> onIdlePlayState
+    | PlayState x -> x |> onIdlePlayState sumLocationsFunc
 
-let handleEvent (event:SDLEvent.Event) (state:GameState) : GameState option =
+let handleEvent (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (event:SDLEvent.Event) (state:GameState) : GameState option =
     match event with
     | SDLEvent.Quit x -> state |> handleQuitEvent x
-    | SDLEvent.KeyDown x -> state |> handleKeyDownEvent x
-    | _ -> state |> onIdle
+    | SDLEvent.KeyDown x -> state |> handleKeyDownEvent sumLocationsFunc setVisibleFunc x
+    | _ -> state |> onIdle sumLocationsFunc
 
 
