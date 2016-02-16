@@ -14,7 +14,11 @@ type MapTerrain =
     | DeepWater = 3
 
 type MapObject =
-    | Boat = 0
+    | Boat
+    | Storm
+    | Pirate
+    | SeaMonster
+    | Merfolk
 
 type MapCell =
     {Terrain:MapTerrain;
@@ -44,8 +48,7 @@ let setVisible (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<M
 
 let setVisibleWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<MapCell> = 
     setVisible (cellLocation |> wrapLocation worldSize) cellMap
-
-
+    
 let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
     let originalCell =
         cellMap.[cellLocation]
@@ -56,7 +59,6 @@ let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:
 
 let setObjectWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
     setObject (cellLocation |> wrapLocation worldSize) mapObject cellMap
-    
 
 let getPlayerLocation (mapGrid:CellMap<MapCell>) = 
     mapGrid
@@ -213,14 +215,53 @@ let updateVisibleFlags (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<M
             |> setVisibleFunc visibleLocation
             ) map
 
-let createWorld (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) = 
+let worldObjects =
+    [(MapObject.Boat,1);
+    (MapObject.Storm,200);
+    (MapObject.Pirate,100);
+    (MapObject.SeaMonster,25);
+    (MapObject.Merfolk,50)]
+
+let rec generateLocations (worldSize:CellLocation) (random:System.Random) (count:int) (input:Set<CellLocation>): Set<CellLocation> =
+    if input |> Set.count = count then
+        input
+    else
+        input
+        |> Set.add {Column = random.Next(worldSize.Column / 1<cell>) * 1<cell>;Row=random.Next(worldSize.Row / 1<cell>) * 1<cell>}
+        |> generateLocations worldSize random count
+
+let generateWorldObjects 
+    (worldSize:CellLocation) 
+    (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
+    (setObjectFunc:CellLocation->MapObject option->CellMap<MapCell>->CellMap<MapCell>) 
+    (random:System.Random) 
+    (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+    let allObjects = 
+        worldObjects
+        |> Seq.map (fun (obj,count)-> [for i = 1 to count do yield obj])
+        |> Seq.reduce (@)
+        |> Seq.ofList
+    generateLocations worldSize random (allObjects |> Seq.length) Set.empty
+    |> Set.toSeq
+    |> Seq.zip allObjects
+    |> Seq.fold (fun map (obj,loc) -> 
+        map
+        |> setObjectFunc loc (Some obj)) map
+
+let createWorld 
+    (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
+    (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) 
+    (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) 
+    (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) 
+    (setObjectFunc:CellLocation->MapObject option->CellMap<MapCell>->CellMap<MapCell>) 
+    (random:System.Random) = 
     mapLocations
     |> Seq.fold(fun map cellLocation -> 
         map
         |> Map.add cellLocation {Terrain=MapTerrain.DeepWater;Object=None;Visible=false}
         ) Map.empty<CellLocation,MapCell>
     |> generateIslands sumLocationsFunc distanceFormulaTestFunc setTerrainFunc random
-    |> setObject {Column = random.Next(MapColumns / 1<cell>) * 1<cell>;Row=random.Next(MapRows / 1<cell>) * 1<cell>} (Some MapObject.Boat)
+    |> generateWorldObjects WorldSize sumLocationsFunc setObjectFunc random
     |> updateVisibleFlags setVisibleFunc
 
 

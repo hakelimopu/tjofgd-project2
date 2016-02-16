@@ -41,7 +41,7 @@ let main argv =
     let random = new System.Random()
 
     let initialMap =
-        createWorld (sumLocationsWrapped WorldSize) (distanceFormulaTestWrapped WorldSize) (setVisibleWrapped WorldSize) (setTerrainWrapped WorldSize) random
+        createWorld (sumLocationsWrapped WorldSize) (distanceFormulaTestWrapped WorldSize) (setVisibleWrapped WorldSize) (setTerrainWrapped WorldSize) (setObjectWrapped WorldSize) random
 
     EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped WorldSize) (setVisibleWrapped  WorldSize)) ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap} |> PlayState)
 
