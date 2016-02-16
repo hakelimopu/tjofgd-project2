@@ -104,5 +104,3 @@ let union (a:Rectangle) (b:Rectangle): Rectangle =
     let mutable r3 = new SDL_Rect()
     SDLRectNative.SDL_UnionRect(&&r1,&&r2,&&r3) |> ignore
     sdl_RectToRectangle(r3)
-
-

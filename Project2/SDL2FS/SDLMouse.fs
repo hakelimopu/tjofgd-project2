@@ -2,7 +2,33 @@
 
 open System
 open System.Runtime.InteropServices
+open SDLUtility
 
+type Button =
+    | Left   = 1
+    | Middle = 2
+    | Right  = 3
+    | X1     = 4
+    | X2     = 5
+
+
+type SystemCursor =
+    | Arrow     = 0
+    | IBeam     = 1
+    | Wait      = 2
+    | Crosshair = 3
+    | Waitarrow = 4
+    | SizeNWSE  = 5
+    | SizeNESW  = 6
+    | SizeWE    = 7
+    | SizeNS    = 8
+    | SizeAll   = 9
+    | No        = 10
+    | Hand      = 11
+
+type WheelDirection = 
+    | Normal  = 0
+    | Flipped = 1
 
 type MouseWheelDirection =
     | Normal  = 0
@@ -10,7 +36,7 @@ type MouseWheelDirection =
 
 module internal SDLMouseNative = 
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern IntPtr SDL_GetMouseFocus()
+    extern IntPtr SDL_GetMouseFocus()//TODO
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern uint32 SDL_GetMouseState(int *x, int *y)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -27,3 +53,51 @@ module internal SDLMouseNative =
     extern int SDL_CaptureMouse(int enabled)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int SDL_GetRelativeMouseMode()
+
+type MouseState =
+    {Position:SDLGeometry.Point;Buttons:Set<Button>}
+
+let private toButtonSet (buttons:uint32) : Set<Button> =
+    (Set.empty, [(Button.Left,0x1u);(Button.Middle,0x2u);(Button.Right,0x4u);(Button.X1,0x8u);(Button.X2,0x10u)])
+    ||> Seq.fold (fun buttonSet (button,flag) ->
+        if buttons ||| flag = flag then
+            buttonSet
+            |> Set.add button
+        else
+            buttonSet)
+
+let getMouseState () :MouseState =
+    let mutable x:int = 0
+    let mutable y:int = 0
+    let buttons = SDLMouseNative.SDL_GetMouseState(&&x,&&y)
+    {Position = {X = x * 1<px>;Y = y * 1<px>};Buttons = buttons |> toButtonSet}
+
+let getGlobalMouseState () :MouseState =
+    let mutable x:int = 0
+    let mutable y:int = 0
+    let buttons = SDLMouseNative.SDL_GetGlobalMouseState(&&x,&&y)
+    {Position = {X = x * 1<px>;Y = y * 1<px>};Buttons = buttons |> toButtonSet}
+
+let getRelativeMouseState () :MouseState =
+    let mutable x:int = 0
+    let mutable y:int = 0
+    let buttons = SDLMouseNative.SDL_GetRelativeMouseState(&&x,&&y)
+    {Position = {X = x * 1<px>;Y = y * 1<px>};Buttons = buttons |> toButtonSet}
+
+let warpMouseInWindow (window:Pointer) (xy:SDLGeometry.Point) :unit =
+    SDLMouseNative.SDL_WarpMouseInWindow(window.Pointer,xy.X / 1<px>,xy.Y / 1<px>)
+
+let warpMouseInCurrentWindow (xy:SDLGeometry.Point) :unit =
+    SDLMouseNative.SDL_WarpMouseInWindow(IntPtr.Zero,xy.X / 1<px>,xy.Y / 1<px>)
+
+let warpMouseGlobal (xy:SDLGeometry.Point) :bool =
+    0 = SDLMouseNative.SDL_WarpMouseGlobal(xy.X / 1<px>,xy.Y / 1<px>)
+
+let setRelativeMouseMode (flag:bool) :bool = 
+    0 = SDLMouseNative.SDL_SetRelativeMouseMode(if flag then 1 else 0)
+
+let getRelativeMouseMove () :bool =
+    0 <> SDLMouseNative.SDL_GetRelativeMouseMode()
+
+let captureMouse (flag:bool) : bool =
+    0 = SDLMouseNative.SDL_CaptureMouse(if flag then 1 else 0)

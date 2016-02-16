@@ -512,6 +512,175 @@ type MouseButtonEvent =
     X: int32;
     Y: int32}
 
+type WindowEvent =
+    {Type: uint32;
+    Timestamp: uint32;
+    WindowID: uint32;
+    Event: uint8;
+    Data1: int32; 
+    Data2: int32}
+
+type TextEditingEvent =
+    {Timestamp: uint32;
+    WindowID: uint32;                          
+    Text: string;
+    Start: int32;                              
+    Length: int32}
+
+type TextInputEvent =
+    {Timestamp: uint32;
+    WindowID: uint32;                            
+    Text:string}
+
+type MouseWheelEvent=
+    {Timestamp:uint32;
+    WindowID:uint32;
+    Which:uint32;
+    X:int32;
+    Y:int32;
+    Direction:uint32}
+
+type JoyAxisEvent=
+    {Timestamp:uint32;
+    Which:int32;
+    Axis:uint8;
+    Value:int16}
+
+type JoyBallEvent=
+    {Timestamp:uint32;
+    Which:int32;
+    Ball:uint8;
+    Xrel:int16;
+    Yrel:int16}
+
+type JoyHatEvent=
+    {
+    Timestamp:uint32;
+    Which:int32     ;
+    Hat:uint8       ;
+    Value:uint8     ;
+    Padding1:uint8  ;
+    Padding2:uint8  ;
+    }
+
+type JoyButtonEvent=
+    {
+    Timestamp:uint32;
+    Which:int32     ;
+    Button:uint8    ;
+    State:uint8     ;
+    Padding1:uint8  ;
+    Padding2:uint8  ;
+    }
+
+type JoyDeviceEvent=
+    {
+    Timestamp:uint32;
+    Which:int32     ;
+    }
+
+type ControllerAxisEvent=
+    {
+    Timestamp:uint32;
+    Which:int32     ;
+    Axis:uint8      ;
+    Padding1:uint8  ;
+    Padding2:uint8  ;
+    Padding3:uint8  ;
+    Value:int16     ;
+    Padding4:uint16 ;
+    }
+
+type ControllerButtonEvent=
+    {
+    Timestamp:uint32;
+    Which:int32     ;
+    Button:uint8    ;
+    State:uint8     ;
+    Padding1:uint8  ;
+    Padding2:uint8  ;
+    } 
+
+type ControllerDeviceEvent=
+    {
+    Timestamp:uint32;
+    Which:int32     ;
+    }
+
+type AudioDeviceEvent=
+    {
+    Timestamp:uint32;
+    Which:uint32    ;
+    Iscapture:uint8 ;
+    Padding1:uint8  ;
+    Padding2:uint8  ;
+    Padding3:uint8  ;
+    }
+
+type TouchFingerEvent=
+    {
+    Timestamp:uint32;
+    TouchId:int64   ;
+    FingerId:int64  ;
+    X:float         ;
+    Y:float         ;
+    Dx:float        ;
+    Dy:float        ;
+    Pressure:float  ;
+    }
+
+type MultiGestureEvent=
+    {
+    Timestamp:uint32 ;
+    TouchId:int64    ;
+    DTheta:float     ;
+    DDist:float      ;
+    X:float          ;
+    Y:float          ;
+    NumFingers:uint16;
+    Padding:uint16
+    }
+
+type DollarGestureEvent=
+    {
+    Timestamp:uint32 ;
+    TouchId:int64    ;
+    GestureId:int64  ;
+    NumFingers:uint32;
+    Error:float      ;
+    X:float          ;
+    Y:float          ;
+    }
+
+type DropEvent=
+    {
+    Timestamp:uint32;
+    File:IntPtr     ;
+    }
+
+type OSEvent=
+    {
+    Timestamp:uint32;
+    }
+
+type UserEvent=
+    {
+    Type:uint32;
+    Timestamp:uint32;
+    WindowID:uint32;
+    Code:int32;
+    Data1:IntPtr;
+    Data2:IntPtr;
+    }
+
+type SysWMEvent=
+    {
+    Type:uint32;
+    Timestamp:uint32;
+    Msg:IntPtr;
+    }
+
+
 type Event = 
     | Quit of QuitEvent
     | KeyDown of KeyboardEvent
@@ -519,6 +688,44 @@ type Event =
     | MouseMotion of MouseMotionEvent
     | MouseButtonDown of MouseButtonEvent
     | MouseButtonUp of MouseButtonEvent
+    | AppTerminating //TODO
+    | AppLowmemory //TODO            
+    | AppWillEnterBackground //TODO  
+    | AppDidEnterBackground //TODO   
+    | AppWillEnterForeground //TODO  
+    | AppDidEnterForeground  //TODO  
+    | WindowEvent of WindowEvent       
+    | SysWMEvent of SysWMEvent               
+    | TextEditing of TextEditingEvent 
+    | TextInput of TextInputEvent
+    | KeyMapChanged  //TODO          
+    | MouseWheel of MouseWheelEvent              
+    | JoyAxisMotion of JoyAxisEvent            
+    | JoyBallMotion of JoyBallEvent           
+    | JoyHatMotion of JoyHatEvent            
+    | JoyButtonDown of JoyButtonEvent           
+    | JoyButtonUp of JoyButtonEvent
+    | JoyDeviceAdded of JoyDeviceEvent           
+    | JoyDeviceRemoved of JoyDeviceEvent         
+    | ControllerAxisMotion of ControllerAxisEvent    
+    | ControllerButtonDown of ControllerButtonEvent     
+    | ControllerButtonUp of ControllerButtonEvent       
+    | ControllerDeviceAdded of ControllerDeviceEvent
+    | ControllerDeviceRemoved of ControllerDeviceEvent
+    | ControllerDeviceRemapped of ControllerDeviceEvent
+    | FingerDown of TouchFingerEvent      
+    | FingerUp of TouchFingerEvent
+    | FingerMotion of TouchFingerEvent
+    | DollarGesture of DollarGestureEvent      
+    | DollarRecord of DollarGestureEvent
+    | MultiGesture of MultiGestureEvent
+    | ClipboardUpdate   //TODO          
+    | DropFile of DropEvent                 
+    | AudioDeviceAdded of AudioDeviceEvent    
+    | AudioDeviceRemoved  of AudioDeviceEvent            
+    | RenderTargetsReset //TODO
+    | RenderDeviceReset //TODO
+    | User of UserEvent
     | Other of uint32
 
 let private toQuitEvent (event:SDL_QuitEvent) :QuitEvent =
