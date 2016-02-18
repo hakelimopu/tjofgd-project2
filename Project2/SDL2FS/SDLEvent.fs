@@ -538,7 +538,7 @@ type MouseWheelEvent=
     Which:uint32;
     X:int32;
     Y:int32;
-    Direction:uint32}
+    Direction:SDLMouse.WheelDirection}
 
 type JoyAxisEvent=
     {Timestamp:uint32;
@@ -683,23 +683,29 @@ type SysWMEvent=
 
 type Event = 
     | Quit of QuitEvent
+
     | KeyDown of KeyboardEvent
     | KeyUp of KeyboardEvent
+
     | MouseMotion of MouseMotionEvent
     | MouseButtonDown of MouseButtonEvent
     | MouseButtonUp of MouseButtonEvent
-    | AppTerminating //TODO
-    | AppLowmemory //TODO            
-    | AppWillEnterBackground //TODO  
-    | AppDidEnterBackground //TODO   
-    | AppWillEnterForeground //TODO  
-    | AppDidEnterForeground  //TODO  
+    | MouseWheel of MouseWheelEvent              
+
+    | AppTerminating
+    | AppLowmemory
+    | AppWillEnterBackground
+    | AppDidEnterBackground
+    | AppWillEnterForeground
+    | AppDidEnterForeground
+
     | WindowEvent of WindowEvent       
-    | SysWMEvent of SysWMEvent               
+    | SysWMEvent of SysWMEvent           
+        
     | TextEditing of TextEditingEvent 
     | TextInput of TextInputEvent
     | KeyMapChanged  //TODO          
-    | MouseWheel of MouseWheelEvent              
+
     | JoyAxisMotion of JoyAxisEvent            
     | JoyBallMotion of JoyBallEvent           
     | JoyHatMotion of JoyHatEvent            
@@ -758,6 +764,14 @@ let private toMouseButtonEvent (event:SDL_MouseButtonEvent) :MouseButtonEvent =
     X = event.X;
     Y = event.Y}
 
+let private toMouseWheelEvent (event:SDL_MouseWheelEvent) :MouseWheelEvent =
+    {Timestamp=event.Timestamp;
+    WindowID=event.WindowID;
+    Which=event.Which;
+    X=event.X;
+    Y=event.Y;
+    Direction=event.Direction |> int32 |> enum<SDLMouse.WheelDirection>}
+
 let private convertEvent (result: bool, event:SDL_Event) =
     match result, (event.Type |> int |> enum<EventType>) with
     | true, EventType.Quit -> event.Quit |> toQuitEvent |> Quit |> Some
@@ -766,6 +780,7 @@ let private convertEvent (result: bool, event:SDL_Event) =
     | true, EventType.MouseMotion -> event.Motion |> toMouseMotionEvent |> MouseMotion |> Some
     | true, EventType.MouseButtonDown -> event.Button |> toMouseButtonEvent |> MouseButtonDown |> Some
     | true, EventType.MouseButtonUp -> event.Button |> toMouseButtonEvent |> MouseButtonUp |> Some
+    | true, EventType.MouseWheel -> event.Wheel |> toMouseWheelEvent |> MouseWheel |> Some
     | true, _ -> event.Type |> Other |> Some
     | _, _ -> None
     

@@ -30,10 +30,6 @@ type WheelDirection =
     | Normal  = 0
     | Flipped = 1
 
-type MouseWheelDirection =
-    | Normal  = 0
-    | Flipped = 1
-
 module internal SDLMouseNative = 
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern IntPtr SDL_GetMouseFocus()//TODO
