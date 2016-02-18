@@ -5,6 +5,7 @@ open GameState
 open CellLocation
 open RenderCell
 open MapCell
+open MapCreate
 
 
 [<EntryPoint>]
@@ -41,8 +42,8 @@ let main argv =
     let random = new System.Random()
 
     let initialMap =
-        createWorld (sumLocationsWrapped WorldSize) (distanceFormulaTestWrapped WorldSize) (setVisibleWrapped WorldSize) (setTerrainWrapped WorldSize) (setObjectWrapped WorldSize) random
+        createWorld (sumLocationsWrapped Constants.WorldSize) (distanceFormulaTestWrapped Constants.WorldSize) (setVisibleWrapped Constants.WorldSize) (setTerrainWrapped Constants.WorldSize) (setObjectWrapped Constants.WorldSize) random
 
-    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped WorldSize) (setVisibleWrapped  WorldSize)) ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap} |> PlayState)
+    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize)) ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap} |> PlayState)
 
     0

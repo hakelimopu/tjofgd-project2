@@ -4,21 +4,28 @@ open GameState
 open CellLocation
 open RenderCell
 open MapCell
+open MapObject
 
 let private handleQuitEvent (quitEvent:SDLEvent.QuitEvent) (state:GameState) :GameState option =
     None
 
+let updateActors (currentTurn:float<turn>) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+    //TODO - update all actors based on current turn of the boat
+    map
+
 let moveBoat (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (delta:CellLocation) (state:PlayState) :GameState option =
-    let playerLocation = state.MapGrid |> getPlayerLocation 
+    let playerLocation = state.MapGrid |> getPlayerLocation
     match playerLocation with
     | Some cellLocation -> 
+        let boat = state.MapGrid.[cellLocation].Object.Value
         let nextLocation = delta |> sumLocationsFunc cellLocation
         let mapGrid =
             if state.MapGrid.ContainsKey nextLocation then
                 state.MapGrid
                 |> setObject cellLocation None
-                |> setObject nextLocation (Some MapObject.Boat)
+                |> setObject nextLocation (Some {boat with CurrentTurn = boat.CurrentTurn + 1.0<turn>})
                 |> updateVisibleFlags setVisibleFunc
+                |> updateActors (boat.CurrentTurn + 1.0<turn>)
             else
                 state.MapGrid
         {state with MapGrid = mapGrid} |> PlayState |> Some

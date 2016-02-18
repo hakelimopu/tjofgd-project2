@@ -81,7 +81,11 @@
     <Compile Include="EventPump.fs" />
     <Compile Include="CellLocation.fs" />
     <Compile Include="RenderCell.fs" />
-    <Compile Include="MapCell.fs" />
+    <Compile Include="MapCells\MapTerrain.fs" />
+    <Compile Include="MapCells\MapObject.fs" />
+    <Compile Include="MapCells\Constants.fs" />
+    <Compile Include="MapCells\MapCell.fs" />
+    <Compile Include="MapCells\MapCreate.fs" />
     <Compile Include="GameState.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="EventHandler.fs" />

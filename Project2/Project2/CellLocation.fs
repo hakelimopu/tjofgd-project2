@@ -26,6 +26,25 @@ let pixelsPerRow = 8<px/cell>
 
 type CellMap<'T> = Map<CellLocation,'T>
 
+let distanceFormulaTest (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
+    let deltaX = second.Column - first.Column
+    let deltaY = second.Row - first.Row
+    (deltaX*deltaX+deltaY*deltaY) > maximum * maximum
+
+let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
+    let locations = 
+        [second;
+        {second with Column=second.Column+worldSize.Column};
+        {second with Row=second.Row+worldSize.Row};
+        {Column=second.Column+worldSize.Column;Row=second.Row+worldSize.Row}]
+    locations
+    |> Seq.fold (fun failures location->
+        if distanceFormulaTest maximum first second then
+            failures + 1
+        else
+            failures) 0
+    |> (=) locations.Length
+
 
 
 
