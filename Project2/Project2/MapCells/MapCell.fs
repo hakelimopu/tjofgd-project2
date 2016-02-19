@@ -48,7 +48,7 @@ let getPlayerLocation (mapGrid:CellMap<MapCell>) =
     mapGrid
     |> Map.tryPick (fun location cell -> 
         match cell.Object with
-        | Boat -> location |> Some
+        | IsBoat -> location |> Some
         | _ -> None)
 
 let updateVisibleFlags (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =

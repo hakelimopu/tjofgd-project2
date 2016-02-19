@@ -18,12 +18,12 @@ let TerrainRenderCells =
 
 let ObjectRenderCells (detail:MapObject option) =
     match detail with
-    | Boat        -> {Character=0xF1uy;Foreground=RenderCellColor.Brown;Background=RenderCellColor.BrightBlue}
-    | Storm       -> {Character=0xF2uy;Foreground=RenderCellColor.BrightYellow;Background=RenderCellColor.BrightBlue}
-    | Pirate      -> {Character=0xF1uy;Foreground=RenderCellColor.Black;Background=RenderCellColor.BrightBlue}
-    | Merfolk     -> {Character=0x02uy;Foreground=RenderCellColor.Magenta;Background=RenderCellColor.BrightBlue}
-    | SeaMonster  -> {Character=0xEBuy;Foreground=RenderCellColor.DarkGray;Background=RenderCellColor.BrightBlue}
-    | Nothing     -> {Character=0x00uy;Foreground=RenderCellColor.Black;Background=RenderCellColor.Black}
+    | IsBoat        -> {Character=0xF1uy;Foreground=RenderCellColor.Brown;Background=RenderCellColor.BrightBlue}
+    | IsStorm       -> {Character=0xF2uy;Foreground=RenderCellColor.BrightYellow;Background=RenderCellColor.BrightBlue}
+    | IsPirate      -> {Character=0xF1uy;Foreground=RenderCellColor.Black;Background=RenderCellColor.BrightBlue}
+    | IsMerfolk     -> {Character=0x02uy;Foreground=RenderCellColor.Magenta;Background=RenderCellColor.BrightBlue}
+    | IsSeaMonster  -> {Character=0xEBuy;Foreground=RenderCellColor.DarkGray;Background=RenderCellColor.BrightBlue}
+    | IsNothing     -> {Character=0x00uy;Foreground=RenderCellColor.Black;Background=RenderCellColor.Black}
 
 let renderCellForMapCell (mapCell:MapCell option) :RenderCell =
     if mapCell.IsSome then
@@ -36,7 +36,17 @@ let renderCellForMapCell (mapCell:MapCell option) :RenderCell =
 
 type PlayState =
     {RenderGrid:CellMap<RenderCell>;
+    PCEncounter:CellLocation option;
+    NPCEncounters:CellLocation list;
     MapGrid:CellMap<MapCell>}
+
+let (|FreeMovement|HasPCEncounter|HasNPCEncounters|) (playState:PlayState) =
+    if playState.PCEncounter.IsSome then
+        HasPCEncounter
+    elif not playState.NPCEncounters.IsEmpty then
+        HasNPCEncounters
+    else
+        FreeMovement
 
 type GameState = 
     | PlayState of PlayState

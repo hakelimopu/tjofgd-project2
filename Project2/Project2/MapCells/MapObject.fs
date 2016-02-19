@@ -47,16 +47,16 @@ type MapObject =
     {CurrentTurn:float<turn>;
     Detail:MapObjectDetail}
 
-let (|Boat|Storm|SeaMonster|Pirate|Merfolk|Nothing|) (mapObject:MapObject option) =
+let (|IsBoat|IsStorm|IsSeaMonster|IsPirate|IsMerfolk|IsNothing|) (mapObject:MapObject option) =
     match mapObject with
-    | None     -> Nothing
+    | None     -> IsNothing
     | Some obj ->
         match obj.Detail with
-        | Boat _       -> Boat
-        | Pirate _     -> Pirate
-        | Storm _      -> Storm
-        | SeaMonster _ -> SeaMonster
-        | Merfolk _    -> Merfolk
+        | Boat _       -> IsBoat
+        | Pirate _     -> IsPirate
+        | Storm _      -> IsStorm
+        | SeaMonster _ -> IsSeaMonster
+        | Merfolk _    -> IsMerfolk
 
 
 
