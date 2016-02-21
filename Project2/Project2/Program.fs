@@ -41,9 +41,9 @@ let main argv =
     
     let random = new System.Random()
 
-    let initialMap =
+    let initialActors, initialMap =
         createWorld (sumLocationsWrapped Constants.WorldSize) (distanceFormulaTestWrapped Constants.WorldSize) (setVisibleWrapped Constants.WorldSize) (setTerrainWrapped Constants.WorldSize) (setObjectWrapped Constants.WorldSize) random
 
-    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize)) ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;PCEncounter=None;NPCEncounters=List.empty} |> PlayState)
+    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize)) ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors} |> PlayState)
 
     0

@@ -9,48 +9,44 @@ open MapObject
 let private handleQuitEvent (quitEvent:SDLEvent.QuitEvent) (state:GameState) :GameState option =
     None
 
-let rec updateActor (actorLocation:CellLocation) (actor:MapObject) (currentTurn:float<turn>) ((map,encounters):Map<CellLocation,MapCell>*CellLocation list) :(Map<CellLocation,MapCell>*CellLocation list)=
+let rec updateActor (actorLocation:CellLocation) (actor:MapObject) (currentTurn:float<turn>) (playState:PlayState) :PlayState=
     if actor.CurrentTurn < currentTurn then
         //actor gets a turn!
         //TODO: does the actor still exist on the map at the original location?
-        map, encounters
+        playState
     else
         //nothing happens!
-        map, encounters
+        playState
 
-let updateActors (currentTurn:float<turn>) (map:Map<CellLocation,MapCell>) :(Map<CellLocation,MapCell>*CellLocation list)=
-    let actorLocations, _ = 
-        map
-        |> Map.partition (fun key value -> value.Object.IsSome)//TODO: this should already exist outside of the map, and map object should be removed from mapcell.
-    let actors = 
-        actorLocations
-        |> Map.map (fun key value -> value.Object.Value)
-    ((map,List.empty<CellLocation>), actors)
-    ||> Map.fold (fun (currentMap:Map<CellLocation,MapCell>,encounters:CellLocation list) (location:CellLocation) (mapObject:MapObject) -> 
-        updateActor location mapObject currentTurn (currentMap,encounters))
+let updateActors (currentTurn:float<turn>) (playState:PlayState) :PlayState=
+    (playState, playState.Actors)
+    ||> Map.fold (fun currentState location actor -> 
+        updateActor location actor currentTurn currentState)
 
 let moveBoat (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (delta:CellLocation) (state:PlayState) :GameState option =
-    let playerLocation = state.MapGrid |> getPlayerLocation
+    let playerLocation = state.Actors |> getPlayerLocation
     match playerLocation with
     | Some cellLocation -> 
-        let boat = state.MapGrid.[cellLocation].Object.Value
+        let boat = state.Actors.[cellLocation]
         let nextLocation = delta |> sumLocationsFunc cellLocation
-        let mapGrid, pcEncounter, npcEncounters =
-            if state.MapGrid.ContainsKey nextLocation then
-                //is the map grid occupied?
-                if state.MapGrid.[nextLocation].Object.IsSome then
-                    (state.MapGrid, nextLocation |> Some, List.empty)
-                else
-                    let updatedMapGrid, npcEncounters = 
-                        state.MapGrid
-                        |> setObject cellLocation None
-                        |> setObject nextLocation (Some {boat with CurrentTurn = boat.CurrentTurn + 1.0<turn>})
-                        |> updateVisibleFlags setVisibleFunc
-                        |> updateActors (boat.CurrentTurn + 1.0<turn>)
-                    (updatedMapGrid, None, npcEncounters)
+        if state.MapGrid.ContainsKey nextLocation then
+            //is the map grid occupied?
+            if state.Actors.ContainsKey(nextLocation) then
+                {state with Encounters=Some (PCEncounter nextLocation)} |> PlayState |> Some
             else
-                (state.MapGrid, None, List.empty)
-        {state with MapGrid = mapGrid; PCEncounter = pcEncounter} |> PlayState |> Some
+                let updatedActors = 
+                    state.Actors
+                    |> setObject cellLocation None
+                    |> setObject nextLocation (Some {boat with CurrentTurn = boat.CurrentTurn + 1.0<turn>})
+                let updatedMapGrid= 
+                    state.MapGrid
+                    |> updateVisibleFlags setVisibleFunc updatedActors
+                {state with MapGrid=updatedMapGrid;Actors=updatedActors}
+                |> updateActors (boat.CurrentTurn + 1.0<turn>)
+                |> PlayState
+                |> Some
+        else
+            {state with Encounters = None} |> PlayState |> Some
     | None -> state |> PlayState |> Some
     
 let private handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
@@ -64,7 +60,7 @@ let private handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:CellLocati
 
 let private handleKeyDownEventPlayStatePCEncounter (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
     match keyboardEvent.Keysym.Scancode with
-    | SDLKeyboard.ScanCode.Escape -> {state with PCEncounter=None} |> PlayState |> Some
+    | SDLKeyboard.ScanCode.Escape -> {state with Encounters=None} |> PlayState |> Some
     | _ -> state |> PlayState |> Some
 
 let private handleKeyDownEventPlayStateNPCEncounters (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
@@ -98,7 +94,7 @@ let mapViewCells =
 
 let private onIdlePlayState (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:PlayState) :GameState option =
     let playerLocation = 
-        state.MapGrid
+        state.Actors
         |> getPlayerLocation
         |> Option.get
     let renderGrid = 
@@ -106,8 +102,9 @@ let private onIdlePlayState (sumLocationsFunc:CellLocation->CellLocation->CellLo
         ||> Map.fold(fun renderGrid renderLocation mapDelta -> 
             let mapLocation = playerLocation |> sumLocationsFunc mapDelta
             let mapCell = state.MapGrid.TryFind mapLocation
+            let actor = state.Actors.TryFind mapLocation
             renderGrid
-            |> Map.add renderLocation (mapCell |> renderCellForMapCell)) 
+            |> Map.add renderLocation (renderCellForMapCell actor mapCell)) 
     {state with RenderGrid = renderGrid} |> PlayState |> Some
 
 let private onIdle (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:GameState): GameState option =

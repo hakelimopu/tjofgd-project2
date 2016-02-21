@@ -6,7 +6,6 @@ open MapObject
 
 type MapCell =
     {Terrain:MapTerrain;
-    Object:MapObject option;
     Visible:bool}
 
 let setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
@@ -16,7 +15,7 @@ let setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:Cell
         if originalCell.IsSome then
             {originalCell.Value with Terrain=mapTerrain}
         else
-            {Terrain=mapTerrain;Object=None;Visible=false}
+            {Terrain=mapTerrain;Visible=false}
     cellMap
     |> Map.add cellLocation newCell
 
@@ -33,26 +32,27 @@ let setVisible (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<M
 let setVisibleWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<MapCell> = 
     setVisible (cellLocation |> wrapLocation worldSize) cellMap
     
-let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
-    let originalCell =
-        cellMap.[cellLocation]
-    let newCell =
-        {originalCell with Object = mapObject}
-    cellMap
-    |> Map.add cellLocation newCell
+let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (actors:CellMap<MapObject>) :CellMap<MapObject> =
+    match mapObject with
+    | Some actor ->
+        actors
+        |> Map.add cellLocation actor
+    | _ -> 
+        actors 
+        |> Map.remove cellLocation
 
-let setObjectWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapObject:MapObject option) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
-    setObject (cellLocation |> wrapLocation worldSize) mapObject cellMap
+let setObjectWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapObject:MapObject option) (actors:CellMap<MapObject>) :CellMap<MapObject> =
+    setObject (cellLocation |> wrapLocation worldSize) mapObject actors
 
-let getPlayerLocation (mapGrid:CellMap<MapCell>) = 
-    mapGrid
+let getPlayerLocation (actors:CellMap<MapObject>) = 
+    actors
     |> Map.tryPick (fun location cell -> 
-        match cell.Object with
+        match Some cell with
         | IsBoat -> location |> Some
         | _ -> None)
 
-let updateVisibleFlags (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
-    let playerLocation = map |> getPlayerLocation
+let updateVisibleFlags (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (actors:Map<CellLocation,MapObject>) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+    let playerLocation = actors |> getPlayerLocation
     match playerLocation with
     | None -> map
     | Some location ->

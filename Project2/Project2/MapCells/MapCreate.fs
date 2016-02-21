@@ -50,9 +50,9 @@ let rec generateLocations (worldSize:CellLocation) (random:System.Random) (count
 let generateWorldObjects 
     (worldSize:CellLocation) 
     (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
-    (setObjectFunc:CellLocation->MapObject option->CellMap<MapCell>->CellMap<MapCell>) 
+    (setObjectFunc:CellLocation->MapObject option->CellMap<MapObject>->CellMap<MapObject>) 
     (random:System.Random) 
-    (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+    (actors:Map<CellLocation,MapObject>):Map<CellLocation,MapObject> =
     let allObjects = 
         worldObjects
         |> Seq.map (fun (obj,count)-> [for i = 1 to count do yield obj])
@@ -61,24 +61,27 @@ let generateWorldObjects
     generateLocations worldSize random (allObjects |> Seq.length) Set.empty
     |> Set.toSeq
     |> Seq.zip allObjects
-    |> Seq.fold (fun map (detail,loc) -> 
-        map
-        |> setObjectFunc loc (Some {CurrentTurn=0.0<turn>;Detail = detail})) map
+    |> Seq.fold (fun actors (detail,loc) -> 
+        actors
+        |> setObjectFunc loc (Some {CurrentTurn=0.0<turn>;Detail = detail})) actors
 
 let createWorld 
     (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
     (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) 
     (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) 
     (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) 
-    (setObjectFunc:CellLocation->MapObject option->CellMap<MapCell>->CellMap<MapCell>) 
+    (setObjectFunc:CellLocation->MapObject option->CellMap<MapObject>->CellMap<MapObject>) 
     (random:System.Random) = 
-    Constants.mapLocations
-    |> Seq.fold(fun map cellLocation -> 
-        map
-        |> Map.add cellLocation {Terrain=MapTerrain.DeepWater;Object=None;Visible=false}
-        ) Map.empty<CellLocation,MapCell>
-    |> generateIslands sumLocationsFunc distanceFormulaTestFunc setTerrainFunc random
-    |> generateWorldObjects Constants.WorldSize sumLocationsFunc setObjectFunc random
-    |> updateVisibleFlags setVisibleFunc
+    let map = 
+        Constants.mapLocations
+        |> Seq.fold(fun map cellLocation -> 
+            map
+            |> Map.add cellLocation {Terrain=MapTerrain.DeepWater;Visible=false}
+            ) Map.empty<CellLocation,MapCell>
+        |> generateIslands sumLocationsFunc distanceFormulaTestFunc setTerrainFunc random
+    let actors = 
+        generateWorldObjects Constants.WorldSize sumLocationsFunc setObjectFunc random Map.empty
+    (actors, (actors,map)
+    ||> updateVisibleFlags setVisibleFunc)
 
 

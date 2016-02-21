@@ -25,28 +25,29 @@ let ObjectRenderCells (detail:MapObject option) =
     | IsSeaMonster  -> {Character=0xEBuy;Foreground=RenderCellColor.DarkGray;Background=RenderCellColor.BrightBlue}
     | IsNothing     -> {Character=0x00uy;Foreground=RenderCellColor.Black;Background=RenderCellColor.Black}
 
-let renderCellForMapCell (mapCell:MapCell option) :RenderCell =
-    if mapCell.IsSome then
-        match mapCell.Value.Visible, mapCell.Value.Object with
-        | true, Some mapObject -> ObjectRenderCells (Some mapObject)
-        | true, None -> TerrainRenderCells.[mapCell.Value.Terrain]
-        | false, _ -> UnexploredRenderCell
-    else
-        OutOfBoundsRenderCell
+let renderCellForMapCell (actor:MapObject option) (mapCell:MapCell option) :RenderCell =
+    match actor, mapCell with
+    | Some _, Some x when x.Visible -> ObjectRenderCells actor
+    | Some _, Some x when not x.Visible -> UnexploredRenderCell
+    | None, Some x when x.Visible -> TerrainRenderCells.[mapCell.Value.Terrain]
+    | None, Some x when not x.Visible -> UnexploredRenderCell
+    | _, _ -> OutOfBoundsRenderCell
+
+type Encounters =
+    | PCEncounter of CellLocation
+    | NPCEncounters of CellLocation list
 
 type PlayState =
     {RenderGrid:CellMap<RenderCell>;
-    PCEncounter:CellLocation option;
-    NPCEncounters:CellLocation list;
+    Encounters:Encounters option;
+    Actors:CellMap<MapObject>;
     MapGrid:CellMap<MapCell>}
 
 let (|FreeMovement|HasPCEncounter|HasNPCEncounters|) (playState:PlayState) =
-    if playState.PCEncounter.IsSome then
-        HasPCEncounter
-    elif not playState.NPCEncounters.IsEmpty then
-        HasNPCEncounters
-    else
-        FreeMovement
+    match playState.Encounters with
+    | Some (PCEncounter _) -> HasPCEncounter
+    | Some (NPCEncounters _) -> HasNPCEncounters
+    | None -> FreeMovement
 
 type GameState = 
     | PlayState of PlayState
