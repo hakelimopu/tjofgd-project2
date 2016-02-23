@@ -33,9 +33,20 @@ let renderCellForMapCell (actor:MapObject option) (mapCell:MapCell option) :Rend
     | None, Some x when not x.Visible -> UnexploredRenderCell
     | _, _ -> OutOfBoundsRenderCell
 
+type EncounterType =
+    | RanIntoStorm
+
+type EncounterDetail =
+    {Location:CellLocation;
+    Type:EncounterType;
+    Title:string;
+    Message:string list;
+    Choices:string list;
+    CurrentChoice:int}
+
 type Encounters =
-    | PCEncounter of CellLocation
-    | NPCEncounters of CellLocation list
+    | PCEncounter of EncounterDetail
+    | NPCEncounters of EncounterDetail list
 
 type PlayState =
     {RenderGrid:CellMap<RenderCell>;
