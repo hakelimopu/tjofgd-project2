@@ -36,12 +36,19 @@ let renderCellForMapCell (actor:MapObject option) (mapCell:MapCell option) :Rend
 type EncounterType =
     | RanIntoStorm
 
+type EncounterReponse =
+    | Confirm
+
+type EncounterChoice =
+    {Response:EncounterReponse;
+    Text:string}
+
 type EncounterDetail =
     {Location:CellLocation;
     Type:EncounterType;
     Title:string;
     Message:string list;
-    Choices:string list;
+    Choices:EncounterChoice list;
     CurrentChoice:int}
 
 type Encounters =
@@ -63,3 +70,9 @@ let (|FreeMovement|HasPCEncounter|HasNPCEncounters|) (playState:PlayState) =
 type GameState = 
     | PlayState of PlayState
 
+let getBoat (state:PlayState) : CellLocation * float<turn> * BoatProperties=
+    state.Actors
+    |> Map.pick (fun location cell -> 
+        match cell.Detail with
+        | Boat boatProps -> (location,cell.CurrentTurn,boatProps) |> Some
+        | _ -> None)

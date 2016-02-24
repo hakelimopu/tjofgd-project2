@@ -1,5 +1,8 @@
 ﻿module RenderCell
 
+open CellLocation
+open System.Text
+
 type RenderCellColor = 
     | Black = 0
     | Blue = 1
@@ -20,6 +23,15 @@ type RenderCellColor =
 
 type RenderCell =
     {Character:byte;Foreground:RenderCellColor;Background:RenderCellColor}
+
+let internal drawText (location:CellLocation) (foreground:RenderCellColor) (background:RenderCellColor) (text:string) (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =
+    let bytes = Encoding.ASCII.GetBytes(text)
+    ((renderGrid,location),bytes)
+    ||> Seq.fold(fun (grid,position) character->
+        (grid |> Map.add position {Character=character;Foreground=foreground;Background=background},{position with Column=position.Column+1<cell>}))
+    |> fst
+
+
 
 
 

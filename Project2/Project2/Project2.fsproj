@@ -88,7 +88,14 @@
     <Compile Include="MapCells\MapCreate.fs" />
     <Compile Include="GameState.fs" />
     <Compile Include="Render.fs" />
-    <Compile Include="EventHandler.fs" />
+    <Compile Include="EventHandler\QuitEvent.fs" />
+    <Compile Include="EventHandler\ActorUpdate.fs" />
+    <Compile Include="EventHandler\EncounterHandler.fs" />
+    <Compile Include="EventHandler\BoatMovement.fs" />
+    <Compile Include="EventHandler\EncounterChoice.fs" />
+    <Compile Include="EventHandler\KeyDownEvent.fs" />
+    <Compile Include="EventHandler\IdleHandler.fs" />
+    <Compile Include="EventHandler\EventHandler.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="Content\romfont8x8.bmp">

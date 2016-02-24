@@ -44,6 +44,7 @@ let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (actors:C
 let setObjectWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapObject:MapObject option) (actors:CellMap<MapObject>) :CellMap<MapObject> =
     setObject (cellLocation |> wrapLocation worldSize) mapObject actors
 
+//TODO: replace me with getBoat
 let getPlayerLocation (actors:CellMap<MapObject>) = 
     actors
     |> Map.tryPick (fun location cell -> 
