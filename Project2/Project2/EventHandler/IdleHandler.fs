@@ -29,8 +29,8 @@ let mapViewCells =
 let private renderStats (state:PlayState) (grid:CellMap<RenderCell>):CellMap<RenderCell> =
     let _, _, boatProps = state |> getBoat
     grid
-    |> drawText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Black RenderCellColor.Black ("          ")
-    |> drawText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Brown RenderCellColor.Black (sprintf "Hull:%2i/%2i" boatProps.Hull boatProps.MaximumHull)
+    |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Black RenderCellColor.Black ("          ")
+    |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Brown RenderCellColor.Black (sprintf "Hull:%2i/%2i" boatProps.Hull boatProps.MaximumHull)
     
 
 let private onIdlePlayState (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:PlayState) :GameState option =

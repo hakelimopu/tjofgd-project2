@@ -85,8 +85,8 @@
     <Compile Include="MapCells\MapObject.fs" />
     <Compile Include="MapCells\Constants.fs" />
     <Compile Include="MapCells\MapCell.fs" />
+    <Compile Include="MapCells\GameState.fs" />
     <Compile Include="MapCells\MapCreate.fs" />
-    <Compile Include="GameState.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="EventHandler\QuitEvent.fs" />
     <Compile Include="EventHandler\ActorUpdate.fs" />

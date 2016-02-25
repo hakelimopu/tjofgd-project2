@@ -16,7 +16,7 @@ let private previousEncounterChoice (encounter: Encounters option) :Encounters o
     | _ -> encounter
 
 let private applyStormPCEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (playState:PlayState) : GameState option = 
-        let playerLocation = playState.Actors |> getPlayerLocation |> Option.get
+        let playerLocation, _, _ = playState |> getBoat
         let boat = playState.Actors.[playerLocation].Detail
         let boatProps = 
             match boat with
@@ -29,7 +29,7 @@ let private applyStormPCEncounterChoice (setVisibleFunc:CellLocation->CellMap<Ma
             | _ -> raise (new System.NotImplementedException())
         let damagedBoat = {playState.Actors.[playerLocation] with Detail = ({boatProps with Hull=boatProps.Hull-damage} |> Boat)}
         let updatedActors = playState.Actors |> Map.remove playerLocation |> Map.add location damagedBoat
-        {playState with Actors = updatedActors; MapGrid=playState.MapGrid |> updateVisibleFlags setVisibleFunc updatedActors; Encounters=None} |> PlayState |> Some
+        {playState with Actors = updatedActors; MapGrid=playState |> updateVisibleFlags setVisibleFunc; Encounters=None} |> PlayState |> Some
 
 let private applyPCEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState) : GameState option =
     match details.Type with

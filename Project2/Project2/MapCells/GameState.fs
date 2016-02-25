@@ -51,6 +51,11 @@ type EncounterDetail =
     Choices:EncounterChoice list;
     CurrentChoice:int}
 
+let getEncounterDetailRows (details:EncounterDetail) : int<cell> =
+    1<cell>
+    + (if details.Message.Length> 0 then details.Message.Length * 1<cell> + 1<cell> else 0<cell>)
+    + (if details.Choices.Length> 0 then details.Choices.Length * 1<cell> + 1<cell> else 0<cell>)
+
 type Encounters =
     | PCEncounter of EncounterDetail
     | NPCEncounters of EncounterDetail list
@@ -76,3 +81,13 @@ let getBoat (state:PlayState) : CellLocation * float<turn> * BoatProperties=
         match cell.Detail with
         | Boat boatProps -> (location,cell.CurrentTurn,boatProps) |> Some
         | _ -> None)
+
+let updateVisibleFlags (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (state:PlayState) :Map<CellLocation,MapCell> =
+    let location, _, _ = state |> getBoat
+    (state.MapGrid, Constants.visibilityTemplate)
+    ||> Seq.fold(fun map delta -> 
+        let visibleLocation = delta |> sumLocations location
+        map
+        |> setVisibleFunc visibleLocation
+        )
+

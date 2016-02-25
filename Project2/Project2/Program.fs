@@ -44,6 +44,8 @@ let main argv =
     let initialActors, initialMap =
         createWorld (sumLocationsWrapped Constants.WorldSize) (distanceFormulaTestWrapped Constants.WorldSize) (setVisibleWrapped Constants.WorldSize) (setTerrainWrapped Constants.WorldSize) (setObjectWrapped Constants.WorldSize) random
 
-    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize)) ({PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors} |> PlayState)
+    let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
+
+    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize)) ( {state with MapGrid = state |> updateVisibleFlags (setVisibleWrapped Constants.WorldSize)} |> PlayState)
 
     0

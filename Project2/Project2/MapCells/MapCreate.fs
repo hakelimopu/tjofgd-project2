@@ -4,6 +4,7 @@ open CellLocation
 open MapTerrain
 open MapCell
 open MapObject
+open GameState
 
 let placeIsland (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
     Constants.islandTemplate
@@ -81,7 +82,6 @@ let createWorld
         |> generateIslands sumLocationsFunc distanceFormulaTestFunc setTerrainFunc random
     let actors = 
         generateWorldObjects Constants.WorldSize sumLocationsFunc setObjectFunc random Map.empty
-    (actors, (actors,map)
-    ||> updateVisibleFlags setVisibleFunc)
+    (actors,map)
 
 

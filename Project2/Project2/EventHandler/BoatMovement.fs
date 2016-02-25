@@ -8,30 +8,27 @@ open EncounterHandler
 open ActorUpdate
 
 let moveBoat (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (delta:CellLocation) (state:PlayState) :GameState option =
-    let playerLocation = state.Actors |> getPlayerLocation
-    match playerLocation with
-    | Some cellLocation -> 
-        let boat = state.Actors.[cellLocation]
-        let nextLocation = delta |> sumLocationsFunc cellLocation
-        if state.MapGrid.ContainsKey nextLocation then
-            //is the map grid occupied?
-            if state.Actors.ContainsKey(nextLocation) then
-                {state with Encounters=(startPCEncounter nextLocation state)} |> PlayState |> Some
-            else
-                let updatedActors = 
-                    state.Actors
-                    |> setObject cellLocation None
-                    |> setObject nextLocation (Some {boat with CurrentTurn = boat.CurrentTurn + 1.0<turn>})
-                let updatedMapGrid= 
-                    state.MapGrid
-                    |> updateVisibleFlags setVisibleFunc updatedActors
-                {state with MapGrid=updatedMapGrid;Actors=updatedActors}
-                |> updateActors (boat.CurrentTurn + 1.0<turn>)
-                |> PlayState
-                |> Some
+    let playerLocation, _, _ = state |> getBoat
+    let boat = state.Actors.[playerLocation]
+    let nextLocation = delta |> sumLocationsFunc playerLocation
+    if state.MapGrid.ContainsKey nextLocation then
+        //is the map grid occupied?
+        if state.Actors.ContainsKey(nextLocation) then
+            {state with Encounters=(startPCEncounter nextLocation state)} |> PlayState |> Some
         else
-            {state with Encounters = None} |> PlayState |> Some
-    | None -> state |> PlayState |> Some
+            let updatedActors = 
+                state.Actors
+                |> setObject playerLocation None
+                |> setObject nextLocation (Some {boat with CurrentTurn = boat.CurrentTurn + 1.0<turn>})
+            let updatedMapGrid= 
+                state
+                |> updateVisibleFlags setVisibleFunc
+            {state with MapGrid=updatedMapGrid;Actors=updatedActors}
+            |> updateActors (boat.CurrentTurn + 1.0<turn>)
+            |> PlayState
+            |> Some
+    else
+        {state with Encounters = None} |> PlayState |> Some
 
 let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
     match keyboardEvent.Keysym.Scancode with
