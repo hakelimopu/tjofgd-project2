@@ -15,10 +15,23 @@ let internal generateStormPCEncounter (location:CellLocation) :Encounters option
     |> PCEncounter 
     |> Some
 
+let internal generateIslandPCEncounter (location:CellLocation) :Encounters option =
+    {Location=location;
+    Title="Island!";
+    Type=DockedWithIsland;
+    Message=["You docked at an island!";"What would you like to do?"];
+    Choices=
+        [{Text="Cast Off!";Response=Cancel};
+        {Text="Repair Ship";Response=Repair}];
+    CurrentChoice=0} 
+    |> PCEncounter 
+    |> Some
+
 let internal startPCEncounter (location:CellLocation) (state:PlayState) :Encounters option =
     let actor = state.Actors.[location]
     match actor.Detail with
     | Storm stormProperties -> location |>  generateStormPCEncounter
+    | Island islandProperties -> location |> generateIslandPCEncounter
     | _ -> None
 
 let private renderPCEncounter (details:EncounterDetail)  (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =

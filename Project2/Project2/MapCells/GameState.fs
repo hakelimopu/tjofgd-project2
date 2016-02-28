@@ -23,6 +23,7 @@ let ObjectRenderCells (detail:MapObject option) =
     | IsPirate      -> {Character=0xF1uy;Foreground=RenderCellColor.Black;Background=RenderCellColor.BrightBlue}
     | IsMerfolk     -> {Character=0x02uy;Foreground=RenderCellColor.Magenta;Background=RenderCellColor.BrightBlue}
     | IsSeaMonster  -> {Character=0xEBuy;Foreground=RenderCellColor.DarkGray;Background=RenderCellColor.BrightBlue}
+    | IsIsland      -> {Character=0x1Euy;Foreground=RenderCellColor.Green;Background=RenderCellColor.BrightBlue}
     | IsNothing     -> {Character=0x00uy;Foreground=RenderCellColor.Black;Background=RenderCellColor.Black}
 
 let renderCellForMapCell (actor:MapObject option) (mapCell:MapCell option) :RenderCell =
@@ -35,9 +36,12 @@ let renderCellForMapCell (actor:MapObject option) (mapCell:MapCell option) :Rend
 
 type EncounterType =
     | RanIntoStorm
+    | DockedWithIsland
 
 type EncounterReponse =
     | Confirm
+    | Cancel
+    | Repair
 
 type EncounterChoice =
     {Response:EncounterReponse;
@@ -50,6 +54,12 @@ type EncounterDetail =
     Message:string list;
     Choices:EncounterChoice list;
     CurrentChoice:int}
+
+let getEncounterResponse (detail:EncounterDetail) :EncounterReponse =
+    let choiceArray = 
+        detail.Choices
+        |> Array.ofList
+    choiceArray.[detail.CurrentChoice].Response
 
 let getEncounterDetailRows (details:EncounterDetail) : int<cell> =
     1<cell>
@@ -81,6 +91,13 @@ let getBoat (state:PlayState) : CellLocation * float<turn> * BoatProperties=
         match cell.Detail with
         | Boat boatProps -> (location,cell.CurrentTurn,boatProps) |> Some
         | _ -> None)
+
+let getStorm (location:CellLocation) (state:PlayState) : float<turn> * StormProperties =
+    let storm = state.Actors.[location]
+    (storm.CurrentTurn,
+        match storm.Detail with
+        | Storm props -> props
+        | _ -> raise (new System.NotImplementedException()))
 
 let updateVisibleFlags (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (state:PlayState) :Map<CellLocation,MapCell> =
     let location, _, _ = state |> getBoat
