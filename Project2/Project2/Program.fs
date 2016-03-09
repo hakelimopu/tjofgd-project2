@@ -46,6 +46,6 @@ let main argv =
 
     let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
 
-    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize)) ( {state with MapGrid = state |> updateVisibleFlags (setVisibleWrapped Constants.WorldSize)} |> PlayState)
+    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize) random) ( {state with MapGrid = state |> updateVisibleFlags (setVisibleWrapped Constants.WorldSize)} |> PlayState)
 
     0

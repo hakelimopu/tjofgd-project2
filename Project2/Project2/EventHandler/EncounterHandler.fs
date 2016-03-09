@@ -34,7 +34,7 @@ let internal startPCEncounter (location:CellLocation) (state:PlayState) :Encount
     | Island islandProperties -> location |> generateIslandPCEncounter
     | _ -> None
 
-let private renderPCEncounter (details:EncounterDetail)  (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =
+let private renderEncounterDetail (details:EncounterDetail)  (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =
     let preparedGrid = 
         renderGrid
         |> clearRectangle {Column=0<cell>;Row=0<cell>} {Column=30<cell>;Row=2<cell> + (getEncounterDetailRows details)} RenderCellColor.Black RenderCellColor.Black 0x20uy
@@ -49,7 +49,8 @@ let private renderPCEncounter (details:EncounterDetail)  (renderGrid:CellMap<Ren
 
 let internal renderEncounter (state:PlayState) (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =
     match state.Encounters with
-    | Some (PCEncounter details) -> renderPCEncounter details renderGrid
+    | Some (PCEncounter details) -> renderEncounterDetail details renderGrid
+    | Some (NPCEncounters (head::tail)) -> renderEncounterDetail head renderGrid
     | _ -> renderGrid
 
 
