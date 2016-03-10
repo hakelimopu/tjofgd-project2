@@ -580,16 +580,10 @@ type JoyDeviceEvent=
     }
 
 type ControllerAxisEvent=
-    {
-    Timestamp:uint32;
-    Which:int32     ;
-    Axis:uint8      ;
-    Padding1:uint8  ;
-    Padding2:uint8  ;
-    Padding3:uint8  ;
-    Value:int16     ;
-    Padding4:uint16 ;
-    }
+    {Timestamp:uint32;
+    Which:int32;
+    Axis:uint8;
+    Value:int16}
 
 type ControllerButtonEvent=
     {
@@ -597,8 +591,6 @@ type ControllerButtonEvent=
     Which:int32     ;
     Button:uint8    ;
     State:uint8     ;
-    Padding1:uint8  ;
-    Padding2:uint8  ;
     } 
 
 type ControllerDeviceEvent=
@@ -608,14 +600,9 @@ type ControllerDeviceEvent=
     }
 
 type AudioDeviceEvent=
-    {
-    Timestamp:uint32;
-    Which:uint32    ;
-    Iscapture:uint8 ;
-    Padding1:uint8  ;
-    Padding2:uint8  ;
-    Padding3:uint8  ;
-    }
+    {Timestamp:uint32;
+    Which:uint32;
+    Iscapture:uint8}
 
 type TouchFingerEvent=
     {
@@ -712,26 +699,36 @@ type Event =
     | JoyButtonDown of JoyButtonEvent           
     | JoyButtonUp of JoyButtonEvent
     | JoyDeviceAdded of JoyDeviceEvent           
-    | JoyDeviceRemoved of JoyDeviceEvent         
+    | JoyDeviceRemoved of JoyDeviceEvent      
+       
     | ControllerAxisMotion of ControllerAxisEvent    
     | ControllerButtonDown of ControllerButtonEvent     
     | ControllerButtonUp of ControllerButtonEvent       
     | ControllerDeviceAdded of ControllerDeviceEvent
     | ControllerDeviceRemoved of ControllerDeviceEvent
     | ControllerDeviceRemapped of ControllerDeviceEvent
+
     | FingerDown of TouchFingerEvent      
     | FingerUp of TouchFingerEvent
     | FingerMotion of TouchFingerEvent
+
     | DollarGesture of DollarGestureEvent      
     | DollarRecord of DollarGestureEvent
+
     | MultiGesture of MultiGestureEvent
-    | ClipboardUpdate   //TODO          
+
+    | ClipboardUpdate   //TODO       
+       
     | DropFile of DropEvent                 
+
     | AudioDeviceAdded of AudioDeviceEvent    
     | AudioDeviceRemoved  of AudioDeviceEvent            
+
     | RenderTargetsReset //TODO
     | RenderDeviceReset //TODO
+
     | User of UserEvent
+
     | Other of uint32
 
 let private toQuitEvent (event:SDL_QuitEvent) :QuitEvent =
@@ -772,15 +769,54 @@ let private toMouseWheelEvent (event:SDL_MouseWheelEvent) :MouseWheelEvent =
     Y=event.Y;
     Direction=event.Direction |> int32 |> enum<SDLMouse.WheelDirection>}
 
+let private toAudioDeviceEvent (event:SDL_AudioDeviceEvent) :AudioDeviceEvent =
+    {Timestamp=event.Timestamp;
+    Which=event.Which;
+    Iscapture=event.Iscapture}    
+
+let private toControllerAxisEvent (event:SDL_ControllerAxisEvent) :ControllerAxisEvent =
+    {Timestamp=event.Timestamp;
+    Which=event.Which;
+    Axis=event.Axis;
+    Value=event.Value}
+    
+let private toControllerButtonEvent (event:SDL_ControllerButtonEvent) :ControllerButtonEvent =
+    {Timestamp=event.Timestamp;
+    Which=event.Which;
+    Button=event.Button;
+    State=event.State} 
+    
+let private toControllerDeviceEvent (event:SDL_ControllerDeviceEvent) :ControllerDeviceEvent=
+    {Timestamp=event.Timestamp;
+    Which=event.Which}
+
+
 let private convertEvent (result: bool, event:SDL_Event) =
     match result, (event.Type |> int |> enum<EventType>) with
     | true, EventType.Quit -> event.Quit |> toQuitEvent |> Quit |> Some
+
     | true, EventType.KeyDown -> event.Key |> toKeyboardEvent |> KeyDown |> Some
     | true, EventType.KeyUp -> event.Key |> toKeyboardEvent |> KeyUp |> Some
+
     | true, EventType.MouseMotion -> event.Motion |> toMouseMotionEvent |> MouseMotion |> Some
+
     | true, EventType.MouseButtonDown -> event.Button |> toMouseButtonEvent |> MouseButtonDown |> Some
     | true, EventType.MouseButtonUp -> event.Button |> toMouseButtonEvent |> MouseButtonUp |> Some
+
     | true, EventType.MouseWheel -> event.Wheel |> toMouseWheelEvent |> MouseWheel |> Some
+
+    | true, EventType.AudioDeviceAdded -> event.Adevice |> toAudioDeviceEvent |> AudioDeviceAdded |> Some
+    | true, EventType.AudioDeviceRemoved -> event.Adevice |> toAudioDeviceEvent |> AudioDeviceRemoved |> Some
+
+    | true, EventType.ControllerAxisMotion -> event.Caxis |> toControllerAxisEvent |> ControllerAxisMotion |> Some
+
+    | true, EventType.ControllerButtonDown -> event.Cbutton |> toControllerButtonEvent |> ControllerButtonDown |> Some
+    | true, EventType.ControllerButtonUp -> event.Cbutton |> toControllerButtonEvent |> ControllerButtonUp |> Some
+
+    | true, EventType.ControllerDeviceAdded -> event.Cdevice |> toControllerDeviceEvent |> ControllerDeviceAdded |> Some
+    | true, EventType.ControllerDeviceRemoved -> event.Cdevice |> toControllerDeviceEvent |> ControllerDeviceRemoved |> Some
+    | true, EventType.ControllerDeviceRemapped -> event.Cdevice |> toControllerDeviceEvent |> ControllerDeviceRemapped |> Some
+
     | true, _ -> event.Type |> Other |> Some
     | _, _ -> None
     
