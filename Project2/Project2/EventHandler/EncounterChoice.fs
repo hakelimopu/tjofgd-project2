@@ -32,16 +32,24 @@ let private applyDockPCEncounterChoice (detail:EncounterDetail) (playState:PlayS
 let private applyStormEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (moveBoat:bool) (encounter:Encounters option) (playState:PlayState) : GameState option = 
     let playerLocation, _, boatProps = playState |> getBoat
     let _, storm = playState |> getStorm location
-    let damagedBoat = {playState.Actors.[playerLocation] with Detail = ({boatProps with Hull=boatProps.Hull-storm.Damage} |> Boat)}
+    let updatedBoatProperties = {boatProps with Hull=if storm.Damage> boatProps.Hull then 0 else boatProps.Hull-storm.Damage}
+    let damagedBoat = {playState.Actors.[playerLocation] with Detail = (updatedBoatProperties |> Boat)}
     let updatedActors = 
         playState.Actors 
-        |> Map.remove playerLocation 
+        |> Map.remove playerLocation
+        |> Map.remove location
         |> Map.add (if moveBoat then location else playerLocation) damagedBoat
-    {playState with Actors = updatedActors; MapGrid=playState |> updateVisibleFlags setVisibleFunc; Encounters=encounter} |> PlayState |> Some
+    let updatedPlayState = {playState with Actors = updatedActors; MapGrid=playState |> updateVisibleFlags setVisibleFunc; Encounters=encounter}
+    if updatedBoatProperties.Hull > 0 then
+        updatedPlayState |> PlayState |> Some
+    else
+        updatedPlayState |> DeadState |> Some
+
 
 let private applyPCEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState) : GameState option =
     match details.Type with
-    | RanIntoStorm -> applyStormEncounterChoice setVisibleFunc details.Location true None playState
+    | RanIntoStorm -> 
+        applyStormEncounterChoice setVisibleFunc details.Location true None playState
     | DockedWithIsland -> applyDockPCEncounterChoice details playState
 
 let private applyNPCEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (head:EncounterDetail) (tail:EncounterDetail list) (playState:PlayState): GameState option =
@@ -50,13 +58,16 @@ let private applyNPCEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCel
         | [] -> None
         | _ -> tail |> NPCEncounters |> Some
     match head.Type with 
-    | RanIntoStorm -> applyStormEncounterChoice setVisibleFunc head.Location false nextEncounter playState
+    | RanIntoStorm -> 
+        applyStormEncounterChoice setVisibleFunc head.Location false nextEncounter playState
     | _ -> raise (new System.NotImplementedException("This encounter is not implemented for NPC encounters!"))
 
 let private applyEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (playState:PlayState) :GameState option =
     match playState.Encounters with
-    | Some (PCEncounter details) -> playState |> applyPCEncounterChoice setVisibleFunc details
-    | Some (NPCEncounters (head::tail)) -> playState |> applyNPCEncounterChoice setVisibleFunc head tail
+    | Some (PCEncounter details) -> 
+        playState |> applyPCEncounterChoice setVisibleFunc details
+    | Some (NPCEncounters (head::tail)) -> 
+        playState |> applyNPCEncounterChoice setVisibleFunc head tail
     | _ -> playState |> PlayState |> Some
 
 let internal handleKeyDownEventPlayStatePCEncounter (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =

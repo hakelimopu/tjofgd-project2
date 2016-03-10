@@ -84,6 +84,7 @@ let (|FreeMovement|HasPCEncounter|HasNPCEncounters|) (playState:PlayState) =
 
 type GameState = 
     | PlayState of PlayState
+    | DeadState of PlayState
 
 let getBoat (state:PlayState) : CellLocation * float<turn> * BoatProperties=
     state.Actors

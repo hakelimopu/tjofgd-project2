@@ -4,7 +4,8 @@ let rec eventPump (renderHandler:'TState->unit) (eventHandler:SDLEvent.Event->'T
     match SDLEvent.pollEvent() with
     | Some event ->
         match state |> eventHandler event with
-        | Some newState -> eventPump renderHandler eventHandler newState
+        | Some newState -> 
+            eventPump renderHandler eventHandler newState
         | None -> ()
     | None -> 
         state

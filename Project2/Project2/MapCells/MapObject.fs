@@ -4,7 +4,8 @@
 
 type BoatProperties =
     {Hull:int;
-    MaximumHull:int}
+    MaximumHull:int;
+    GenerateNextStorm:float<turn>}
 
 type StormProperties = 
     {Damage:int}

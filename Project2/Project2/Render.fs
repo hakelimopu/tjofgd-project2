@@ -54,6 +54,8 @@ let draw (context:RenderingContext) (state:GameState) :unit =
     |> ignore
 
     match state with
+    | DeadState state -> 
+        ()//TODO: render dead state
     | PlayState state ->
         state.RenderGrid
         |> Map.iter(fun location cell -> 

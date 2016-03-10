@@ -47,8 +47,24 @@ let private onIdlePlayState (sumLocationsFunc:CellLocation->CellLocation->CellLo
         |> renderStats state
     {state with RenderGrid = renderGrid} |> PlayState |> Some
 
+//TODO: make this not a copypasta!
+let private onIdleDeadState (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:PlayState) :GameState option =
+    let playerLocation, _, _ = state |> getBoat
+    let renderGrid = 
+        (state.RenderGrid, mapViewCells)
+        ||> Map.fold(fun renderGrid renderLocation mapDelta -> 
+            let mapLocation = playerLocation |> sumLocationsFunc mapDelta
+            let mapCell = state.MapGrid.TryFind mapLocation
+            let actor = state.Actors.TryFind mapLocation
+            renderGrid
+            |> Map.add renderLocation (renderCellForMapCell actor mapCell)) 
+        |> renderEncounter state
+        |> renderStats state
+    {state with RenderGrid = renderGrid} |> DeadState |> Some
+
 let internal onIdle (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:GameState): GameState option =
     match state with
     | PlayState x -> x |> onIdlePlayState sumLocationsFunc
+    | DeadState x -> x |> onIdleDeadState sumLocationsFunc
 
 

@@ -34,7 +34,7 @@ let generateIslands (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
 
 
 let worldObjects =
-    [(MapObjectDetail.Boat {Hull=10;MaximumHull=10},1);
+    [(MapObjectDetail.Boat {Hull=10;MaximumHull=10;GenerateNextStorm=5.0<turn>},1);
     (MapObjectDetail.Storm {Damage=1},200);
     (MapObjectDetail.Pirate {Hull=5;Attitude=PirateAttitude.Neutral},100);
     (MapObjectDetail.SeaMonster {Health=5;Attitude=SeaMonsterAttitude.Neutral},25);

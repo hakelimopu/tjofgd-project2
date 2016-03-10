@@ -25,8 +25,22 @@ let updateStormActor (sumLocationsFunc:CellLocation->CellLocation->CellLocation)
         if originalActors.ContainsKey newStormLocation then
             let otherActor = originalActors.[newStormLocation]
             match otherActor.Detail with
-            | Boat boatProperties -> {playState with Actors = (originalActors |> Map.add actorLocation {CurrentTurn=updateStormTurn;Detail=Storm stormProperties})} |> addNPCStormEncounter actorLocation
-            | _ -> {playState with Actors = originalActors}
+            | Boat boatProperties -> 
+                {playState with Actors = (originalActors |> Map.add actorLocation {CurrentTurn=updateStormTurn;Detail=Storm stormProperties})} |> addNPCStormEncounter actorLocation
+
+            | Storm otherStormProperties ->  
+                {playState with Actors = (originalActors |> Map.add newStormLocation {CurrentTurn = (updateStormTurn + otherActor.CurrentTurn)/2.0 ; Detail = Storm {Damage=stormProperties.Damage+otherStormProperties.Damage}})}
+
+            | Pirate pirateProperties ->
+                let newPirateProperties = {pirateProperties with Hull=pirateProperties.Hull-stormProperties.Damage}
+                if newPirateProperties.Hull < 0 then
+                    {playState with Actors = (originalActors |> Map.remove newStormLocation)}
+                else
+                    {playState with Actors = (originalActors |> Map.add newStormLocation {CurrentTurn = otherActor.CurrentTurn; Detail = Pirate newPirateProperties})}
+
+            | _ -> 
+                {playState with Actors = originalActors}
+
         else
             {playState with Actors = (originalActors |> Map.add newStormLocation {CurrentTurn=updateStormTurn;Detail=Storm stormProperties} )}
     else

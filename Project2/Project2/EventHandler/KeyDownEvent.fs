@@ -16,6 +16,7 @@ let private handleKeyDownEventPlayState (sumLocationsFunc:CellLocation->CellLoca
 let internal handleKeyDownEvent (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (keyboardEvent:SDLEvent.KeyboardEvent) (state:GameState) :GameState option =
     match state with
     | PlayState x -> x |> handleKeyDownEventPlayState sumLocationsFunc setVisibleFunc random keyboardEvent
+    | _ -> state |> Some
 
 
 
