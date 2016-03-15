@@ -2,6 +2,7 @@
 
 [<Measure>] type turn
 
+//TODO: add cargo capacity, equipment capacity, quests
 type BoatProperties =
     {Hull:int;
     MaximumHull:int;
@@ -37,6 +38,7 @@ type MerfolkAttitude =
 type MerfolkProperties =
     {Attitude:MerfolkAttitude}
 
+//give a name!
 type IslandProperties = 
     {Visits:int}
 

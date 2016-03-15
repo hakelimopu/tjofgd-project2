@@ -64,7 +64,9 @@ let private onIdleDeadState (sumLocationsFunc:CellLocation->CellLocation->CellLo
 
 let internal onIdle (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:GameState): GameState option =
     match state with
-    | PlayState x -> x |> onIdlePlayState sumLocationsFunc
-    | DeadState x -> x |> onIdleDeadState sumLocationsFunc
+    | PlayState x -> 
+        x |> onIdlePlayState sumLocationsFunc
+    | DeadState x -> 
+        x |> onIdleDeadState sumLocationsFunc
 
 

@@ -27,6 +27,7 @@ let generateIslands (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
         validLocations <-
             validLocations
             |> Array.filter (distanceFormulaTestFunc Constants.IslandDistance islandLocation)
+    //TODO: come up with name list for islands.
     ((map, islandLocations)
     ||> List.fold(fun map location -> 
         map

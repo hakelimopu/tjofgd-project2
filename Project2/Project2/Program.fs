@@ -6,10 +6,13 @@ open CellLocation
 open RenderCell
 open MapCell
 open MapCreate
+open Render
 
 
 [<EntryPoint>]
 let main argv = 
+    //SDL setup
+    
     use system = new SDL.System(SDL.Init.Video ||| SDL.Init.Events)
 
     use mainWindow = SDLWindow.create "test" 100<px> 100<px> 640<px> 480<px> 0u
@@ -34,18 +37,38 @@ let main argv =
 
     mainRenderer |> SDLRender.setLogicalSize (320<px>,240<px>) |> ignore
 
+    //graphics setup
+
     let sprites = 
         [0uy..255uy]
         |> Seq.map(fun index-> (index, (Render.createSprite bitmap {X=8<px>*((index |> int) % 16);Y=8<px>*((index |> int) / 16);Width=8<px>;Height=8<px>})))
         |> Map.ofSeq
     
+    //game setup
+    let sumLocationsFunc = sumLocationsWrapped Constants.WorldSize
+    let setVisibleFunc = setVisibleWrapped  Constants.WorldSize
+    let distanceFormulaTestFunc = distanceFormulaTestWrapped Constants.WorldSize
+    let setTerrainFunc = setTerrainWrapped Constants.WorldSize
+    let setObjectFunc = setObjectWrapped Constants.WorldSize
+
     let random = new System.Random()
 
-    let initialActors, initialMap =
-        createWorld (sumLocationsWrapped Constants.WorldSize) (distanceFormulaTestWrapped Constants.WorldSize) (setVisibleWrapped Constants.WorldSize) (setTerrainWrapped Constants.WorldSize) (setObjectWrapped Constants.WorldSize) random
+    let createFunc ()= 
+        let initialActors, initialMap =
+            createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc random
+        let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
+        {state with MapGrid = state |> updateVisibleFlags setVisibleFunc} |> PlayState
 
-    let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
+    //rendering setup
+    let renderingContext:RenderingContext = {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}
+    let renderFunc = Render.draw renderingContext
 
-    EventPump.eventPump (Render.draw {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}) (EventHandler.handleEvent (sumLocationsWrapped Constants.WorldSize) (setVisibleWrapped  Constants.WorldSize) random) ( {state with MapGrid = state |> updateVisibleFlags (setVisibleWrapped Constants.WorldSize)} |> PlayState)
+    //event handler setup
+    let eventHandler = EventHandler.handleEvent sumLocationsFunc setVisibleFunc createFunc random
+
+    EventPump.eventPump 
+        renderFunc 
+        eventHandler 
+        (createFunc())
 
     0

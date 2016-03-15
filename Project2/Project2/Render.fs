@@ -53,10 +53,7 @@ let draw (context:RenderingContext) (state:GameState) :unit =
     |> SDLSurface.fillRect None {Red=255uy;Green=0uy;Blue=255uy;Alpha=255uy}
     |> ignore
 
-    match state with
-    | DeadState state -> 
-        ()//TODO: render dead state
-    | PlayState state ->
+    let renderPlayState (state:PlayState) = 
         state.RenderGrid
         |> Map.iter(fun location cell -> 
             let foreground = palette.[cell.Foreground]
@@ -81,8 +78,12 @@ let draw (context:RenderingContext) (state:GameState) :unit =
             |> SDLSurface.blit (Some {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>}) context.WorkSurface dstRect
             |> ignore
             )
-        
 
+    match state with
+    | DeadState state  ->
+        state |> renderPlayState
+    | PlayState state ->
+        state |> renderPlayState
 
     context.Texture
     |> SDLTexture.update None context.Surface
