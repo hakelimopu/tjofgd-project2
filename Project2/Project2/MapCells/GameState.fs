@@ -93,6 +93,14 @@ let getBoat (state:PlayState) : CellLocation * float<turn> * BoatProperties=
         | Boat boatProps -> (location,cell.CurrentTurn,boatProps) |> Some
         | _ -> None)
 
+let getCurrency (state:PlayState) : float<currency> =
+    let _,_,props = state |> getBoat
+    props.Wallet
+
+let setCurrency (amount:float<currency>) (state:PlayState) :PlayState =
+    let where,turn,props = state |> getBoat
+    {state with Actors = state.Actors |> Map.add where {CurrentTurn=turn;Detail={props with Wallet=amount} |> Boat}}
+
 let getStorm (location:CellLocation) (state:PlayState) : float<turn> * StormProperties =
     let storm = state.Actors.[location]
     (storm.CurrentTurn,

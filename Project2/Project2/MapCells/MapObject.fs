@@ -1,15 +1,25 @@
 ﻿module MapObject
 
+open CellLocation
+
 [<Measure>] type turn
+[<Measure>] type health
+[<Measure>] type currency
+
+type QuestDetails =
+    {Destination:CellLocation;
+    Reward:float<currency>}
 
 //TODO: add cargo capacity, equipment capacity, quests
 type BoatProperties =
-    {Hull:int;
-    MaximumHull:int;
+    {Hull:int<health>;
+    MaximumHull:int<health>;
+    Wallet:float<currency>;
+    Quest:QuestDetails option;
     GenerateNextStorm:float<turn>}
 
 type StormProperties = 
-    {Damage:int}
+    {Damage:int<health>}
 
 type PirateAttitude =
     | Friendly
@@ -17,7 +27,7 @@ type PirateAttitude =
     | Enemy
 
 type PirateProperties =
-    {Hull:int;
+    {Hull:int<health>;
     Attitude:PirateAttitude}
 
 type SeaMonsterAttitude =
@@ -25,7 +35,7 @@ type SeaMonsterAttitude =
     | Enraged
 
 type SeaMonsterProperties =
-    {Health:int;
+    {Health:int<health>;
     Attitude:SeaMonsterAttitude}
 
 
@@ -40,7 +50,9 @@ type MerfolkProperties =
 
 //give a name!
 type IslandProperties = 
-    {Visits:int}
+    {Name:string;
+    Visits:int;
+    Quest:QuestDetails}
 
 type MapObjectDetail =
     | Boat of BoatProperties

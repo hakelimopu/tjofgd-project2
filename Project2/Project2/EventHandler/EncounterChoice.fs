@@ -32,7 +32,7 @@ let private applyDockPCEncounterChoice (detail:EncounterDetail) (playState:PlayS
 let private applyStormEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (moveBoat:bool) (encounter:Encounters option) (playState:PlayState) : GameState option = 
     let playerLocation, _, boatProps = playState |> getBoat
     let _, storm = playState |> getStorm location
-    let updatedBoatProperties = {boatProps with Hull=if storm.Damage> boatProps.Hull then 0 else boatProps.Hull-storm.Damage}
+    let updatedBoatProperties = {boatProps with Hull=if storm.Damage> boatProps.Hull then 0<health> else boatProps.Hull-storm.Damage}
     let damagedBoat = {playState.Actors.[playerLocation] with Detail = (updatedBoatProperties |> Boat)}
     let updatedActors = 
         playState.Actors 
@@ -40,7 +40,7 @@ let private applyStormEncounterChoice (setVisibleFunc:CellLocation->CellMap<MapC
         |> Map.remove location
         |> Map.add (if moveBoat then location else playerLocation) damagedBoat
     let updatedPlayState = {playState with Actors = updatedActors; MapGrid=playState |> updateVisibleFlags setVisibleFunc; Encounters=encounter}
-    if updatedBoatProperties.Hull > 0 then
+    if updatedBoatProperties.Hull > 0<health> then
         updatedPlayState |> PlayState |> Some
     else
         updatedPlayState |> DeadState |> Some

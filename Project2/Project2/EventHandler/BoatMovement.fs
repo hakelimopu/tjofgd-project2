@@ -18,7 +18,7 @@ let generateStorm (flag:bool) (turn:float<turn>) (random:System.Random) (state:P
         if state.Actors.ContainsKey location then
             state
         else
-            {state with Actors = state.Actors |> Map.add location {CurrentTurn=turn;Detail = Storm {Damage=1}}}
+            {state with Actors = state.Actors |> Map.add location {CurrentTurn=turn;Detail = Storm {Damage=1<health>}}}
     else
         state
 

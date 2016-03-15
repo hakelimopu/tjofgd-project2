@@ -33,7 +33,7 @@ let updateStormActor (sumLocationsFunc:CellLocation->CellLocation->CellLocation)
 
             | Pirate pirateProperties ->
                 let newPirateProperties = {pirateProperties with Hull=pirateProperties.Hull-stormProperties.Damage}
-                if newPirateProperties.Hull < 0 then
+                if newPirateProperties.Hull < 0<health> then
                     {playState with Actors = (originalActors |> Map.remove newStormLocation)}
                 else
                     {playState with Actors = (originalActors |> Map.add newStormLocation {CurrentTurn = otherActor.CurrentTurn; Detail = Pirate newPirateProperties})}
