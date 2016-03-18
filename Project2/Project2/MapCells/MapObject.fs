@@ -13,10 +13,10 @@ type QuestDetails =
 //TODO: add cargo capacity, equipment capacity, quests
 type BoatProperties =
     {Hull:int<health>;
-    MaximumHull:int<health>;
-    Wallet:float<currency>;
-    Quest:QuestDetails option;
-    GenerateNextStorm:float<turn>}
+     MaximumHull:int<health>;
+     Wallet:float<currency>;
+     Quest:QuestDetails option;
+     GenerateNextStorm:float<turn>}
 
 type StormProperties = 
     {Damage:int<health>}
@@ -28,7 +28,7 @@ type PirateAttitude =
 
 type PirateProperties =
     {Hull:int<health>;
-    Attitude:PirateAttitude}
+     Attitude:PirateAttitude}
 
 type SeaMonsterAttitude =
     | Neutral
@@ -36,7 +36,7 @@ type SeaMonsterAttitude =
 
 type SeaMonsterProperties =
     {Health:int<health>;
-    Attitude:SeaMonsterAttitude}
+     Attitude:SeaMonsterAttitude}
 
 
 type MerfolkAttitude =
@@ -51,8 +51,8 @@ type MerfolkProperties =
 //give a name!
 type IslandProperties = 
     {Name:string;
-    Visits:int;
-    Quest:QuestDetails}
+     Visits:int;
+     Quest:QuestDetails}
 
 type MapObjectDetail =
     | Boat of BoatProperties
@@ -64,7 +64,7 @@ type MapObjectDetail =
 
 type MapObject =
     {CurrentTurn:float<turn>;
-    Detail:MapObjectDetail}
+     Detail:MapObjectDetail}
 
 let (|IsBoat|IsStorm|IsSeaMonster|IsPirate|IsMerfolk|IsNothing|IsIsland|) (mapObject:MapObject option) =
     match mapObject with

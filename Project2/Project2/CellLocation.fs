@@ -1,48 +1,71 @@
 ﻿module CellLocation
 
-open SDLUtility
-
+//in a grid, we measure things in cells
 [<Measure>] type cell
 
+//a grid location
 type CellLocation =
-    {Column:int<cell>;Row:int<cell>}
+    {Column: int<cell>;
+     Row   : int<cell>}
 
-let sumLocations (first:CellLocation) (second:CellLocation) :CellLocation =
-    {Column=first.Column+second.Column;Row=first.Row+second.Row}
-
-let wrapDimension dimensionSize dimensionValue =
-    let newDimensionValue = dimensionValue % dimensionSize
-    if newDimensionValue < 0<cell> then newDimensionValue + dimensionSize else newDimensionValue
-
-let wrapLocation (worldSize:CellLocation) (location:CellLocation) = 
-    {Column=location.Column |> wrapDimension worldSize.Column; Row =location.Row |> wrapDimension worldSize.Row}
-
-let sumLocationsWrapped (worldSize:CellLocation) (first:CellLocation) (second:CellLocation) :CellLocation =
-    sumLocations first second
-    |> wrapLocation worldSize
-
-let pixelsPerColumn = 8<px/cell>
-let pixelsPerRow = 8<px/cell>
-
+//the grid itself is a simple map
 type CellMap<'T> = Map<CellLocation,'T>
 
-let distanceFormulaTest (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
-    let deltaX = second.Column - first.Column
-    let deltaY = second.Row - first.Row
-    (deltaX*deltaX+deltaY*deltaY) > maximum * maximum
+//more or less, function interfaces
+type SumLocationsFunc = CellLocation -> CellLocation -> CellLocation
+type DistanceFormulaTest = int<cell> -> CellLocation -> CellLocation -> bool
 
+//making a toroid world
+let wrapLocation (worldSize:CellLocation) (location:CellLocation) = 
+    let wrapDimension (dimensionSize:int<cell>) (dimensionValue:int<cell>) :int<cell>=
+        let newDimensionValue = 
+            dimensionValue % dimensionSize
+
+        if newDimensionValue < 0<cell> then 
+            newDimensionValue + dimensionSize 
+        else 
+            newDimensionValue
+
+    {Column = (worldSize.Column, location.Column) ||> wrapDimension; 
+     Row    = (worldSize.Row   , location.Row   ) ||> wrapDimension}
+
+//must be a way to walk from one location to another!
+let private sumLocations (first:CellLocation) (second:CellLocation) :CellLocation =
+    {Column = first.Column + second.Column;
+     Row    = first.Row    + second.Row}
+
+//adding locations in a toroid world
+let sumLocationsWrapped (worldSize:CellLocation) (first:CellLocation) (second:CellLocation) :CellLocation =
+    (first,second)
+    ||> sumLocations
+    |> wrapLocation worldSize
+
+//checking distance
+let private distanceFormulaTest (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
+    let deltaX, deltaY = second.Column - first.Column, second.Row - first.Row
+    (deltaX * deltaX + deltaY * deltaY) > maximum * maximum
+
+//in a wrapped world, distance determination is based on actual location and three "ghost" locations
+let private fourWrappedLocations (worldSize:CellLocation) (location:CellLocation) : CellLocation list = 
+    [location;
+    {location with Column=location.Column+worldSize.Column};
+    {location with Row=location.Row+worldSize.Row};
+    {Column=location.Column+worldSize.Column;Row=location.Row+worldSize.Row}]
+
+//distance formula applied to all four versions of a location on a torus
 let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
     let locations = 
-        [second;
-        {second with Column=second.Column+worldSize.Column};
-        {second with Row=second.Row+worldSize.Row};
-        {Column=second.Column+worldSize.Column;Row=second.Row+worldSize.Row}]
-    locations
-    |> Seq.fold (fun failures location->
+        second
+        |> fourWrappedLocations worldSize
+
+    let countFailures (accumulator:int) (location:CellLocation) :int =
         if distanceFormulaTest maximum first second then
-            failures + 1
+            accumulator + 1
         else
-            failures) 0
+            accumulator
+
+    (0,locations)
+    ||> Seq.fold countFailures
     |> (=) locations.Length
 
 

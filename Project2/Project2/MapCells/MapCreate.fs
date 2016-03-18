@@ -6,51 +6,55 @@ open MapCell
 open MapObject
 open GameState
 
-let placeIsland (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
-    Constants.islandTemplate
-    |> Map.fold(fun map delta terrain ->
+let placeIsland (sumLocationsFunc:SumLocationsFunc) (setTerrainFunc:SetTerrainFunc) (location:CellLocation) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
+    (map, Constants.islandTemplate)
+    ||> Map.fold(fun map delta terrain ->
         let mapLocation = sumLocationsFunc location delta
         if map.ContainsKey mapLocation then
             map
             |> setTerrainFunc mapLocation terrain
         else
-            map) map
+            map)
 
-let private consonants = 
+let private randomFromList (items:'T list) (random:System.Random) : 'T =
+    items
+    |> Seq.sortBy (fun e->random.Next())
+    |> Seq.head
+
+let private randomConsonant = 
     ["h";"k";"l";"m";"p"]
+    |> randomFromList
 
-let private vowels = 
+let private randomVowel = 
     ["a";"e";"i";"o";"u"]
+    |> randomFromList
 
-let private randomConsonant (random:System.Random) :string =
-    consonants
-    |> Seq.sortBy (fun e->random.Next())
-    |> Seq.head
+let private generateName (length:int) (consonant:bool) (random:System.Random) : string =
+    let generateCharacter (length:int, consonant:bool) : (string * (int * bool)) option= 
+        if length = 0 then
+            None
+        else
+            Some ((random |> (if consonant then randomConsonant else randomVowel))    , (length - 1, not consonant ))
 
-let private randomVowel (random:System.Random) :string =
-    vowels
-    |> Seq.sortBy (fun e->random.Next())
-    |> Seq.head
-
-let rec private generateName (length:int) (consonant:bool) (random:System.Random) (name:string) : string =
-    if name.Length = length then
-        name
-    else
-        let nextCharacter = random |> (if consonant then randomConsonant else randomVowel)
-        generateName length (not consonant) random (name+nextCharacter)
-
-let rec private generateNameSet (count:int) (random:System.Random) (nameSet:Set<string>) :Set<string> =
-    if nameSet.Count = count then
-        nameSet
-    else
-        generateNameSet count random (nameSet.Add (generateName (random.Next(1,4)+random.Next(1,4)+random.Next(1,4)) (random.Next(2)=0) random ""))
-
+    (length,consonant)
+    |> Seq.unfold generateCharacter
+    |> Seq.reduce (+)
 
 let private generateNames (count:int) (random:System.Random) :string list= 
-    generateNameSet count random Set.empty<string>
-    |> Set.toList
+    let unfolder (count:int, nameSet:Set<string>) : (string * (int * Set<string>)) option=
+        if count = nameSet.Count then
+            None
+        else
+            let name = generateName (random.Next(1,4)+random.Next(1,4)+random.Next(1,4)) (random.Next(2)=0) random
+            Some (name, (count, nameSet |> Set.add name))
+
+    (count, Set.empty<string>)
+    |> Seq.unfold unfolder
+    |> List.ofSeq
     |> List.sortBy (fun e->random.Next())
     
+
+//// Stopped here
 
 let generateIslands (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> * CellLocation list =
     let mutable islandLocations = List<CellLocation>.Empty
@@ -71,10 +75,10 @@ let generateIslands (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
 
 let worldObjects =
     [(MapObjectDetail.Boat {Hull=10<health>;MaximumHull=10<health>;GenerateNextStorm=5.0<turn>;Wallet=0.0<currency>;Quest=None},1);
-    (MapObjectDetail.Storm {Damage=1<health>},200);
-    (MapObjectDetail.Pirate {Hull=5<health>;Attitude=PirateAttitude.Neutral},100);
-    (MapObjectDetail.SeaMonster {Health=5<health>;Attitude=SeaMonsterAttitude.Neutral},25);
-    (MapObjectDetail.Merfolk {Attitude = MerfolkAttitude.Neutral} ,50)]
+     (MapObjectDetail.Storm {Damage=1<health>},200);
+     (MapObjectDetail.Pirate {Hull=5<health>;Attitude=PirateAttitude.Neutral},100);
+     (MapObjectDetail.SeaMonster {Health=5<health>;Attitude=SeaMonsterAttitude.Neutral},25);
+     (MapObjectDetail.Merfolk {Attitude = MerfolkAttitude.Neutral} ,50)]
 
 let rec generateLocations (worldSize:CellLocation) (random:System.Random) (count:int) (exclusion:Set<CellLocation>) (input:Set<CellLocation>): Set<CellLocation> =
     if input |> Set.count = count then

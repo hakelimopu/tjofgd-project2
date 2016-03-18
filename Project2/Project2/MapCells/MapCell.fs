@@ -6,9 +6,13 @@ open MapObject
 
 type MapCell =
     {Terrain:MapTerrain;
-    Visible:bool}
+     Visible:bool}
 
-let setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
+type SetTerrainFunc = CellLocation -> MapTerrain -> CellMap<MapCell> -> CellMap<MapCell>
+type SetVisibleFunc = CellLocation -> CellMap<MapCell> -> CellMap<MapCell>
+type SetObjectFunc = CellLocation -> MapObject option -> CellMap<MapCell> -> CellMap<MapCell>
+
+let private setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
     let originalCell = 
         cellMap.TryFind(cellLocation)
     let newCell =
@@ -19,9 +23,6 @@ let setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:Cell
     cellMap
     |> Map.add cellLocation newCell
 
-let setTerrainWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
-    setTerrain (cellLocation |> wrapLocation worldSize) mapTerrain cellMap
-
 let setVisible (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<MapCell> = 
     match cellMap.TryFind(cellLocation) with
     | None -> cellMap
@@ -29,9 +30,6 @@ let setVisible (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<M
         cellMap
         |> Map.add cellLocation {mapCell with Visible=true}
 
-let setVisibleWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<MapCell> = 
-    setVisible (cellLocation |> wrapLocation worldSize) cellMap
-    
 let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (actors:CellMap<MapObject>) :CellMap<MapObject> =
     match mapObject with
     | Some actor ->
@@ -41,6 +39,12 @@ let setObject (cellLocation:CellLocation) (mapObject:MapObject option) (actors:C
         actors 
         |> Map.remove cellLocation
 
+let setTerrainWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
+    setTerrain (cellLocation |> wrapLocation worldSize) mapTerrain cellMap
+
+let setVisibleWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (cellMap:CellMap<MapCell>) :CellMap<MapCell> = 
+    setVisible (cellLocation |> wrapLocation worldSize) cellMap
+    
 let setObjectWrapped (worldSize:CellLocation) (cellLocation:CellLocation) (mapObject:MapObject option) (actors:CellMap<MapObject>) :CellMap<MapObject> =
     setObject (cellLocation |> wrapLocation worldSize) mapObject actors
 

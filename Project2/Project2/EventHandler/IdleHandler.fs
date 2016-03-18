@@ -30,9 +30,9 @@ let private renderStats (state:PlayState) (grid:CellMap<RenderCell>):CellMap<Ren
     let _, _, boatProps = state |> getBoat
     grid
     |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Black RenderCellColor.Black ("          ")
-    |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Brown RenderCellColor.Black (sprintf "Hull:%2i/%2i" boatProps.Hull boatProps.MaximumHull)
+    |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Brown RenderCellColor.Black (sprintf "Hull:%2i/%2i" (boatProps.Hull/1<health>) (boatProps.MaximumHull/1<health>))
     |> writeText {Column=StatsViewX;Row=(StatsViewY+1<cell>)} RenderCellColor.Black RenderCellColor.Black ("          ")
-    |> writeText {Column=StatsViewX;Row=(StatsViewY+1<cell>)} RenderCellColor.BrightYellow RenderCellColor.Black (sprintf "$%9.2f" boatProps.Wallet)
+    |> writeText {Column=StatsViewX;Row=(StatsViewY+1<cell>)} RenderCellColor.BrightYellow RenderCellColor.Black (sprintf "$%9.2f" (boatProps.Wallet/1.0<currency>))
 
     
 

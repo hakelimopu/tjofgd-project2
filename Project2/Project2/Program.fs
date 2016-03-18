@@ -57,7 +57,7 @@ let main argv =
         let initialActors, initialMap =
             createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc random
         let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
-        {state with MapGrid = state |> updateVisibleFlags setVisibleFunc} |> PlayState
+        {state with MapGrid = state |> updateVisibleFlags sumLocationsFunc setVisibleFunc} |> PlayState
 
     //rendering setup
     let renderingContext:RenderingContext = {Renderer=mainRenderer;Texture=mainTexture;Surface=surface;Sprites = sprites;WorkSurface=workSurface}

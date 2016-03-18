@@ -22,7 +22,7 @@ let generateStorm (flag:bool) (turn:float<turn>) (random:System.Random) (state:P
     else
         state
 
-let moveBoat (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (delta:CellLocation) (state:PlayState) :GameState option =
+let moveBoat (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (delta:CellLocation) (state:PlayState) :GameState option =
     let playerLocation, boatTurn, boatProperties = state |> getBoat
     let nextLocation = delta |> sumLocationsFunc playerLocation
     if state.MapGrid.ContainsKey nextLocation then
@@ -43,7 +43,7 @@ let moveBoat (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (setVis
                 |> setObject nextLocation (Some {CurrentTurn = updatedBoatTurn;Detail = Boat updateBoatProperties})
             let updatedMapGrid= 
                 state
-                |> updateVisibleFlags setVisibleFunc
+                |> updateVisibleFlags sumLocationsFunc setVisibleFunc
             {state with MapGrid=updatedMapGrid;Actors=updatedActors}
             |> generateStorm spawnStorm updatedBoatTurn random 
             |> updateActors sumLocationsFunc random updatedBoatTurn

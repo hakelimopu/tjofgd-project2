@@ -17,6 +17,7 @@ module private SDLInitNative =
 
 [<Flags>]
 type Init =
+    | None           = 0x00000000
     | Timer          = 0x00000001
     | Audio          = 0x00000010
     | Video          = 0x00000020

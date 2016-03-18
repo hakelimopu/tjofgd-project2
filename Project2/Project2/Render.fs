@@ -45,6 +45,9 @@ let private palette =
     (RenderCellColor.BrightWhite  ,{Red=0xFFuy;Green=0xFFuy;Blue=0xFFuy;Alpha=0x00uy})]
     |> Map.ofSeq
 
+let pixelsPerColumn = 8<px/cell>
+let pixelsPerRow = 8<px/cell>
+
 let draw (context:RenderingContext) (state:GameState) :unit =
     context.Renderer |> SDLRender.setDrawColor (255uy,0uy,255uy,255uy) |> ignore
     context.Renderer |> SDLRender.clear |> ignore
