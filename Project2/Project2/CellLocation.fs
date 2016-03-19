@@ -13,7 +13,7 @@ type CellMap<'T> = Map<CellLocation,'T>
 
 //more or less, function interfaces
 type SumLocationsFunc = CellLocation -> CellLocation -> CellLocation
-type DistanceFormulaTest = int<cell> -> CellLocation -> CellLocation -> bool
+type DistanceFormulaTestFunc = int<cell> -> CellLocation -> CellLocation -> bool
 
 //making a toroid world
 let wrapLocation (worldSize:CellLocation) (location:CellLocation) = 
@@ -64,7 +64,7 @@ let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (fir
         else
             accumulator
 
-    (0,locations)
+    (0, locations)
     ||> Seq.fold countFailures
     |> (=) locations.Length
 

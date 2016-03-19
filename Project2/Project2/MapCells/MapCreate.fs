@@ -6,15 +6,18 @@ open MapCell
 open MapObject
 open GameState
 
-let placeIsland (sumLocationsFunc:SumLocationsFunc) (setTerrainFunc:SetTerrainFunc) (location:CellLocation) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> =
-    (map, Constants.islandTemplate)
-    ||> Map.fold(fun map delta terrain ->
-        let mapLocation = sumLocationsFunc location delta
+let placeIsland (sumLocationsFunc:SumLocationsFunc) (setTerrainFunc:SetTerrainFunc) (location:CellLocation) (map:CellMap<MapCell>) :CellMap<MapCell> =
+    let foldFunc (map:CellMap<MapCell>) (delta:CellLocation) (terrain:MapTerrain) :CellMap<MapCell> =
+        let mapLocation = (location, delta) ||> sumLocationsFunc
+
         if map.ContainsKey mapLocation then
             map
             |> setTerrainFunc mapLocation terrain
         else
-            map)
+            map
+
+    (map, Constants.islandTemplate)
+    ||> Map.fold foldFunc
 
 let private randomFromList (items:'T list) (random:System.Random) : 'T =
     items
@@ -30,18 +33,19 @@ let private randomVowel =
     |> randomFromList
 
 let private generateName (length:int) (consonant:bool) (random:System.Random) : string =
-    let generateCharacter (length:int, consonant:bool) : (string * (int * bool)) option= 
+    let generateCharacter (length:int, consonant:bool) : (string * (int * bool)) option = 
         if length = 0 then
             None
         else
-            Some ((random |> (if consonant then randomConsonant else randomVowel))    , (length - 1, not consonant ))
+            Some ((random |> (if consonant then randomConsonant else randomVowel)), (length - 1, not consonant ))
 
-    (length,consonant)
+    (length, consonant)
     |> Seq.unfold generateCharacter
     |> Seq.reduce (+)
 
+//TODO: emitter returns a set!
 let private generateNames (count:int) (random:System.Random) :string list= 
-    let unfolder (count:int, nameSet:Set<string>) : (string * (int * Set<string>)) option=
+    let emitter (count:int, nameSet:Set<string>) : (string * (int * Set<string>)) option=
         if count = nameSet.Count then
             None
         else
@@ -49,27 +53,32 @@ let private generateNames (count:int) (random:System.Random) :string list=
             Some (name, (count, nameSet |> Set.add name))
 
     (count, Set.empty<string>)
-    |> Seq.unfold unfolder
-    |> List.ofSeq
+    |> Seq.unfold emitter
+    |> Set.ofSeq
+    |> Set.toList
     |> List.sortBy (fun e->random.Next())
 
-//// Stopped here
+let generateIslands (sumLocationsFunc:SumLocationsFunc) (distanceFormulaTestFunc:DistanceFormulaTestFunc) (setTerrainFunc:SetTerrainFunc) (random:System.Random) (map:CellMap<MapCell>) :CellMap<MapCell> * CellLocation list =
+    let islandGenerator (locations:seq<CellLocation>) : (CellLocation * seq<CellLocation>) option=
+        if locations |> Seq.isEmpty then
+            None
+        else
+            let location = 
+                locations
+                |> Seq.head
+            Some (location, locations |> Seq.filter (distanceFormulaTestFunc Constants.IslandDistance location))
 
-let generateIslands (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (map:Map<CellLocation,MapCell>) :Map<CellLocation,MapCell> * CellLocation list =
-    let mutable islandLocations = List<CellLocation>.Empty
-    let mutable validLocations = Constants.mapLocations |> Array.ofSeq
-    while validLocations |> Array.isEmpty |> not do
-        let index = random.Next(validLocations |> Array.length)
-        let islandLocation = validLocations.[index]
-        islandLocations <- islandLocation :: islandLocations
-        validLocations <-
-            validLocations
-            |> Array.filter (distanceFormulaTestFunc Constants.IslandDistance islandLocation)
-    //TODO: come up with name list for islands.
-    ((map, islandLocations)
-    ||> List.fold(fun map location -> 
+    let islandLocations =
+        Constants.mapLocations
+        |> Seq.sortBy (fun e -> random.Next())
+        |> Seq.unfold islandGenerator
+        |> List.ofSeq
+
+    let islandPlacer map location =
         map
-        |> placeIsland sumLocationsFunc setTerrainFunc location), islandLocations)
+        |> placeIsland sumLocationsFunc setTerrainFunc location
+
+    ((map, islandLocations) ||> List.fold islandPlacer, islandLocations)
 
 
 let worldObjects =
@@ -79,23 +88,32 @@ let worldObjects =
      (MapObjectDetail.SeaMonster {Health=5<health>;Attitude=SeaMonsterAttitude.Neutral},25);
      (MapObjectDetail.Merfolk {Attitude = MerfolkAttitude.Neutral} ,50)]
 
-let rec generateLocations (worldSize:CellLocation) (random:System.Random) (count:int) (exclusion:Set<CellLocation>) (input:Set<CellLocation>): Set<CellLocation> =
-    if input |> Set.count = count then
-        input
-    else
-        let location = {Column = random.Next(worldSize.Column / 1<cell>) * 1<cell>;Row=random.Next(worldSize.Row / 1<cell>) * 1<cell>}
-        if not (exclusion.Contains location) then
-            input
-            |> Set.add location
-            |> generateLocations worldSize random count exclusion
+let rec generateLocations 
+    (worldSize:CellLocation) 
+    (random:System.Random) 
+    (count:int)
+    (exclusion:Set<CellLocation>): Set<CellLocation> =
+
+    let locationEmitter (count:int, locations:Set<CellLocation>) : (Set<CellLocation> * (int * Set<CellLocation>)) option=
+        if count = locations.Count then        
+            None
         else
-            input
-            |> generateLocations worldSize random count exclusion
+            let location = {Column = random.Next(worldSize.Column / 1<cell>) * 1<cell>;Row=random.Next(worldSize.Row / 1<cell>) * 1<cell>}            
+            if (locations.Contains location) || (exclusion.Contains location) then
+                Some (Set.empty<CellLocation>, (count, locations))
+            else
+                Some ([location] |> Set.ofList, (count - 1, locations.Remove location))
+
+    (count, Set.empty<CellLocation>)
+    |> Seq.unfold locationEmitter
+    |> Seq.reduce Set.union
+
+//Stopped here!
 
 let generateWorldObjects 
     (worldSize:CellLocation) 
-    (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
-    (setObjectFunc:CellLocation->MapObject option->CellMap<MapObject>->CellMap<MapObject>) 
+    (sumLocationsFunc:SumLocationsFunc) 
+    (setObjectFunc:SetObjectFunc) 
     (random:System.Random) 
     (excludedLocations:Set<CellLocation>)
     (actors:Map<CellLocation,MapObject>):Map<CellLocation,MapObject> =
@@ -104,7 +122,7 @@ let generateWorldObjects
         |> Seq.map (fun (obj,count)-> [for i = 1 to count do yield obj])
         |> Seq.reduce (@)
         |> Seq.ofList
-    generateLocations worldSize random (allObjects |> Seq.length) excludedLocations Set.empty
+    generateLocations worldSize random (allObjects |> Seq.length) excludedLocations
     |> Set.toSeq
     |> Seq.zip allObjects
     |> Seq.fold (fun actors (detail,loc) -> 

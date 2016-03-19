@@ -7,11 +7,20 @@ let WorldSize = {Column=256<cell>;Row=256<cell>}
 let IslandDistance = 20<cell>
 
 let mapLocations = 
-    [0 .. (WorldSize.Column/1<cell>)-1]
-    |> Seq.map(fun column-> 
-        [0 .. (WorldSize.Row / 1<cell>)-1]
-        |> Seq.map(fun row-> 
-            {Column=column * 1<cell>;Row=row * 1<cell>}))
+    let unfoldColumns (rows:int<cell>) (columns:int<cell>) : (seq<CellLocation> * int<cell>) option =
+        let unfoldRows (column:int<cell>) (rows:int<cell>) : (CellLocation * int<cell>) option =
+            if rows = 0<cell> then
+                None
+            else
+                Some ({Column = column; Row = (rows-1<cell>)}, rows-1<cell>)
+
+        if columns = 0<cell> then
+            None
+        else
+            Some ((rows) |> Seq.unfold (unfoldRows (columns-1<cell>)), columns-1<cell>)
+
+    (WorldSize.Column)
+    |> Seq.unfold (unfoldColumns WorldSize.Row)
     |> Seq.reduce (Seq.append)
 
 let islandTemplate = 

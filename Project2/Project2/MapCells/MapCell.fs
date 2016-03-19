@@ -10,7 +10,7 @@ type MapCell =
 
 type SetTerrainFunc = CellLocation -> MapTerrain -> CellMap<MapCell> -> CellMap<MapCell>
 type SetVisibleFunc = CellLocation -> CellMap<MapCell> -> CellMap<MapCell>
-type SetObjectFunc = CellLocation -> MapObject option -> CellMap<MapCell> -> CellMap<MapCell>
+type SetObjectFunc = CellLocation -> MapObject option -> CellMap<MapObject> -> CellMap<MapObject>
 
 let private setTerrain (cellLocation:CellLocation) (mapTerrain:MapTerrain) (cellMap:CellMap<MapCell>) :CellMap<MapCell> =
     let originalCell = 
