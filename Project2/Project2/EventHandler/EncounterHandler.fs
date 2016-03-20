@@ -5,6 +5,8 @@ open GameState
 open MapObject
 open RenderCell
 
+//TODO: start here!
+
 let internal generateStormPCEncounter (location:CellLocation) :Encounters option =
     {Location=location;
     Title="Storm!";

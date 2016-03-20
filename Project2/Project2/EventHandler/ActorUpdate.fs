@@ -4,63 +4,124 @@ open GameState
 open CellLocation
 open MapObject
 
-let addNPCStormEncounter (actorLocation:CellLocation) (playState:PlayState) :PlayState =
-    let encounterDetail =
-        {Location=actorLocation;
-        Title="Storm!";
-        Type=RanIntoStorm;
-        Message=["You have run into a storm;";"it has damaged your boat!"];
-        Choices=[{Text="OK";Response=Confirm}];
-        CurrentChoice=0} 
+let addNPCEncounter (encounterDetail:EncounterDetail) (playState:PlayState) :PlayState =
     match playState.Encounters with
-    | None -> {playState with Encounters = Some (NPCEncounters [encounterDetail])}
-    | Some (NPCEncounters detailList) -> {playState with Encounters = Some (NPCEncounters (detailList |> List.append [encounterDetail]))}
-    | Some (PCEncounter detail) -> raise (new System.InvalidOperationException("Cannot add NPC encounter to a PC encounter!"))
+    | None                            -> {playState with Encounters = Some (NPCEncounters [encounterDetail])}
+    | Some (NPCEncounters detailList) -> {playState with Encounters = Some (NPCEncounters (detailList @ [encounterDetail]))}
+    | Some (PCEncounter detail)       -> raise (new System.InvalidOperationException("Cannot add NPC encounter to a PC encounter!"))
 
-let updateStormActor (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (random:System.Random) (actorLocation:CellLocation) (stormProperties:StormProperties) (stormTurn:float<turn>) (currentTurn:float<turn>) (playState:PlayState) :PlayState =
-    if currentTurn > stormTurn then
-        let originalActors = playState.Actors |> Map.remove actorLocation
-        let newStormLocation = actorLocation |> sumLocationsFunc {Column=random.Next(-1,2) * 1<cell>;Row=random.Next(-1,2) * 1<cell>}
-        let updateStormTurn = stormTurn + 0.5<turn>
-        if originalActors.ContainsKey newStormLocation then
-            let otherActor = originalActors.[newStormLocation]
-            match otherActor.Detail with
-            | Boat boatProperties -> 
-                {playState with Actors = (originalActors |> Map.add actorLocation {CurrentTurn=updateStormTurn;Detail=Storm stormProperties})} |> addNPCStormEncounter actorLocation
+let addNPCStormEncounter (actorLocation:CellLocation) (playState:PlayState) :PlayState =
+    ({Location=actorLocation;
+     Title="Storm!";
+     Type=RanIntoStorm;
+     Message=["You have run into a storm;";"it has damaged your boat!"];
+     Choices=[{Text="OK";Response=Confirm}];
+     CurrentChoice=0},
+     playState)
+    ||> addNPCEncounter
 
-            | Storm otherStormProperties ->  
-                {playState with Actors = (originalActors |> Map.add newStormLocation {CurrentTurn = (updateStormTurn + otherActor.CurrentTurn)/2.0 ; Detail = Storm {Damage=stormProperties.Damage+otherStormProperties.Damage}})}
+let updateStormActor 
+    (sumLocationsFunc:SumLocationsFunc) 
+    (random:System.Random) 
+    (actorLocation:CellLocation) 
+    (stormProperties:StormProperties) 
+    (stormTurn:float<turn>) 
+    (currentTurn:float<turn>) 
+    (playState:PlayState) :PlayState =
+    if currentTurn <= stormTurn then
+        playState
+    else
+        let strikeBoat (actors:CellMap<MapObject>) (actorLocation:CellLocation) (updatedTurn:float<turn>) (playState:PlayState) :PlayState =
+            let updatedActors = 
+                actors 
+                |> Map.add actorLocation {CurrentTurn=updatedTurn;Detail=Storm stormProperties}
 
-            | Pirate pirateProperties ->
-                let newPirateProperties = {pirateProperties with Hull=pirateProperties.Hull-stormProperties.Damage}
-                if newPirateProperties.Hull < 0<health> then
-                    {playState with Actors = (originalActors |> Map.remove newStormLocation)}
-                else
-                    {playState with Actors = (originalActors |> Map.add newStormLocation {CurrentTurn = otherActor.CurrentTurn; Detail = Pirate newPirateProperties})}
+            {playState with Actors = updatedActors} 
+            |> addNPCStormEncounter actorLocation
 
-            | _ -> 
-                {playState with Actors = originalActors}
+        let combineStorms (actors:CellMap<MapObject>) (updatedTurn:float<turn>) (otherActor:MapObject) (otherActorLocation:CellLocation) (stormProperties:StormProperties) (otherStormProperties:StormProperties) (playState:PlayState) :PlayState =
+            let updatedStorm = 
+                {CurrentTurn = (updatedTurn + otherActor.CurrentTurn)/2.0; 
+                 Detail      = {Damage = stormProperties.Damage+otherStormProperties.Damage} |> Storm}
 
+            let updatedActors = 
+                actors 
+                |> Map.add otherActorLocation updatedStorm
+            {playState with Actors = updatedActors}
+
+        let strikePirate (actors:CellMap<MapObject>) (otherActor:MapObject) (otherActorLocation:CellLocation) (pirateProperties:PirateProperties) (stormProperties:StormProperties) (playState:PlayState) :PlayState =
+            let updatedPirateHull = pirateProperties.Hull-stormProperties.Damage
+
+            if updatedPirateHull <= 0<health> then
+                let updatedActors = 
+                    actors 
+                    |> Map.remove otherActorLocation
+
+                {playState with Actors = updatedActors}
+            else
+                let updatedPirateProperties = 
+                    {pirateProperties with Hull = updatedPirateHull}
+
+                let updatedActor = 
+                    {CurrentTurn = otherActor.CurrentTurn; 
+                     Detail = Pirate updatedPirateProperties}
+
+                let updatedActors = 
+                    actors 
+                    |> Map.add otherActorLocation updatedActor
+
+                {playState with Actors = updatedActors}
+
+        let originalActors = 
+            playState.Actors 
+            |> Map.remove actorLocation
+
+        let newStormLocation = 
+            actorLocation 
+            |> sumLocationsFunc {Column=random.Next(-1,2) * 1<cell>;Row=random.Next(-1,2) * 1<cell>}
+
+        let updateStormTurn = 
+            stormTurn + 0.5<turn>
+
+        let otherActor = originalActors.TryFind newStormLocation
+        if otherActor.IsNone then
+            let updatedStorm = 
+                {CurrentTurn = updateStormTurn;
+                 Detail      = stormProperties |> Storm}
+
+            let updatedActors =
+                originalActors 
+                |> Map.add newStormLocation updatedStorm
+
+            {playState with Actors = updatedActors}
         else
-            {playState with Actors = (originalActors |> Map.add newStormLocation {CurrentTurn=updateStormTurn;Detail=Storm stormProperties} )}
-    else
-        playState
+            match otherActor.Value.Detail with
+            | Boat boatProperties        -> playState |> strikeBoat    originalActors actorLocation updateStormTurn
+            | Storm otherStormProperties -> playState |> combineStorms originalActors updateStormTurn otherActor.Value newStormLocation stormProperties otherStormProperties
+            | Pirate pirateProperties    -> playState |> strikePirate  originalActors otherActor.Value newStormLocation pirateProperties stormProperties
+            | _                          -> {playState with Actors = originalActors}
 
-let rec updateActor (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (random:System.Random) (actorLocation:CellLocation) (actor:MapObject) (currentTurn:float<turn>) (playState:PlayState) :PlayState=
-    if actor.CurrentTurn < currentTurn then
-        //actor gets a turn!
-        //TODO: does the actor still exist on the map at the original location?
-        match actor.Detail with
-        | Storm stormProperties -> playState |> updateStormActor sumLocationsFunc random actorLocation stormProperties actor.CurrentTurn currentTurn
-        | _ -> playState
-    else
+let updateActor (sumLocationsFunc:SumLocationsFunc) (random:System.Random) (actorLocation:CellLocation) (actor:MapObject) (currentTurn:float<turn>) (playState:PlayState, flag:bool) :PlayState * bool=
+    if actor.CurrentTurn >= currentTurn then
         //nothing happens!
-        playState
+        (playState, flag)
+    else
+        match actor.Detail with
+        | Storm stormProperties -> (playState |> updateStormActor sumLocationsFunc random actorLocation stormProperties actor.CurrentTurn currentTurn, true)
+        | _ -> (playState, flag)
 
-let updateActors (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (random:System.Random) (currentTurn:float<turn>) (playState:PlayState) :PlayState=
-    (playState, playState.Actors)
-    ||> Map.fold (fun currentState location actor -> 
-        updateActor sumLocationsFunc random location actor currentTurn currentState)
+let rec updateActors (sumLocationsFunc:SumLocationsFunc) (random:System.Random) (currentTurn:float<turn>) (playState:PlayState) :PlayState=
+    let actorUpdater (currentState:PlayState * bool) (location:CellLocation) (actor:MapObject) :PlayState * bool= 
+        updateActor sumLocationsFunc random location actor currentTurn currentState
+
+    let updatedPlayState, flag = 
+        ((playState, false), playState.Actors)
+        ||> Map.fold actorUpdater
+
+    if flag then
+        updatedPlayState |> updateActors sumLocationsFunc random currentTurn
+    else
+        updatedPlayState
 
 
 
