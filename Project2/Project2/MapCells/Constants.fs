@@ -22,6 +22,7 @@ let mapLocations =
     (WorldSize.Column)
     |> Seq.unfold (unfoldColumns WorldSize.Row)
     |> Seq.reduce (Seq.append)
+    |> Set.ofSeq
 
 let islandTemplate = 
     [(-3,-3,MapTerrain.DeepWater);

@@ -55,7 +55,7 @@ let main argv =
 
     let createFunc ()= 
         let initialActors, initialMap =
-            createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc random
+            createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc Constants.WorldSize random
         let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
         {state with MapGrid = state |> updateVisibleFlags sumLocationsFunc setVisibleFunc} |> PlayState
 
