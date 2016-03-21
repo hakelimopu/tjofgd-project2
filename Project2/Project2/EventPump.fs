@@ -3,9 +3,6 @@
 //The event pump... the heart of every SDL based game
 let rec eventPump (idleHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TState->'TState option) (state:'TState) : unit =
 
-    //for convenience, when we call ourselves later, we only change the value of state
-    let keepPumping = eventPump idleHandler eventHandler
-
     //poll for events
     match SDLEvent.pollEvent() with
 
@@ -15,7 +12,7 @@ let rec eventPump (idleHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TSt
         //see how the state gets mutated by the event handler...
         match state |> eventHandler event with
         //it results in a new state, so keep pumping!
-        | Some newState -> keepPumping newState
+        | Some newState -> eventPump idleHandler eventHandler newState
         //there is no longer a state, so exit event pump!
         | None -> ()
 
@@ -26,6 +23,6 @@ let rec eventPump (idleHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TSt
         |> idleHandler
 
         //keep pumping with the original state!
-        keepPumping state
+        eventPump idleHandler eventHandler state
 
 

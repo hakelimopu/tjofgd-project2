@@ -92,7 +92,7 @@ let updateStormActor
             {playState with Actors = updatedActors}
         else
             match otherActor.Value.Detail with
-            | Boat boatProperties        -> playState |> strikeBoat    originalActors actorLocation updateStormTurn
+            | Boat boatProperties        -> playState |> strikeBoat    originalActors actorLocation currentTurn
             | Storm otherStormProperties -> playState |> combineStorms originalActors updateStormTurn otherActor.Value newStormLocation stormProperties otherStormProperties
             | Pirate pirateProperties    -> playState |> strikePirate  originalActors otherActor.Value newStormLocation pirateProperties stormProperties
             | _                          -> {playState with Actors = originalActors}
