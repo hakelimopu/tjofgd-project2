@@ -1,10 +1,10 @@
 ﻿module EventPump
 
 //The event pump... the heart of every SDL based game
-let rec eventPump (idleHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TState->'TState option) (state:'TState) : unit =
+let rec eventPump (eventPoller:unit->SDLEvent.Event option) (idleHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TState->'TState option) (state:'TState) : unit =
 
     //poll for events
-    match SDLEvent.pollEvent() with
+    match eventPoller() with
 
     //there is an event!
     | Some event ->
@@ -12,7 +12,7 @@ let rec eventPump (idleHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TSt
         //see how the state gets mutated by the event handler...
         match state |> eventHandler event with
         //it results in a new state, so keep pumping!
-        | Some newState -> eventPump idleHandler eventHandler newState
+        | Some newState -> eventPump eventPoller idleHandler eventHandler newState
         //there is no longer a state, so exit event pump!
         | None -> ()
 
@@ -23,6 +23,6 @@ let rec eventPump (idleHandler:'TState->unit) (eventHandler:SDLEvent.Event->'TSt
         |> idleHandler
 
         //keep pumping with the original state!
-        eventPump idleHandler eventHandler state
+        eventPump eventPoller idleHandler eventHandler state
 
 

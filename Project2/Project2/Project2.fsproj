@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>41dd7c00-4e10-4462-be71-ca595c2cf4cd</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>Project2</RootNamespace>
     <AssemblyName>Project2</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -97,7 +97,7 @@
     <Compile Include="EventHandler\KeyDownEvent.fs" />
     <Compile Include="EventHandler\IdleHandler.fs" />
     <Compile Include="EventHandler\EventHandler.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Game.fs" />
     <None Include="App.config" />
     <Content Include="Content\romfont8x8.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

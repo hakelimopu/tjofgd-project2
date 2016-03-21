@@ -1,4 +1,6 @@
-﻿open SDLUtility
+﻿module Game
+
+open SDLUtility
 open SDLGeometry
 open SDLPixel
 open GameState
@@ -9,8 +11,7 @@ open MapCreate
 open Render
 
 
-[<EntryPoint>]
-let main argv = 
+let runGame() = 
     //SDL setup
     
     use system = new SDL.System(SDL.Init.Video ||| SDL.Init.Events)
@@ -67,8 +68,7 @@ let main argv =
     let eventHandler = EventHandler.handleEvent sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize random
 
     EventPump.eventPump 
+        SDLEvent.pollEvent
         renderFunc 
         eventHandler 
         (createFunc())
-
-    0
