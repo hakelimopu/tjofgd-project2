@@ -123,6 +123,14 @@ let getStorm (location:CellLocation) (state:PlayState) : float<turn> * StormProp
         | Storm props -> props
         | _ -> raise (new System.NotImplementedException()))
 
+//TODO: this is more or less the same function as getStorm!
+let getIsland (location:CellLocation) (state:PlayState) : float<turn> * IslandProperties =
+    let island = state.Actors.[location]
+    (island.CurrentTurn,
+        match island.Detail with
+        | Island props -> props
+        | _ -> raise (new System.NotImplementedException()))
+
 let updateVisibleFlags (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (state:PlayState) :Map<CellLocation,MapCell> =
     let updateVisibility sumLocationsFunc setVisibleFunc location map delta = 
         map

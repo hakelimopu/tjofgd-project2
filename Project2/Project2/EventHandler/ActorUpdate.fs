@@ -3,6 +3,7 @@
 open GameState
 open CellLocation
 open MapObject
+open EncounterDetails
 
 let addNPCEncounter (encounterDetail:EncounterDetail) (playState:PlayState) :PlayState =
     match playState.Encounters with
@@ -11,12 +12,7 @@ let addNPCEncounter (encounterDetail:EncounterDetail) (playState:PlayState) :Pla
     | Some (PCEncounter detail)       -> raise (new System.InvalidOperationException("Cannot add NPC encounter to a PC encounter!"))
 
 let addNPCStormEncounter (actorLocation:CellLocation) (playState:PlayState) :PlayState =
-    ({Location=actorLocation;
-     Title="Storm!";
-     Type=RanIntoStorm;
-     Message=["You have run into a storm;";"it has damaged your boat!"];
-     Choices=[{Text="OK";Response=Confirm}];
-     CurrentChoice=0},
+    (actorLocation |> createStorm,
      playState)
     ||> addNPCEncounter
 

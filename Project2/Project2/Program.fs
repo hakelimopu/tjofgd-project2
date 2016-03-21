@@ -64,7 +64,7 @@ let main argv =
     let renderFunc = Render.draw renderingContext
 
     //event handler setup
-    let eventHandler = EventHandler.handleEvent sumLocationsFunc setVisibleFunc createFunc random
+    let eventHandler = EventHandler.handleEvent sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize random
 
     EventPump.eventPump 
         renderFunc 

@@ -89,6 +89,7 @@
     <Compile Include="MapCells\MapCreate.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="EventHandler\QuitEvent.fs" />
+    <Compile Include="EventHandler\EncounterDetails.fs" />
     <Compile Include="EventHandler\ActorUpdate.fs" />
     <Compile Include="EventHandler\EncounterHandler.fs" />
     <Compile Include="EventHandler\BoatMovement.fs" />
