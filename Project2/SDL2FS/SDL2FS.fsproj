@@ -74,6 +74,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SDLUtility.fs" />
     <Compile Include="SDLGeometry.fs" />
+    <Compile Include="SDLHints.fs" />
     <Compile Include="SDL.fs" />
     <Compile Include="SDLVersion.fs" />
     <Compile Include="SDLError.fs" />

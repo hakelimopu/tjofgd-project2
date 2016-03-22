@@ -1,4 +1,5 @@
-﻿module SDLGeometry
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLGeometry
 
 #nowarn "9"
 

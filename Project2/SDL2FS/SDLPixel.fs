@@ -1,4 +1,5 @@
-﻿module SDLPixel
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLPixel
 
 open System.Runtime.InteropServices
 open System

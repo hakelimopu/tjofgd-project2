@@ -1,4 +1,5 @@
-﻿module SDLWindow
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLWindow
 
 open System.Runtime.InteropServices
 open System

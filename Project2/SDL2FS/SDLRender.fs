@@ -1,4 +1,5 @@
-﻿module SDLRender
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLRender
 
 #nowarn "9"
 

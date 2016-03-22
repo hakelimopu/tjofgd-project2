@@ -1,4 +1,5 @@
-﻿module SDLCursor
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLCursor
 
 open System
 open System.Runtime.InteropServices

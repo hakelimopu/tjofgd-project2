@@ -1,4 +1,5 @@
-﻿module SDLMouse
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLMouse
 
 open System
 open System.Runtime.InteropServices

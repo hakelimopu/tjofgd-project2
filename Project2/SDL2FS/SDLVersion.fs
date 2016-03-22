@@ -1,4 +1,5 @@
-﻿module SDLVersion
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLVersion
 
 #nowarn "9" 
 

@@ -1,4 +1,5 @@
-﻿module SDLSurface
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLSurface
 
 open System
 open SDLGeometry

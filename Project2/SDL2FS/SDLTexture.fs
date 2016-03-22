@@ -1,4 +1,5 @@
-﻿module SDLTexture
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLTexture
 
 #nowarn "9"
 

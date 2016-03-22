@@ -4,6 +4,7 @@ open GameState
 open CellLocation
 open MapObject
 open EncounterDetails
+open Random
 
 let addNPCEncounter (encounterDetail:EncounterDetail) (playState:PlayState) :PlayState =
     match playState.Encounters with
@@ -18,7 +19,7 @@ let addNPCStormEncounter (actorLocation:CellLocation) (playState:PlayState) :Pla
 
 let updateStormActor 
     (sumLocationsFunc:SumLocationsFunc) 
-    (random:System.Random) 
+    (random:RandomFunc) 
     (actorLocation:CellLocation) 
     (stormProperties:StormProperties) 
     (stormTurn:float<turn>) 
@@ -74,7 +75,7 @@ let updateStormActor
 
         let newStormLocation = 
             actorLocation 
-            |> sumLocationsFunc {Column=random.Next(-1,2) * 1<cell>;Row=random.Next(-1,2) * 1<cell>}
+            |> sumLocationsFunc {Column=((-1,2) |> IntRange |> random |> getInt) * 1<cell>;Row=((-1,2) |> IntRange |> random |> getInt) * 1<cell>}
 
         let updateStormTurn = 
             stormTurn + 0.5<turn>
@@ -97,7 +98,7 @@ let updateStormActor
             | Pirate pirateProperties    -> playState |> strikePirate  originalActors otherActor.Value newStormLocation pirateProperties stormProperties
             | _                          -> {playState with Actors = originalActors}
 
-let updateActor (sumLocationsFunc:SumLocationsFunc) (random:System.Random) (actorLocation:CellLocation) (actor:MapObject) (currentTurn:float<turn>) (playState:PlayState, flag:bool) :PlayState * bool=
+let updateActor (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (actorLocation:CellLocation) (actor:MapObject) (currentTurn:float<turn>) (playState:PlayState, flag:bool) :PlayState * bool=
     if actor.CurrentTurn >= currentTurn then
         //nothing happens!
         (playState, flag)
@@ -106,7 +107,7 @@ let updateActor (sumLocationsFunc:SumLocationsFunc) (random:System.Random) (acto
         | Storm stormProperties -> (playState |> updateStormActor sumLocationsFunc random actorLocation stormProperties actor.CurrentTurn currentTurn, true)
         | _ -> (playState, flag)
 
-let rec updateActors (sumLocationsFunc:SumLocationsFunc) (random:System.Random) (currentTurn:float<turn>) (playState:PlayState) :PlayState=
+let rec updateActors (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (currentTurn:float<turn>) (playState:PlayState) :PlayState=
     let actorUpdater (currentState:PlayState * bool) (location:CellLocation) (actor:MapObject) :PlayState * bool= 
         updateActor sumLocationsFunc random location actor currentTurn currentState
 

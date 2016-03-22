@@ -1,7 +1,10 @@
-﻿module SDL
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDL
 
 open System.Runtime.InteropServices
 open System
+
+type private MainFunction = nativeint * IntPtr -> nativeint
 
 module private SDLInitNative =
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -14,6 +17,10 @@ module private SDLInitNative =
     extern void SDL_QuitSubSystem(uint32 flags)
     [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern uint32 SDL_WasInit(uint32 flags)
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_SetMainReady()
+    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern void SDL_WinRTRunApp(MainFunction mainFunction,IntPtr reserved)//TODO
 
 [<Flags>]
 type Init =
@@ -39,3 +46,7 @@ type System(flags:Init) =
     interface IDisposable with
         member this.Dispose() =
             SDLInitNative.SDL_Quit()
+
+//NOTE: Untested
+let setMainReady () =
+    SDLInitNative.SDL_SetMainReady()

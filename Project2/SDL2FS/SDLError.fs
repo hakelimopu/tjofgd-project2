@@ -1,4 +1,5 @@
-﻿module SDLError
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLError
 
 #nowarn "9"
 

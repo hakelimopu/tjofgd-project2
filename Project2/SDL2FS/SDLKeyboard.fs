@@ -1,4 +1,5 @@
-﻿module SDLKeyboard
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLKeyboard
 
 #nowarn "9"
 

@@ -1,4 +1,5 @@
-﻿module SDLEvent
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLEvent
 
 #nowarn "9"
 

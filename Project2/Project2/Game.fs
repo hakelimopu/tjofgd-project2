@@ -53,11 +53,9 @@ let runGame (randomFunc:RandomFunc) =
     let setTerrainFunc = setTerrainWrapped Constants.WorldSize
     let setObjectFunc = setObjectWrapped Constants.WorldSize
 
-    let random = new System.Random()
-
     let createFunc ()= 
         let initialActors, initialMap =
-            createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc Constants.WorldSize random
+            createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc Constants.WorldSize randomFunc
         let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
         {state with MapGrid = state |> updateVisibleFlags sumLocationsFunc setVisibleFunc} |> PlayState
 
@@ -66,7 +64,7 @@ let runGame (randomFunc:RandomFunc) =
     let renderFunc = Render.draw renderingContext
 
     //event handler setup
-    let eventHandler = EventHandler.handleEvent sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize random
+    let eventHandler = EventHandler.handleEvent sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize randomFunc
 
     EventPump.eventPump 
         SDLEvent.pollEvent

@@ -4,6 +4,7 @@ open GameState
 open MapCell
 open MapObject
 open CellLocation
+open Random
 
 let private nextEncounterChoice (encounter: Encounters option) :Encounters option =
     match encounter with
@@ -70,7 +71,7 @@ let private applyEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisible
         (head, tail, playState) |||> applyNPCEncounterChoice sumLocationsFunc setVisibleFunc
     | _ -> playState |> PlayState |> Some
 
-let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
+let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.KeyPad8
     | SDLKeyboard.ScanCode.Down   -> {state with Encounters=(nextEncounterChoice state.Encounters)} |> PlayState |> Some
@@ -83,7 +84,7 @@ let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocati
 
     | _                           -> state |> PlayState |> Some
 
-let internal handleKeyDownEventPlayStateNPCEncounters  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:System.Random) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
+let internal handleKeyDownEventPlayStateNPCEncounters  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.Down -> {state with Encounters=(nextEncounterChoice state.Encounters)} |> PlayState |> Some
     | SDLKeyboard.ScanCode.Up -> {state with Encounters=(previousEncounterChoice state.Encounters)} |> PlayState |> Some

@@ -1,4 +1,5 @@
-﻿module SDLRWops
+﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module SDLRWops
 
 open System
 open System.Runtime.InteropServices
