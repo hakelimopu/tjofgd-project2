@@ -18,6 +18,7 @@ type CellMap<'T> = Map<CellLocation,'T>
 type SumLocationsFunc = CellLocation -> CellLocation -> CellLocation
 type DistanceFormulaTestFunc = int<cell> -> CellLocation -> CellLocation -> bool
 
+[<ExcludeFromCodeCoverage>]
 exception InvalidWorldSize
 
 //making a toroid world
@@ -48,6 +49,7 @@ let sumLocationsWrapped (worldSize:CellLocation) (first:CellLocation) (second:Ce
     ||> sumLocations
     |> wrapLocation worldSize
 
+[<ExcludeFromCodeCoverage>]
 exception NegativeValue
 
 //checking distance

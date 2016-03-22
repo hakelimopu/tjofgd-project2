@@ -9,9 +9,10 @@ open RenderCell
 open MapCell
 open MapCreate
 open Render
+open Random
 
 
-let runGame() = 
+let runGame (randomFunc:RandomFunc) = 
     //SDL setup
     
     use system = new SDL.System(SDL.Init.Video ||| SDL.Init.Events)
