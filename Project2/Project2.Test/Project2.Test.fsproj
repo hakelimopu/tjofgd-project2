@@ -80,6 +80,9 @@
     <Compile Include="DistanceFormulaTestWrappedTests.fs" />
     <Compile Include="EventPumpTests.fs" />
     <Compile Include="RandomTests.fs" />
+    <Compile Include="AddNPCEncounterTests.fs" />
+    <Compile Include="AddNPCStormEncounterTests.fs" />
+    <Compile Include="UpdateStormActorTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
