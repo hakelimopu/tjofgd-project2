@@ -244,3 +244,72 @@ let ``updateStormActor strike and eliminate pirate`` () =
         |> updateStormActor (sumLocationsWrapped worldSize) (randomFunc randomFuncCounter) stormLocation stormProperties stormTurn currentTurn
 
     Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``updateStormActor strike boat`` () =
+    let randomFuncCounter = ref 0
+    let randomFunc (counter:ref<int>) parm =
+        counter := !counter + 1
+        match !counter with
+        | 1 -> -1 |> Int
+        | 2 ->  1 |> Int
+        | _ -> raise InvalidCallToRandomFunc
+
+    let worldSize = {Column = 10<cell>;Row = 11<cell>}
+    
+    let stormLocation = {Column = 0<cell>;Row = 1<cell>}
+
+    let stormProperties = {Damage = 1<health>}
+
+    let stormTurn = 1.0<turn>
+
+    let otherActorLocation = {Column = 9<cell>;Row = 2<cell>}
+
+    let otherActorProperties = 
+        {Hull = 10<health>;
+         MaximumHull = 10<health>;
+         Wallet = 0.0<currency>;
+         Quest = None;
+         GenerateNextStorm = 5.0<turn>}
+
+    let otherStormTurn = 1.0<turn>
+
+    let actor = {CurrentTurn = stormTurn; Detail = stormProperties |> Storm}
+
+    let otherActor = {CurrentTurn = otherStormTurn; Detail = otherActorProperties |> Boat}
+
+    let initialState =
+        {RenderGrid=Map.empty;
+         Encounters=None;
+         Actors=Map.empty |> Map.add stormLocation actor |> Map.add otherActorLocation otherActor;
+         MapGrid=Map.empty}
+
+    let currentTurn = 2.0<turn>
+
+    let expectedActorLocation = stormLocation
+
+    let expectedActorProperties = stormProperties
+
+    let expectedActor = {CurrentTurn = currentTurn; Detail = expectedActorProperties |> Storm}
+
+    let expectedEncounters =
+        [{Location=stormLocation;
+         Title="Storm!";
+         Type=RanIntoStorm;
+         Message=["You have run into a storm;";"it has damaged your boat!"];
+         Choices=[{Text="OK";Response=Confirm}];
+         CurrentChoice=0}]
+        |> NPCEncounters
+        |> Some
+
+    let expected = 
+        {RenderGrid=Map.empty;
+         Encounters=expectedEncounters;
+         Actors=Map.empty |> Map.add expectedActorLocation expectedActor |> Map.add otherActorLocation otherActor;
+         MapGrid=Map.empty}
+
+    let actual =
+        initialState 
+        |> updateStormActor (sumLocationsWrapped worldSize) (randomFunc randomFuncCounter) stormLocation stormProperties stormTurn currentTurn
+
+    Assert.Equal(expected, actual)
