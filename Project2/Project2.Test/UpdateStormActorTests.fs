@@ -313,3 +313,53 @@ let ``updateStormActor strike boat`` () =
         |> updateStormActor (sumLocationsWrapped worldSize) (randomFunc randomFuncCounter) stormLocation stormProperties stormTurn currentTurn
 
     Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``updateStormActor strike sea monster`` () =
+    let randomFuncCounter = ref 0
+    let randomFunc (counter:ref<int>) parm =
+        counter := !counter + 1
+        match !counter with
+        | 1 -> -1 |> Int
+        | 2 ->  1 |> Int
+        | _ -> raise InvalidCallToRandomFunc
+
+    let worldSize = {Column = 10<cell>;Row = 11<cell>}
+    
+    let stormLocation = {Column = 0<cell>;Row = 1<cell>}
+
+    let stormProperties = {Damage = 1<health>}
+
+    let stormTurn = 1.0<turn>
+
+    let otherActorLocation = {Column = 9<cell>;Row = 2<cell>}
+
+    let otherActorProperties = 
+        {Health = 10<health>;
+         Attitude = SeaMonsterAttitude.Enraged}
+
+    let otherStormTurn = 1.0<turn>
+
+    let actor = {CurrentTurn = stormTurn; Detail = stormProperties |> Storm}
+
+    let otherActor = {CurrentTurn = otherStormTurn; Detail = otherActorProperties |> SeaMonster}
+
+    let initialState =
+        {RenderGrid=Map.empty;
+         Encounters=None;
+         Actors=Map.empty |> Map.add stormLocation actor |> Map.add otherActorLocation otherActor;
+         MapGrid=Map.empty}
+
+    let currentTurn = 2.0<turn>
+
+    let expected = 
+        {RenderGrid=Map.empty;
+         Encounters=None;
+         Actors=Map.empty |> Map.add otherActorLocation otherActor;
+         MapGrid=Map.empty}
+
+    let actual =
+        initialState 
+        |> updateStormActor (sumLocationsWrapped worldSize) (randomFunc randomFuncCounter) stormLocation stormProperties stormTurn currentTurn
+
+    Assert.Equal(expected, actual)

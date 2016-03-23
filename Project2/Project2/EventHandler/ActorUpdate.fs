@@ -16,7 +16,7 @@ let addNPCEncounter (encounterDetail:EncounterDetail) (playState:PlayState) :Pla
     | Some (PCEncounter detail)       -> raise IncompatibleEncounterType
 
 let addNPCStormEncounter (actorLocation:CellLocation) (playState:PlayState) :PlayState =
-    (actorLocation |> createStorm,
+    (actorLocation |> createStormEncounterDetail,
      playState)
     ||> addNPCEncounter
 
@@ -101,7 +101,7 @@ let updateStormActor
             | Pirate pirateProperties    -> playState |> strikePirate  originalActors otherActor.Value newStormLocation pirateProperties stormProperties
             | _                          -> {playState with Actors = originalActors}
 
-let updateActor (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (actorLocation:CellLocation) (actor:MapObject) (currentTurn:float<turn>) (playState:PlayState, flag:bool) :PlayState * bool=
+let updateActor (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (currentTurn:float<turn>) (playState:PlayState, flag:bool) (actorLocation:CellLocation) (actor:MapObject):PlayState * bool=
     if actor.CurrentTurn >= currentTurn then
         //nothing happens!
         (playState, flag)
@@ -111,12 +111,10 @@ let updateActor (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (actorLo
         | _ -> (playState, flag)
 
 let rec updateActors (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (currentTurn:float<turn>) (playState:PlayState) :PlayState=
-    let actorUpdater (currentState:PlayState * bool) (location:CellLocation) (actor:MapObject) :PlayState * bool= 
-        updateActor sumLocationsFunc random location actor currentTurn currentState
 
     let updatedPlayState, flag = 
         ((playState, false), playState.Actors)
-        ||> Map.fold actorUpdater
+        ||> Map.fold (updateActor sumLocationsFunc random currentTurn)
 
     if flag then
         updatedPlayState |> updateActors sumLocationsFunc random currentTurn

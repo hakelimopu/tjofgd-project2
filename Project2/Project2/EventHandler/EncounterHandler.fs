@@ -8,13 +8,13 @@ open EncounterDetails
 
 let internal generateStormPCEncounter (location:CellLocation) :Encounters option =
     location 
-    |> createStorm
+    |> createStormEncounterDetail
     |> PCEncounter 
     |> Some
 
 let internal generateIslandPCEncounter (playState:PlayState) (location:CellLocation) :Encounters option =
     location
-    |> createIsland playState
+    |> createIslandEncounterDetail playState
     |> PCEncounter 
     |> Some
 

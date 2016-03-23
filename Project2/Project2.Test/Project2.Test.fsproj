@@ -83,6 +83,7 @@
     <Compile Include="AddNPCEncounterTests.fs" />
     <Compile Include="AddNPCStormEncounterTests.fs" />
     <Compile Include="UpdateStormActorTests.fs" />
+    <Compile Include="UpdateActorTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

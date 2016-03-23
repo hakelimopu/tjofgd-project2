@@ -4,7 +4,7 @@ open CellLocation
 open GameState
 
 
-let createStorm (location:CellLocation) :EncounterDetail =
+let createStormEncounterDetail (location:CellLocation) :EncounterDetail =
     {Location=location;
      Title="Storm!";
      Type=RanIntoStorm;
@@ -12,15 +12,22 @@ let createStorm (location:CellLocation) :EncounterDetail =
      Choices=[{Text="OK";Response=Confirm}];
      CurrentChoice=0}
 
-let createIsland (playState:PlayState) (location:CellLocation) :EncounterDetail =
-    let canRepair (playState:PlayState) :bool =
-        let boatProperties = playState |> getBoatProperties
-        boatProperties.Hull < boatProperties.MaximumHull
+let private ``can the ship repair?`` (playState:PlayState) :bool =
+    let boatProperties = playState |> getBoatProperties
+    boatProperties.Hull < boatProperties.MaximumHull
 
-    let choices: (EncounterChoice * (PlayState -> bool)) list = 
-        [({Text="Cast Off!";   Response=Cancel}, fun state->true);
-         ({Text="Repair Ship"; Response=Repair}, canRepair)]
-        |> List.filter (fun (choice,func) -> playState |> func)
+let private ``always include choice`` (playState:PlayState) :bool = true
+
+let private filterChoice (playState:PlayState) (choice, func) =
+    playState |> func
+
+let createIslandEncounterDetail (playState:PlayState) (location:CellLocation) :EncounterDetail =
+
+    let choices = 
+        [({Text="Cast Off!";   Response=Cancel}, ``always include choice``);
+         ({Text="Repair Ship"; Response=Repair}, ``can the ship repair?``)]
+        |> List.filter (filterChoice playState)
+        |> List.map fst
 
     let _,island =  getIsland location playState
 
@@ -28,5 +35,5 @@ let createIsland (playState:PlayState) (location:CellLocation) :EncounterDetail 
     Title="Island!";
     Type=DockedWithIsland;
     Message=[island.Name |> sprintf "You docked at %s!";"What would you like to do?"];
-    Choices=choices |> List.map fst;
+    Choices=choices;
     CurrentChoice=0} 
