@@ -18,15 +18,18 @@ let internal generateIslandPCEncounter (playState:PlayState) (location:CellLocat
     |> PCEncounter 
     |> Some
 
-//TODO: pass in the properties to the generators!
-let internal startPCEncounter (location:CellLocation) (state:PlayState) :Encounters option =
-    let actor = 
-        state.Actors.[location]
+exception private NoActorExistsAtTheSpecifiedLocation
 
-    match actor.Detail with
-    | Storm stormProperties   -> location |> generateStormPCEncounter
-    | Island islandProperties -> location |> generateIslandPCEncounter state
-    | _                       -> None
+let internal startPCEncounter (location:CellLocation) (state:PlayState) :Encounters option =
+    let actor = state.Actors |> Map.tryFind location
+
+    if actor.IsNone then
+        raise NoActorExistsAtTheSpecifiedLocation
+    else
+        match actor.Value.Detail with
+        | Storm stormProperties   -> location |> generateStormPCEncounter
+        | Island islandProperties -> location |> generateIslandPCEncounter state
+        | _                       -> None
 
 let private renderEncounterDetail (details:EncounterDetail)  (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =
     let upperLeft = 
