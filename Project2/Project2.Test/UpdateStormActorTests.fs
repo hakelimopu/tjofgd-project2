@@ -2,12 +2,11 @@
 module UpdateStormActorTests
 
 open Xunit
-open ActorUpdate
 open GameState
 open CellLocation
 open MapObject
 open Random
-open StormUpdator
+open StormUpdater
 
 exception private InvalidCallToRandomFunc
 

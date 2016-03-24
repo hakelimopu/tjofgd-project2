@@ -91,7 +91,11 @@
     <Compile Include="Render.fs" />
     <Compile Include="EncounterUtilities\EncounterDetails.fs" />
     <Compile Include="EncounterUtilities\NPCEncounterUtilities.fs" />
-    <Compile Include="ActorUpdators\StormUpdator.fs" />
+    <Compile Include="ActorUpdate\ActorUtilities.fs" />
+    <Compile Include="ActorUpdate\StormUpdate.fs" />
+    <Compile Include="ActorUpdate\PirateUpdate.fs" />
+    <Compile Include="ActorUpdate\SeaMonsterUpdate.fs" />
+    <Compile Include="ActorUpdate\MerfolkUpdate.fs" />
     <Compile Include="EventHandler\QuitEvent.fs" />
     <Compile Include="EventHandler\ActorUpdate.fs" />
     <Compile Include="EventHandler\EncounterHandler.fs" />
@@ -112,9 +116,12 @@
       <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharp.Data.TypeProviders" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Numerics" />
     <ProjectReference Include="..\SDL2FS\SDL2FS.fsproj">
       <Name>SDL2FS</Name>

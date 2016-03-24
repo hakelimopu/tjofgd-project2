@@ -29,3 +29,8 @@ let getFloat (result:RandomResult) : float =
     match result with
     | Float value -> value
     | _ -> raise WrongRandomResultType
+
+let randomIntRange (random:RandomFunc) (min:int, max:int) :int =
+    (min, max) |> IntRange |> random |> getInt
+
+    

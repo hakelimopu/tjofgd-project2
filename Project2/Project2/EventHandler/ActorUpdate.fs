@@ -4,7 +4,10 @@ open GameState
 open CellLocation
 open MapObject
 open Random
-open StormUpdator
+open StormUpdater
+open MerfolkUpdate
+open SeaMonsterUpdate
+open PirateUpdater
 
 let updateActor (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (currentTurn:float<turn>) (playState:PlayState<_>, flag:bool) (actorLocation:CellLocation) (actor:MapObject):PlayState<_> * bool=
     if actor.CurrentTurn >= currentTurn then
@@ -12,19 +15,22 @@ let updateActor (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (current
         (playState, flag)
     else
         match actor.Detail with
-        | Storm stormProperties -> (playState |> updateStormActor sumLocationsFunc random actorLocation stormProperties actor.CurrentTurn currentTurn, true)
-        | _ -> (playState, flag)
+        | Storm properties      -> playState |> updateStormActor sumLocationsFunc random actorLocation properties actor.CurrentTurn currentTurn, true
+        | Pirate properties     -> playState |> updatePirateActor sumLocationsFunc random actorLocation properties actor.CurrentTurn currentTurn, flag
+        | SeaMonster properties -> playState |> updateSeaMonsterActor sumLocationsFunc random actorLocation properties actor.CurrentTurn currentTurn, flag
+        | Merfolk properties    -> playState |> updateMerfolkActor sumLocationsFunc random actorLocation properties actor.CurrentTurn currentTurn, flag
+        | _                     -> playState, flag
 
 let rec updateActors (sumLocationsFunc:SumLocationsFunc) (random:RandomFunc) (currentTurn:float<turn>) (playState:PlayState<_>) :PlayState<_>=
 
-    let updatedPlayState, flag = 
+    let playState', flag = 
         ((playState, false), playState.Actors)
         ||> Map.fold (updateActor sumLocationsFunc random currentTurn)
 
     if flag then
-        updatedPlayState |> updateActors sumLocationsFunc random currentTurn
+        playState' |> updateActors sumLocationsFunc random currentTurn
     else
-        updatedPlayState
+        playState'
 
 
 

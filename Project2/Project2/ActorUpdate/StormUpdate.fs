@@ -1,4 +1,4 @@
-﻿module StormUpdator
+﻿module StormUpdater
 
 open GameState
 open MapObject
@@ -51,40 +51,40 @@ let updateStormActor
     (sumLocationsFunc:SumLocationsFunc) 
     (random:RandomFunc) 
     (actorLocation:CellLocation) 
-    (stormProperties:StormProperties) 
-    (stormTurn:float<turn>) 
+    (actorProperties:StormProperties) 
+    (actorTurn:float<turn>) 
     (currentTurn:float<turn>) 
     (playState:PlayState<_>) :PlayState<_> =
-    if currentTurn <= stormTurn then
+    if currentTurn <= actorTurn then
         playState
     else
-        let originalActors = 
+        let actors' = 
             playState.Actors 
             |> Map.remove actorLocation
 
-        let newStormLocation = 
+        let actorLocation' = 
             actorLocation 
-            |> sumLocationsFunc {Column=((-1,2) |> IntRange |> random |> getInt) * 1<cell>;Row=((-1,2) |> IntRange |> random |> getInt) * 1<cell>}
+            |> sumLocationsFunc {Column=((-1,2) |> randomIntRange random ) * 1<cell>;Row=((-1,2) |> randomIntRange random ) * 1<cell>}
 
-        let updateStormTurn = 
-            stormTurn + 0.5<turn>
+        let actorTurn' = 
+            actorTurn + 0.5<turn>
 
-        let otherActor = originalActors.TryFind newStormLocation
+        let otherActor = actors'.TryFind actorLocation'
         if otherActor.IsNone then
-            let updatedStorm = 
-                {CurrentTurn = updateStormTurn;
-                 Detail      = stormProperties |> Storm}
+            let actor' = 
+                {CurrentTurn = actorTurn';
+                 Detail      = actorProperties |> Storm}
 
-            let updatedActors =
-                originalActors 
-                |> Map.add newStormLocation updatedStorm
+            let actors'' =
+                actors' 
+                |> Map.add actorLocation' actor'
 
-            {playState with Actors = updatedActors}
+            {playState with Actors = actors''}
         else
             match otherActor.Value.Detail with
-            | Boat boatProperties        -> playState |> strikeBoat stormProperties originalActors actorLocation currentTurn
-            | Storm otherStormProperties -> playState |> combineStorms originalActors updateStormTurn otherActor.Value newStormLocation stormProperties otherStormProperties
-            | Pirate pirateProperties    -> playState |> strikePirate  originalActors otherActor.Value newStormLocation pirateProperties stormProperties
-            | _                          -> {playState with Actors = originalActors}
+            | Boat properties   -> playState |> strikeBoat actorProperties actors' actorLocation currentTurn
+            | Storm properties  -> playState |> combineStorms actors' actorTurn' otherActor.Value actorLocation' actorProperties properties
+            | Pirate properties -> playState |> strikePirate  actors' otherActor.Value actorLocation' properties actorProperties
+            | _                 -> {playState with Actors = actors'}
 
 
