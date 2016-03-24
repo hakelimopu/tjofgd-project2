@@ -66,7 +66,7 @@ let randomLocation (worldSize:CellLocation) (random:RandomFunc) :CellLocation =
      Row=     ((worldSize.Row  / 1<cell>)   |> MaxInt |> random |> getInt) * 1<cell>}            
 
 
-let generateIslands (sumLocationsFunc:SumLocationsFunc) (distanceFormulaTestFunc:DistanceFormulaTestFunc) (setTerrainFunc:SetTerrainFunc) (worldSize:CellLocation) (random:RandomFunc) (map:CellMap<MapCell>) :CellMap<MapCell> * CellLocation list =
+let generateIslands (sumLocationsFunc:SumLocationsFunc) (checkLocationsFunc:CheckLocationsFunc) (setTerrainFunc:SetTerrainFunc) (worldSize:CellLocation) (random:RandomFunc) (map:CellMap<MapCell>) :CellMap<MapCell> * CellLocation list =
     let islandGenerator (worldSize:CellLocation) (locations:Set<CellLocation>) : (Set<CellLocation> * Set<CellLocation>) option=
         if locations |> Seq.isEmpty then
             None
@@ -76,7 +76,7 @@ let generateIslands (sumLocationsFunc:SumLocationsFunc) (distanceFormulaTestFunc
                 ||> randomLocation
 
             if locations.Contains location then
-                Some ([location] |> Set.ofSeq, locations |> Set.filter (distanceFormulaTestFunc Constants.IslandDistance location))//TODO: get rid of Constants.IslandDistance
+                Some ([location] |> Set.ofSeq, locations |> Set.filter (checkLocationsFunc location))
             else
                 Some (Set.empty<CellLocation>, locations)
 
@@ -206,11 +206,11 @@ let generateQuests (random:RandomFunc) (originalActors:CellMap<MapObject>) : Cel
     ||> Map.fold (folder islandLocations random)
 
 let createWorld 
-    (sumLocationsFunc:CellLocation->CellLocation->CellLocation) 
-    (distanceFormulaTestFunc:int<cell>->CellLocation->CellLocation->bool) 
-    (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) 
-    (setTerrainFunc:CellLocation->MapTerrain->CellMap<MapCell>->CellMap<MapCell>) 
-    (setObjectFunc:CellLocation->MapObject option->CellMap<MapObject>->CellMap<MapObject>) 
+    (sumLocationsFunc:SumLocationsFunc) 
+    (checkLocationsFunc:CheckLocationsFunc) 
+    (setVisibleFunc:SetVisibleFunc) 
+    (setTerrainFunc:SetTerrainFunc) 
+    (setObjectFunc:SetObjectFunc) 
     (worldSize:CellLocation)
     (random:RandomFunc) = 
 
@@ -221,7 +221,7 @@ let createWorld
     let map, islandLocations = 
         (Map.empty<CellLocation,MapCell>, Constants.mapLocations)
         ||> Seq.fold mapFiller 
-        |> generateIslands sumLocationsFunc distanceFormulaTestFunc setTerrainFunc worldSize random
+        |> generateIslands sumLocationsFunc checkLocationsFunc setTerrainFunc worldSize random
 
     let islandNames = generateNames (islandLocations |> List.length) random
 

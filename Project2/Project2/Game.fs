@@ -56,7 +56,7 @@ let runGame (randomFunc:RandomFunc) =
 
     let createFunc () :GameState<CellMap<RenderCell>>= 
         let initialActors, initialMap =
-            createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc Constants.WorldSize randomFunc
+            createWorld sumLocationsFunc (distanceFormulaTestFunc Constants.IslandDistance ) setVisibleFunc setTerrainFunc setObjectFunc Constants.WorldSize randomFunc
         let state: PlayState<CellMap<RenderCell>> = {RenderData = CellLocation.emptyCellMap;MapGrid=initialMap;Encounters=None;Actors=initialActors}
         {state with MapGrid = state |> updateVisibleFlags sumLocationsFunc setVisibleFunc} |> PlayState
 

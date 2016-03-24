@@ -18,7 +18,7 @@ let emptyCellMap<'T> :CellMap<'T> = Map.empty<CellLocation,'T>
 
 //more or less, function interfaces
 type SumLocationsFunc = CellLocation -> CellLocation -> CellLocation
-type DistanceFormulaTestFunc = int<cell> -> CellLocation -> CellLocation -> bool
+type CheckLocationsFunc = CellLocation -> CellLocation -> bool
 
 [<ExcludeFromCodeCoverage>]
 exception InvalidWorldSize
