@@ -88,6 +88,40 @@ let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (fir
         ||> Seq.fold countFailures
         |> (=) locations.Length
 
+let make (column:int<cell>) (row:int<cell>) :CellLocation =
+    {Column = column; Row = row}
 
+let private generateRadiusCellLocationEmitter (radius:int<cell>) (column:int<cell>) (current:int<cell>, maximum:int<cell>) : (Set<CellLocation> * (int<cell> * int<cell>)) option =
+    if current > maximum then
+        None
+    else
+        let location =
+            if column * column + current * current <= radius * radius then
+                [(column,current) ||> make] |> Set.ofSeq
+            else
+                Set.empty
+        Some (location, (current + 1<cell>, maximum))
 
+let private generateRadiusColumnEmitter (radius:int<cell>) (rows:int<cell> * int<cell>) (current:int<cell>, maximum:int<cell>) : (Set<CellLocation> * (int<cell> * int<cell>)) option =
+    if current > maximum then
+        None
+    else
+        let locations =
+            rows
+            |> Seq.unfold (generateRadiusCellLocationEmitter radius current)
+            |> Seq.reduce Set.union
 
+        Some (locations, (current + 1<cell>, maximum))
+
+let generateRadius (radius:int<cell>) :Set<CellLocation> =
+    (-radius, radius)
+    |> Seq.unfold (generateRadiusColumnEmitter radius (-radius, radius))
+    |> Seq.reduce Set.union
+
+let private transformSetFolder (transform:CellLocation->CellLocation) (state:Set<CellLocation>) (location:CellLocation) :Set<CellLocation> =
+    state
+    |> Set.add (transform location)
+
+let transformSet (sumLocationsFunc:SumLocationsFunc) (locations:Set<CellLocation>) (delta:CellLocation) :Set<CellLocation> =
+    (Set.empty<CellLocation>, locations)
+    ||> Set.fold (delta |> sumLocationsFunc |> transformSetFolder)
