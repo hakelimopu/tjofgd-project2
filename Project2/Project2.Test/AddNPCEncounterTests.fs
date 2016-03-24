@@ -5,6 +5,7 @@ open Xunit
 open ActorUpdate
 open GameState
 open CellLocation
+open NPCEncounterUtilities
 
 [<Fact>]
 let ``addNPCEncounter with initial play state having no encounters`` () =
@@ -17,7 +18,7 @@ let ``addNPCEncounter with initial play state having no encounters`` () =
          CurrentChoice=0}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty;
          MapGrid=Map.empty}
@@ -50,7 +51,7 @@ let ``addNPCEncounter with initial play state with npc encounter`` () =
          CurrentChoice=0}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=[initialEncounter] |> NPCEncounters |> Some;
          Actors=Map.empty;
          MapGrid=Map.empty}
@@ -83,7 +84,7 @@ let ``addNPCEncounter with initial play state with pc encounter`` () =
          CurrentChoice=0}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=initialEncounter |> PCEncounter |> Some;
          Actors=Map.empty;
          MapGrid=Map.empty}

@@ -76,23 +76,23 @@ type Encounters =
     | PCEncounter   of EncounterDetail
     | NPCEncounters of EncounterDetail list
 
-type PlayState =
-    {RenderGrid:CellMap<RenderCell>;
+type PlayState<'TRender> =
+    {RenderData:'TRender;
      Encounters:Encounters option;
      Actors:CellMap<MapObject>;
      MapGrid:CellMap<MapCell>}
 
-let (|FreeMovement|HasPCEncounter|HasNPCEncounters|) (playState:PlayState) =
+let (|FreeMovement|HasPCEncounter|HasNPCEncounters|) (playState:PlayState<_>) =
     match playState.Encounters with
     | Some (PCEncounter _)   -> HasPCEncounter
     | Some (NPCEncounters _) -> HasNPCEncounters
     | None                   -> FreeMovement
 
-type GameState = 
-    | PlayState of PlayState
-    | DeadState of PlayState
+type GameState<'TRender> = 
+    | PlayState of PlayState<'TRender>
+    | DeadState of PlayState<'TRender>
 
-let getBoat (state:PlayState) : CellLocation * float<turn> * BoatProperties=
+let getBoat (state:PlayState<_>) : CellLocation * float<turn> * BoatProperties=
     let picker location cell = 
         match cell.Detail with
         | Boat boatProps -> (location,cell.CurrentTurn,boatProps) |> Some
@@ -101,22 +101,22 @@ let getBoat (state:PlayState) : CellLocation * float<turn> * BoatProperties=
     state.Actors
     |> Map.pick picker
 
-let getBoatProperties (state:PlayState) : BoatProperties =
+let getBoatProperties (state:PlayState<_>) : BoatProperties =
     let _,_,props = state |> getBoat
     props
 
-let getBoatLocation (state:PlayState) : CellLocation =
+let getBoatLocation (state:PlayState<_>) : CellLocation =
     let location,_,_ = state |> getBoat
     location
 
-let getCurrency (state:PlayState) : float<currency> =
+let getCurrency (state:PlayState<_>) : float<currency> =
     (state |> getBoatProperties).Wallet
 
-let setCurrency (amount:float<currency>) (state:PlayState) :PlayState =
+let setCurrency (amount:float<currency>) (state:PlayState<_>) :PlayState<_> =
     let where,turn,props = state |> getBoat
     {state with Actors = state.Actors |> Map.add where {CurrentTurn=turn;Detail={props with Wallet=amount} |> Boat}}
 
-let getStorm (location:CellLocation) (state:PlayState) : float<turn> * StormProperties =
+let getStorm (location:CellLocation) (state:PlayState<_>) : float<turn> * StormProperties =
     let storm = state.Actors.[location]
     (storm.CurrentTurn,
         match storm.Detail with
@@ -124,14 +124,14 @@ let getStorm (location:CellLocation) (state:PlayState) : float<turn> * StormProp
         | _ -> raise (new System.NotImplementedException()))
 
 //TODO: this is more or less the same function as getStorm!
-let getIsland (location:CellLocation) (state:PlayState) : float<turn> * IslandProperties =
+let getIsland (location:CellLocation) (state:PlayState<_>) : float<turn> * IslandProperties =
     let island = state.Actors.[location]
     (island.CurrentTurn,
         match island.Detail with
         | Island props -> props
         | _ -> raise (new System.NotImplementedException()))
 
-let updateVisibleFlags (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (state:PlayState) :Map<CellLocation,MapCell> =
+let updateVisibleFlags (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (state:PlayState<_>) :Map<CellLocation,MapCell> =
     let updateVisibility sumLocationsFunc setVisibleFunc location map delta = 
         map
         |> setVisibleFunc ((location, delta) ||> sumLocationsFunc)

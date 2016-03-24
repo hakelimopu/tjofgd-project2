@@ -89,8 +89,10 @@
     <Compile Include="MapCells\GameState.fs" />
     <Compile Include="MapCells\MapCreate.fs" />
     <Compile Include="Render.fs" />
+    <Compile Include="EncounterUtilities\EncounterDetails.fs" />
+    <Compile Include="EncounterUtilities\NPCEncounterUtilities.fs" />
+    <Compile Include="ActorUpdators\StormUpdator.fs" />
     <Compile Include="EventHandler\QuitEvent.fs" />
-    <Compile Include="EventHandler\EncounterDetails.fs" />
     <Compile Include="EventHandler\ActorUpdate.fs" />
     <Compile Include="EventHandler\EncounterHandler.fs" />
     <Compile Include="EventHandler\BoatMovement.fs" />

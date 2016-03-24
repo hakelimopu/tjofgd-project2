@@ -28,7 +28,7 @@ type RenderingContext =
      WorkSurface: SDLSurface.Surface}
 
 
-let draw (context:RenderingContext) (state:GameState) :unit =
+let draw (context:RenderingContext) (state:GameState<_>) :unit =
     let pixelsPerColumn = 8<px/cell>
     let pixelsPerRow = 8<px/cell>
     let palette = 
@@ -90,8 +90,8 @@ let draw (context:RenderingContext) (state:GameState) :unit =
         |> SDLSurface.blit (Some {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>}) context.WorkSurface dstRect
         |> ignore
 
-    let renderPlayState (state:PlayState) = 
-        state.RenderGrid
+    let renderPlayState (state:PlayState<CellMap<RenderCell>>) = 
+        state.RenderData
         |> Map.iter renderCell
 
     match state with

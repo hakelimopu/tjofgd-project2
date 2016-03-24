@@ -21,7 +21,7 @@ let ``updateActor with no updates and false initial flag`` () =
     let initialActor = {CurrentTurn = 0.0<turn>; Detail = {Damage = 1<health>} |> Storm}
     let initialCurrentTurn = 0.0<turn>
     let initialPlayState = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty;
          MapGrid=Map.empty}
@@ -45,7 +45,7 @@ let ``updateActor with no updates and true initial flag`` () =
     let initialActor = {CurrentTurn = 0.0<turn>; Detail = {Damage = 1<health>} |> Storm}
     let initialCurrentTurn = 0.0<turn>
     let initialPlayState = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty;
          MapGrid=Map.empty}
@@ -74,7 +74,7 @@ let ``updateActor update storm`` () =
     let initialActor = {CurrentTurn = 0.0<turn>; Detail = {Damage = 1<health>} |> Storm}
     let initialCurrentTurn = 1.0<turn>
     let initialPlayState = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty;
          MapGrid=Map.empty}

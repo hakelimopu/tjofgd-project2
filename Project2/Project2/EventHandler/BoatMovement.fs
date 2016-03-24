@@ -9,7 +9,7 @@ open ActorUpdate
 open MapCreate
 open Random
 
-let generateStorm (generateFlag:bool) (turn:float<turn>) (worldSize:CellLocation) (random:RandomFunc) (state:PlayState) : PlayState =
+let generateStorm (generateFlag:bool) (turn:float<turn>) (worldSize:CellLocation) (random:RandomFunc) (state:PlayState<_>) : PlayState<_> =
     if not generateFlag then
         state
     else
@@ -22,7 +22,7 @@ let generateStorm (generateFlag:bool) (turn:float<turn>) (worldSize:CellLocation
         else
             {state with Actors = state.Actors |> Map.add location {CurrentTurn=turn;Detail = Storm {Damage=1<health>}}}
 
-let moveBoat (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (delta:CellLocation) (state:PlayState) :GameState option =
+let moveBoat (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (delta:CellLocation) (state:PlayState<_>) :GameState<_> option =
     let playerLocation, boatTurn, boatProperties = state |> getBoat
 
     let nextLocation = 
@@ -72,7 +72,7 @@ let moveBoat (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc)
             |> PlayState
             |> Some
 
-let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
+let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     let moveBoatFunc = moveBoat sumLocationsFunc setVisibleFunc worldSize random
 
     match keyboardEvent.Keysym.Scancode with

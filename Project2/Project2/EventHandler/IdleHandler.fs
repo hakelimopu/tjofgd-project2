@@ -26,7 +26,7 @@ let mapViewCells =
     |> Seq.reduce (Seq.append)
     |> Map.ofSeq
 
-let private renderStats (state:PlayState) (grid:CellMap<RenderCell>):CellMap<RenderCell> =
+let private renderStats (state:PlayState<_>) (grid:CellMap<RenderCell>):CellMap<RenderCell> =
     let _, _, boatProps = state |> getBoat
     grid
     |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Black RenderCellColor.Black ("          ")
@@ -34,42 +34,42 @@ let private renderStats (state:PlayState) (grid:CellMap<RenderCell>):CellMap<Ren
     |> writeText {Column=StatsViewX;Row=(StatsViewY+1<cell>)} RenderCellColor.Black RenderCellColor.Black ("          ")
     |> writeText {Column=StatsViewX;Row=(StatsViewY+1<cell>)} RenderCellColor.BrightYellow RenderCellColor.Black (sprintf "$%9.2f" (boatProps.Wallet/1.0<currency>))
 
-    
+let private renderFolder (sumLocationsFunc:SumLocationsFunc) (playerLocation:CellLocation) (state:PlayState<CellMap<RenderCell>>) (renderGrid:CellMap<RenderCell>) (renderLocation:CellLocation) (mapDelta:CellLocation) :CellMap<RenderCell> =
+    let mapLocation = playerLocation |> sumLocationsFunc mapDelta
+    let mapCell = state.MapGrid.TryFind mapLocation
+    let actor = state.Actors.TryFind mapLocation
+    renderGrid
+    |> Map.add renderLocation (renderCellForMapCell actor mapCell)
 
-let private onIdlePlayState (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:PlayState) :GameState option =
-    let playerLocation, _, _ = state |> getBoat
-    let renderGrid = 
-        (state.RenderGrid, mapViewCells)
-        ||> Map.fold(fun renderGrid renderLocation mapDelta -> 
-            let mapLocation = playerLocation |> sumLocationsFunc mapDelta
-            let mapCell = state.MapGrid.TryFind mapLocation
-            let actor = state.Actors.TryFind mapLocation
-            renderGrid
-            |> Map.add renderLocation (renderCellForMapCell actor mapCell)) 
+let gridRenderer (sumLocationsFunc:SumLocationsFunc) (state:PlayState<CellMap<RenderCell>>) :PlayState<CellMap<RenderCell>> =
+    let playerLocation = state |> getBoatLocation
+    let renderGrid :CellMap<RenderCell>= 
+        (state.RenderData, mapViewCells)
+        ||> Map.fold (renderFolder sumLocationsFunc playerLocation state) 
         |> renderEncounter state
         |> renderStats state
-    {state with RenderGrid = renderGrid} |> PlayState |> Some
+    {state with RenderData = renderGrid}
+
+type GridRendererFunc<'TRender> = SumLocationsFunc -> PlayState<'TRender> -> PlayState<'TRender>
+
+let private onIdlePlayState<'TRender> (renderer:GridRendererFunc<'TRender>) (sumLocationsFunc:SumLocationsFunc) (state:PlayState<'TRender>) :GameState<'TRender> option =
+    state
+    |> renderer sumLocationsFunc
+    |> PlayState 
+    |> Some
 
 //TODO: make this not a copypasta!
-let private onIdleDeadState (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:PlayState) :GameState option =
-    let playerLocation, _, _ = state |> getBoat
-    let renderGrid = 
-        (state.RenderGrid, mapViewCells)
-        ||> Map.fold(fun renderGrid renderLocation mapDelta -> 
-            let mapLocation = playerLocation |> sumLocationsFunc mapDelta
-            let mapCell = state.MapGrid.TryFind mapLocation
-            let actor = state.Actors.TryFind mapLocation
-            renderGrid
-            |> Map.add renderLocation (renderCellForMapCell actor mapCell)) 
-        |> renderEncounter state
-        |> renderStats state
-    {state with RenderGrid = renderGrid} |> DeadState |> Some
+let private onIdleDeadState<'TRender> (renderer:GridRendererFunc<'TRender>) (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:PlayState<'TRender>) :GameState<'TRender> option =
+    state
+    |> renderer sumLocationsFunc
+    |> DeadState 
+    |> Some
 
-let internal onIdle (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:GameState): GameState option =
+let internal onIdle<'TRender> (renderer:GridRendererFunc<'TRender>) (sumLocationsFunc:CellLocation->CellLocation->CellLocation) (state:GameState<'TRender>): GameState<'TRender> option =
     match state with
     | PlayState x -> 
-        x |> onIdlePlayState sumLocationsFunc
+        x |> onIdlePlayState<'TRender> renderer sumLocationsFunc
     | DeadState x -> 
-        x |> onIdleDeadState sumLocationsFunc
+        x |> onIdleDeadState<'TRender> renderer sumLocationsFunc
 
 

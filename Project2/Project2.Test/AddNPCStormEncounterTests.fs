@@ -5,6 +5,7 @@ open Xunit
 open ActorUpdate
 open GameState
 open CellLocation
+open NPCEncounterUtilities
 
 [<Fact>]
 let ``addNPCStormEncounter with specified location`` () =
@@ -19,7 +20,7 @@ let ``addNPCStormEncounter with specified location`` () =
          CurrentChoice=0}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty;
          MapGrid=Map.empty}

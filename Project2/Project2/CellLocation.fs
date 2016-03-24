@@ -14,6 +14,8 @@ type CellLocation =
 //the grid itself is a simple map
 type CellMap<'T> = Map<CellLocation,'T>
 
+let emptyCellMap<'T> :CellMap<'T> = Map.empty<CellLocation,'T>
+
 //more or less, function interfaces
 type SumLocationsFunc = CellLocation -> CellLocation -> CellLocation
 type DistanceFormulaTestFunc = int<cell> -> CellLocation -> CellLocation -> bool

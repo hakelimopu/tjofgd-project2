@@ -12,16 +12,16 @@ let createStormEncounterDetail (location:CellLocation) :EncounterDetail =
      Choices=[{Text="OK";Response=Confirm}];
      CurrentChoice=0}
 
-let private ``can the ship repair?`` (playState:PlayState) :bool =
+let private ``can the ship repair?`` (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
     boatProperties.Hull < boatProperties.MaximumHull
 
-let private ``always include choice`` (playState:PlayState) :bool = true
+let private ``always include choice`` (playState:PlayState<_>) :bool = true
 
-let private filterChoice (playState:PlayState) (choice, func) =
+let private filterChoice (playState:PlayState<_>) (choice, func) =
     playState |> func
 
-let createIslandEncounterDetail (playState:PlayState) (location:CellLocation) :EncounterDetail =
+let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
 
     let choices = 
         [({Text="Cast Off!";   Response=Cancel}, ``always include choice``);

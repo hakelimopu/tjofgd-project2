@@ -19,18 +19,18 @@ let private previousEncounterChoice (encounter: Encounters option) :Encounters o
     | _ -> encounter
 
 
-let private repairBoat (playState:PlayState) : PlayState =
+let private repairBoat (playState:PlayState<_>) : PlayState<_> =
     let location, turns, boatProps = playState |> getBoat
     let repairedBoat = {playState.Actors.[location] with Detail = ({boatProps with Hull=boatProps.MaximumHull} |> Boat); CurrentTurn=turns + (((boatProps.MaximumHull-boatProps.Hull)|> float) * 1.0<turn>)}
     {playState with Actors = (playState.Actors |> Map.add location repairedBoat)}
 
-let private applyDockPCEncounterChoice (detail:EncounterDetail) (playState:PlayState) : GameState option = 
+let private applyDockPCEncounterChoice (detail:EncounterDetail) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
     | Repair -> {(playState |> repairBoat) with Encounters=None} |> PlayState |> Some
     | _ -> {playState with Encounters=None} |> PlayState |> Some
     
 
-let private applyStormEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (moveBoat:bool) (encounter:Encounters option) (playState:PlayState) : GameState option = 
+let private applyStormEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (location:CellLocation) (moveBoat:bool) (encounter:Encounters option) (playState:PlayState<_>) : GameState<_> option = 
     let playerLocation, _, boatProps = playState |> getBoat
     let _, storm = playState |> getStorm location
     let updatedBoatProperties = {boatProps with Hull=if storm.Damage> boatProps.Hull then 0<health> else boatProps.Hull-storm.Damage}
@@ -47,13 +47,13 @@ let private applyStormEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVi
         updatedPlayState |> DeadState |> Some
 
 
-let private applyPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState) : GameState option =
+let private applyPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState<_>) : GameState<_> option =
     match details.Type with
     | RanIntoStorm -> 
         applyStormEncounterChoice sumLocationsFunc setVisibleFunc details.Location true None playState
     | DockedWithIsland -> applyDockPCEncounterChoice details playState
 
-let private applyNPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (head:EncounterDetail) (tail:EncounterDetail list) (playState:PlayState): GameState option =
+let private applyNPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (head:EncounterDetail) (tail:EncounterDetail list) (playState:PlayState<_>): GameState<_> option =
     let nextEncounter =
         match tail with
         | [] -> None
@@ -63,7 +63,7 @@ let private applyNPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisi
         applyStormEncounterChoice sumLocationsFunc setVisibleFunc head.Location false nextEncounter playState
     | _ -> raise (new System.NotImplementedException("This encounter is not implemented for NPC encounters!"))
 
-let private applyEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (playState:PlayState) :GameState option =
+let private applyEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (playState:PlayState<_>) :GameState<_> option =
     match playState.Encounters with
     | Some (PCEncounter details) -> 
         (details, playState) ||> applyPCEncounterChoice sumLocationsFunc setVisibleFunc
@@ -71,7 +71,7 @@ let private applyEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisible
         (head, tail, playState) |||> applyNPCEncounterChoice sumLocationsFunc setVisibleFunc
     | _ -> playState |> PlayState |> Some
 
-let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
+let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.KeyPad8
     | SDLKeyboard.ScanCode.Down   -> {state with Encounters=(nextEncounterChoice state.Encounters)} |> PlayState |> Some
@@ -84,7 +84,7 @@ let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocati
 
     | _                           -> state |> PlayState |> Some
 
-let internal handleKeyDownEventPlayStateNPCEncounters  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState) :GameState option =
+let internal handleKeyDownEventPlayStateNPCEncounters  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.Down -> {state with Encounters=(nextEncounterChoice state.Encounters)} |> PlayState |> Some
     | SDLKeyboard.ScanCode.Up -> {state with Encounters=(previousEncounterChoice state.Encounters)} |> PlayState |> Some

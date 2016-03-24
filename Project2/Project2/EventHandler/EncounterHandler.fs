@@ -12,7 +12,7 @@ let internal generateStormPCEncounter (location:CellLocation) :Encounters option
     |> PCEncounter 
     |> Some
 
-let internal generateIslandPCEncounter (playState:PlayState) (location:CellLocation) :Encounters option =
+let internal generateIslandPCEncounter (playState:PlayState<_>) (location:CellLocation) :Encounters option =
     location
     |> createIslandEncounterDetail playState
     |> PCEncounter 
@@ -20,7 +20,7 @@ let internal generateIslandPCEncounter (playState:PlayState) (location:CellLocat
 
 exception private NoActorExistsAtTheSpecifiedLocation
 
-let internal startPCEncounter (location:CellLocation) (state:PlayState) :Encounters option =
+let internal startPCEncounter (location:CellLocation) (state:PlayState<_>) :Encounters option =
     let actor = state.Actors |> Map.tryFind location
 
     if actor.IsNone then
@@ -91,7 +91,7 @@ let private renderEncounterDetail (details:EncounterDetail)  (renderGrid:CellMap
     ||> List.fold writeChoiceLine
     |> fst3
 
-let internal renderEncounter (state:PlayState) (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =
+let internal renderEncounter (state:PlayState<CellMap<RenderCell>>) (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =
     match state.Encounters with
     | Some (PCEncounter details)        -> renderEncounterDetail details renderGrid
     | Some (NPCEncounters (head::tail)) -> renderEncounterDetail head    renderGrid

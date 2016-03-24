@@ -7,6 +7,7 @@ open GameState
 open CellLocation
 open MapObject
 open Random
+open StormUpdator
 
 exception private InvalidCallToRandomFunc
 
@@ -18,7 +19,7 @@ let ``updateStormActor with currentTurn equal to stormTurn`` () =
     let worldSize = {Column = 10<cell>;Row = 11<cell>}
     
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty;
          MapGrid=Map.empty}
@@ -60,7 +61,7 @@ let ``updateStormActor with currentTurn greater than stormTurn and no interactio
     let actor = {CurrentTurn = stormTurn; Detail = stormProperties |> Storm}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add stormLocation actor;
          MapGrid=Map.empty}
@@ -74,7 +75,7 @@ let ``updateStormActor with currentTurn greater than stormTurn and no interactio
     let expectedActor = {CurrentTurn = expectedStormTurn; Detail = stormProperties |> Storm}
 
     let expected = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add expectedStormLocation expectedActor;
          MapGrid=Map.empty}
@@ -114,7 +115,7 @@ let ``updateStormActor combine storms`` () =
     let otherActor = {CurrentTurn = otherStormTurn; Detail = otherStormProperties |> Storm}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add stormLocation actor |> Map.add otherStormLocation otherActor;
          MapGrid=Map.empty}
@@ -130,7 +131,7 @@ let ``updateStormActor combine storms`` () =
     let expectedActor = {CurrentTurn = expectedStormTurn; Detail = expectedStormProperties |> Storm}
 
     let expected = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add expectedStormLocation expectedActor;
          MapGrid=Map.empty}
@@ -170,7 +171,7 @@ let ``updateStormActor strike pirate`` () =
     let otherActor = {CurrentTurn = otherStormTurn; Detail = otherActorProperties |> Pirate}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add stormLocation actor |> Map.add otherActorLocation otherActor;
          MapGrid=Map.empty}
@@ -186,7 +187,7 @@ let ``updateStormActor strike pirate`` () =
     let expectedActor = {CurrentTurn = expectedActorTurn; Detail = expectedActorProperties |> Pirate}
 
     let expected = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add expectedActorLocation expectedActor;
          MapGrid=Map.empty}
@@ -226,7 +227,7 @@ let ``updateStormActor strike and eliminate pirate`` () =
     let otherActor = {CurrentTurn = otherStormTurn; Detail = otherActorProperties |> Pirate}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add stormLocation actor |> Map.add otherActorLocation otherActor;
          MapGrid=Map.empty}
@@ -234,7 +235,7 @@ let ``updateStormActor strike and eliminate pirate`` () =
     let currentTurn = 2.0<turn>
 
     let expected = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty;
          MapGrid=Map.empty}
@@ -279,7 +280,7 @@ let ``updateStormActor strike boat`` () =
     let otherActor = {CurrentTurn = otherStormTurn; Detail = otherActorProperties |> Boat}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add stormLocation actor |> Map.add otherActorLocation otherActor;
          MapGrid=Map.empty}
@@ -303,7 +304,7 @@ let ``updateStormActor strike boat`` () =
         |> Some
 
     let expected = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=expectedEncounters;
          Actors=Map.empty |> Map.add expectedActorLocation expectedActor |> Map.add otherActorLocation otherActor;
          MapGrid=Map.empty}
@@ -345,7 +346,7 @@ let ``updateStormActor strike sea monster`` () =
     let otherActor = {CurrentTurn = otherStormTurn; Detail = otherActorProperties |> SeaMonster}
 
     let initialState =
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add stormLocation actor |> Map.add otherActorLocation otherActor;
          MapGrid=Map.empty}
@@ -353,7 +354,7 @@ let ``updateStormActor strike sea monster`` () =
     let currentTurn = 2.0<turn>
 
     let expected = 
-        {RenderGrid=Map.empty;
+        {RenderData=Map.empty;
          Encounters=None;
          Actors=Map.empty |> Map.add otherActorLocation otherActor;
          MapGrid=Map.empty}

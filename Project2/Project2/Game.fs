@@ -10,6 +10,7 @@ open MapCell
 open MapCreate
 open Render
 open Random
+open IdleHandler
 
 
 let runGame (randomFunc:RandomFunc) = 
@@ -53,10 +54,10 @@ let runGame (randomFunc:RandomFunc) =
     let setTerrainFunc = setTerrainWrapped Constants.WorldSize
     let setObjectFunc = setObjectWrapped Constants.WorldSize
 
-    let createFunc ()= 
+    let createFunc () :GameState<CellMap<RenderCell>>= 
         let initialActors, initialMap =
             createWorld sumLocationsFunc distanceFormulaTestFunc setVisibleFunc setTerrainFunc setObjectFunc Constants.WorldSize randomFunc
-        let state = {PlayState.RenderGrid = Map.empty<CellLocation,RenderCell>;MapGrid=initialMap;Encounters=None;Actors=initialActors}
+        let state: PlayState<CellMap<RenderCell>> = {RenderData = CellLocation.emptyCellMap;MapGrid=initialMap;Encounters=None;Actors=initialActors}
         {state with MapGrid = state |> updateVisibleFlags sumLocationsFunc setVisibleFunc} |> PlayState
 
     //rendering setup
@@ -64,7 +65,7 @@ let runGame (randomFunc:RandomFunc) =
     let renderFunc = Render.draw renderingContext
 
     //event handler setup
-    let eventHandler = EventHandler.handleEvent sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize randomFunc
+    let eventHandler = EventHandler.handleEvent<CellMap<RenderCell>> gridRenderer sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize randomFunc
 
     EventPump.eventPump 
         SDLEvent.pollEvent
