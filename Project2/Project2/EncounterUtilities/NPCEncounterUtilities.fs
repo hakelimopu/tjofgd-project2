@@ -2,7 +2,7 @@
 
 open GameState
 open CellLocation
-open EncounterDetails
+open StormEncounterDetails
 
 [<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
 exception IncompatibleEncounterType

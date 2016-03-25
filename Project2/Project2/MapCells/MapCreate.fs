@@ -158,8 +158,7 @@ let generateWorldObjects
 
 let generateIslandObject (name:string) (random:RandomFunc) :MapObject =
     {CurrentTurn=0.0<turn>;
-    Detail=Island {Visits=0;Name=name;Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}}}//TODO: generate valid quest
-    //TODO: pick an island location
+    Detail=Island {Visits=0;Name=name;Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}}}
 
 
 let generateIslandObjects (names:string list) (random:RandomFunc) (map:CellMap<MapCell>) (originalActors:CellMap<MapObject>) : CellMap<MapObject> =

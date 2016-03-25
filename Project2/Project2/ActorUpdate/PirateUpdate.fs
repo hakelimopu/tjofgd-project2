@@ -1,10 +1,12 @@
-﻿module PirateUpdater
+﻿module PirateUpdate
 
 open GameState
 open MapObject
 open CellLocation
 open Random
 open NPCEncounterUtilities
+open ActorUtilities
+
 
 let updatePirateActor 
     (sumLocationsFunc:SumLocationsFunc) 
@@ -34,13 +36,15 @@ let updatePirateActor
 
         let otherActor = actors'.TryFind actorLocation'
         if otherActor.IsNone then
-            let actors'' =
-                actors' 
-                |> Map.add actorLocation' actor'
-
-            {playState with Actors = actors''}
+            playState
+            |> placeActor actors' actorLocation' actor'
         else
             match otherActor.Value.Detail with
-            | _                 -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | Boat properties       -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | Storm properties      -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | Pirate properties     -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | SeaMonster properties -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | Merfolk properties    -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | _                     -> {playState with Actors = actors' |> Map.add actorLocation actor'}
 
 

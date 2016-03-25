@@ -5,6 +5,7 @@ open MapObject
 open CellLocation
 open Random
 open NPCEncounterUtilities
+open ActorUtilities
 
 let updateSeaMonsterActor 
     (sumLocationsFunc:SumLocationsFunc) 
@@ -34,14 +35,15 @@ let updateSeaMonsterActor
 
         let otherActor = actors'.TryFind actorLocation'
         if otherActor.IsNone then
-
-            let actors'' =
-                actors' 
-                |> Map.add actorLocation' actor'
-
-            {playState with Actors = actors''}
+            playState
+            |> placeActor actors' actorLocation' actor'
         else
             match otherActor.Value.Detail with
+            | Boat properties       -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | Storm properties      -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | Pirate properties     -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | SeaMonster properties -> {playState with Actors = actors' |> Map.add actorLocation actor'}
+            | Merfolk properties    -> {playState with Actors = actors' |> Map.add actorLocation actor'}
             | _                 -> {playState with Actors = actors' |> Map.add actorLocation actor'}
 
 

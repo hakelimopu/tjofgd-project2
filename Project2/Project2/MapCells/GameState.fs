@@ -37,11 +37,13 @@ let renderCellForMapCell (actor:MapObject option) (mapCell:MapCell option) :Rend
 type EncounterType =
     | RanIntoStorm
     | DockedWithIsland
+    | QueryQuest
 
 type EncounterReponse =
     | Confirm
     | Cancel
     | Repair
+    | QueryQuest
 
 type EncounterChoice =
     {Response:EncounterReponse;

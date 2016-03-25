@@ -117,11 +117,3 @@ let generateRadius (radius:int<cell>) :Set<CellLocation> =
     (-radius, radius)
     |> Seq.unfold (generateRadiusColumnEmitter radius (-radius, radius))
     |> Seq.reduce Set.union
-
-let private transformSetFolder (transform:CellLocation->CellLocation) (state:Set<CellLocation>) (location:CellLocation) :Set<CellLocation> =
-    state
-    |> Set.add (transform location)
-
-let transformSet (sumLocationsFunc:SumLocationsFunc) (locations:Set<CellLocation>) (delta:CellLocation) :Set<CellLocation> =
-    (Set.empty<CellLocation>, locations)
-    ||> Set.fold (delta |> sumLocationsFunc |> transformSetFolder)

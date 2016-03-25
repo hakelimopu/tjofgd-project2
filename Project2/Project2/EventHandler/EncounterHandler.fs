@@ -4,31 +4,25 @@ open CellLocation
 open GameState
 open MapObject
 open RenderCell
-open EncounterDetails
+open IslandEncounterDetails
+open StormEncounterDetails
 
-let internal generateStormPCEncounter (location:CellLocation) :Encounters option =
-    location 
-    |> createStormEncounterDetail
-    |> PCEncounter 
-    |> Some
-
-let internal generateIslandPCEncounter (playState:PlayState<_>) (location:CellLocation) :Encounters option =
+let internal generatePCEncounter (specificEncounterGenerator:CellLocation -> EncounterDetail) (location:CellLocation):Encounters option =
     location
-    |> createIslandEncounterDetail playState
-    |> PCEncounter 
+    |> specificEncounterGenerator
+    |> PCEncounter
     |> Some
-
-exception private NoActorExistsAtTheSpecifiedLocation
 
 let internal startPCEncounter (location:CellLocation) (state:PlayState<_>) :Encounters option =
     let actor = state.Actors |> Map.tryFind location
 
     if actor.IsNone then
-        raise NoActorExistsAtTheSpecifiedLocation
+        //cannot start an encounter with nothing... so ignore!
+        None
     else
         match actor.Value.Detail with
-        | Storm stormProperties   -> location |> generateStormPCEncounter
-        | Island islandProperties -> location |> generateIslandPCEncounter state
+        | Storm stormProperties   -> location |> generatePCEncounter createStormEncounterDetail
+        | Island islandProperties -> location |> generatePCEncounter (createIslandEncounterDetail state)
         | _                       -> None
 
 let private renderEncounterDetail (details:EncounterDetail)  (renderGrid:CellMap<RenderCell>) :CellMap<RenderCell> =

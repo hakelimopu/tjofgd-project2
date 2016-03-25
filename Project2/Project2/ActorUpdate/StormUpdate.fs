@@ -1,10 +1,11 @@
-﻿module StormUpdater
+﻿module StormUpdate
 
 open GameState
 open MapObject
 open CellLocation
 open Random
 open NPCEncounterUtilities
+open ActorUtilities
 
 let private strikeBoat (stormProperties:StormProperties) (actors:CellMap<MapObject>) (actorLocation:CellLocation) (updatedTurn:float<turn>) (playState:PlayState<_>) :PlayState<_> =
     let updatedActors = 
@@ -75,11 +76,8 @@ let updateStormActor
                 {CurrentTurn = actorTurn';
                  Detail      = actorProperties |> Storm}
 
-            let actors'' =
-                actors' 
-                |> Map.add actorLocation' actor'
-
-            {playState with Actors = actors''}
+            playState
+            |> placeActor actors' actorLocation' actor'
         else
             match otherActor.Value.Detail with
             | Boat properties   -> playState |> strikeBoat actorProperties actors' actorLocation currentTurn

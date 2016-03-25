@@ -6,7 +6,7 @@ open GameState
 open CellLocation
 open MapObject
 open Random
-open StormUpdater
+open StormUpdate
 
 exception private InvalidCallToRandomFunc
 

@@ -18,7 +18,7 @@ let runGame (randomFunc:RandomFunc) =
     
     use system = new SDL.System(SDL.Init.Video ||| SDL.Init.Events)
 
-    use mainWindow = SDLWindow.create "test" 100<px> 100<px> 640<px> 480<px> 0u
+    use mainWindow = SDLWindow.create "Splorr!! Island Interloper" 100<px> 100<px> 640<px> 480<px> 0u
 
     use mainRenderer = SDLRender.create mainWindow -1 SDLRender.Flags.Accelerated
 

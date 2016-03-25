@@ -5,6 +5,7 @@ open MapCell
 open MapObject
 open CellLocation
 open Random
+open QueryQuestEncounterDetails
 
 let private nextEncounterChoice (encounter: Encounters option) :Encounters option =
     match encounter with
@@ -24,9 +25,19 @@ let private repairBoat (playState:PlayState<_>) : PlayState<_> =
     let repairedBoat = {playState.Actors.[location] with Detail = ({boatProps with Hull=boatProps.MaximumHull} |> Boat); CurrentTurn=turns + (((boatProps.MaximumHull-boatProps.Hull)|> float) * 1.0<turn>)}
     {playState with Actors = (playState.Actors |> Map.add location repairedBoat)}
 
+let private queryQuest (playState:PlayState<_>) : PlayState<_> =
+    {playState with Encounters=None}
+
 let private applyDockPCEncounterChoice (detail:EncounterDetail) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
     | Repair -> {(playState |> repairBoat) with Encounters=None} |> PlayState |> Some
+    | QueryQuest ->
+        let encounter = 
+            detail.Location
+            |> createQuestQueryEncounterDetail playState
+            |> PCEncounter
+            |> Some
+        {playState with Encounters = encounter}|> PlayState |> Some
     | _ -> {playState with Encounters=None} |> PlayState |> Some
     
 
@@ -46,12 +57,14 @@ let private applyStormEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVi
     else
         updatedPlayState |> DeadState |> Some
 
+let private applyQueryQuestEncounterChoice (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
+    {playState with Encounters = None}|> PlayState |> Some
 
 let private applyPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState<_>) : GameState<_> option =
     match details.Type with
-    | RanIntoStorm -> 
-        applyStormEncounterChoice sumLocationsFunc setVisibleFunc details.Location true None playState
-    | DockedWithIsland -> applyDockPCEncounterChoice details playState
+    | RanIntoStorm             -> applyStormEncounterChoice sumLocationsFunc setVisibleFunc details.Location true None playState
+    | DockedWithIsland         -> applyDockPCEncounterChoice details playState
+    | EncounterType.QueryQuest -> applyQueryQuestEncounterChoice details.Location playState
 
 let private applyNPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (head:EncounterDetail) (tail:EncounterDetail list) (playState:PlayState<_>): GameState<_> option =
     let nextEncounter =

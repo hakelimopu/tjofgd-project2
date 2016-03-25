@@ -1,31 +1,23 @@
-﻿module EncounterDetails
+﻿module IslandEncounterDetails
 
 open CellLocation
 open GameState
-
-
-let createStormEncounterDetail (location:CellLocation) :EncounterDetail =
-    {Location=location;
-     Title="Storm!";
-     Type=RanIntoStorm;
-     Message=["You have run into a storm;";"it has damaged your boat!"];
-     Choices=[{Text="OK";Response=Confirm}];
-     CurrentChoice=0}
+open EncounterDetailUtilities
 
 let private ``can the ship repair?`` (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
     boatProperties.Hull < boatProperties.MaximumHull
 
-let private ``always include choice`` (playState:PlayState<_>) :bool = true
-
-let private filterChoice (playState:PlayState<_>) (choice, func) =
-    playState |> func
+let private ``can accept quest?`` (playState:PlayState<_>) :bool =
+    let boatProperties = playState |> getBoatProperties
+    boatProperties.Quest.IsNone
 
 let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
 
     let choices = 
-        [({Text="Cast Off!";   Response=Cancel}, ``always include choice``);
-         ({Text="Repair Ship"; Response=Repair}, ``can the ship repair?``)]
+        [({Text="Cast Off!";   Response=Cancel},    ``always include choice``);
+         ({Text="Repair Ship"; Response=Repair},    ``can the ship repair?``);
+         ({Text="Need work!";  Response=QueryQuest},``can accept quest?``)]
         |> List.filter (filterChoice playState)
         |> List.map fst
 
