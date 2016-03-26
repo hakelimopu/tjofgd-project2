@@ -53,6 +53,7 @@ let runGame (randomFunc:RandomFunc) =
     let distanceFormulaTestFunc = distanceFormulaTestWrapped Constants.WorldSize
     let setTerrainFunc = setTerrainWrapped Constants.WorldSize
     let setObjectFunc = setObjectWrapped Constants.WorldSize
+    let vectorToLocationFunc = vectorToLocationWrapped Constants.WorldSize
 
     let createFunc () :GameState<CellMap<RenderCell>>= 
         let initialActors, initialMap =
@@ -65,7 +66,7 @@ let runGame (randomFunc:RandomFunc) =
     let renderFunc = Render.draw renderingContext
 
     //event handler setup
-    let eventHandler = EventHandler.handleEvent<CellMap<RenderCell>> gridRenderer sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize randomFunc
+    let eventHandler = EventHandler.handleEvent<CellMap<RenderCell>> (gridRenderer vectorToLocationFunc) sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize randomFunc
 
     EventPump.eventPump 
         SDLEvent.pollEvent

@@ -19,6 +19,7 @@ let emptyCellMap<'T> :CellMap<'T> = Map.empty<CellLocation,'T>
 //more or less, function interfaces
 type SumLocationsFunc = CellLocation -> CellLocation -> CellLocation
 type CheckLocationsFunc = CellLocation -> CellLocation -> bool
+type VectorToLocationFunc = CellLocation -> CellLocation -> float<cell> * float
 
 [<ExcludeFromCodeCoverage>]
 exception InvalidWorldSize
@@ -51,6 +52,23 @@ let sumLocationsWrapped (worldSize:CellLocation) (first:CellLocation) (second:Ce
     ||> sumLocations
     |> wrapLocation worldSize
 
+let private vectorMagnitude (vector:CellLocation) :float<cell> =
+    ((vector.Column * vector.Column + vector.Row * vector.Row)
+    / 1<cell^2>
+    |> float
+    |> sqrt)
+    * 1.0<cell>
+
+let private vectorDirection (vector:CellLocation) :float =
+    atan2 (vector.Row / 1<cell> |> float) (vector.Column / 1<cell> |> float)
+
+let private vectorToLocation (start:CellLocation) (finish:CellLocation) :float<cell> * float =
+    let delta = 
+        {Column = finish.Column - start.Column;
+         Row    = finish.Row    - start.Row}
+    let magnitude = delta |> vectorMagnitude
+    (magnitude, delta |> vectorDirection)
+
 [<ExcludeFromCodeCoverage>]
 exception NegativeValue
 
@@ -62,12 +80,16 @@ let private distanceFormulaTest (maximum:int<cell>) (first:CellLocation) (second
         let deltaX, deltaY = second.Column - first.Column, second.Row - first.Row
         (deltaX * deltaX + deltaY * deltaY) > maximum * maximum
 
-//in a wrapped world, distance determination is based on actual location and three "ghost" locations
-let private fourWrappedLocations (worldSize:CellLocation) (location:CellLocation) : CellLocation list = 
+let private nineWrappedLocations (worldSize:CellLocation) (location:CellLocation) : CellLocation list = 
     [location;
     {location with Column=location.Column+worldSize.Column};
+    {location with Column=location.Column-worldSize.Column};
     {location with Row=location.Row+worldSize.Row};
-    {Column=location.Column+worldSize.Column;Row=location.Row+worldSize.Row}]
+    {location with Row=location.Row-worldSize.Row};
+    {Column=location.Column+worldSize.Column;Row=location.Row+worldSize.Row};
+    {Column=location.Column+worldSize.Column;Row=location.Row-worldSize.Row};
+    {Column=location.Column-worldSize.Column;Row=location.Row+worldSize.Row};
+    {Column=location.Column-worldSize.Column;Row=location.Row-worldSize.Row}]
 
 //distance formula applied to all four versions of a location on a torus
 let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (first:CellLocation) (second:CellLocation) :bool =
@@ -76,7 +98,7 @@ let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (fir
     else
         let locations = 
             second
-            |> fourWrappedLocations worldSize
+            |> nineWrappedLocations worldSize
 
         let countFailures (accumulator:int) (location:CellLocation) :int =
             if distanceFormulaTest maximum first second then
@@ -87,6 +109,12 @@ let distanceFormulaTestWrapped (worldSize:CellLocation) (maximum:int<cell>) (fir
         (0, locations)
         ||> Seq.fold countFailures
         |> (=) locations.Length
+
+let vectorToLocationWrapped (worldSize:CellLocation) (start:CellLocation) (finish:CellLocation) :float<cell> * float =
+    finish
+    |> nineWrappedLocations worldSize
+    |> List.map (fun e -> vectorToLocation start e)
+    |> List.minBy (fun (m,d) -> m)
 
 let make (column:int<cell>) (row:int<cell>) :CellLocation =
     {Column = column; Row = row}
