@@ -25,19 +25,33 @@ let private repairBoat (playState:PlayState<_>) : PlayState<_> =
     let repairedBoat = {playState.Actors.[location] with Detail = ({boatProps with Hull=boatProps.MaximumHull} |> Boat); CurrentTurn=turns + (((boatProps.MaximumHull-boatProps.Hull)|> float) * 1.0<turn>)}
     {playState with Actors = (playState.Actors |> Map.add location repairedBoat)}
 
-let private queryQuest (playState:PlayState<_>) : PlayState<_> =
-    {playState with Encounters=None}
+let private queryQuest (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
+    let encounter = 
+        location
+        |> createQuestQueryEncounterDetail playState
+        |> PCEncounter
+        |> Some
+    {playState with Encounters = encounter}
+
+let private completeQuest (playState:PlayState<_>) : PlayState<_> =
+    let location, turn, boatProperties = getBoat playState
+
+    let quest = boatProperties.Quest |> Option.get
+
+    let boatProperties' =
+        {boatProperties with Quest = None; Wallet = boatProperties.Wallet + quest.Reward}
+
+    let actors =
+        playState.Actors
+        |> Map.add location {CurrentTurn = turn; Detail = (boatProperties' |> Boat)}
+
+    {playState with Encounters=None; Actors = actors}
 
 let private applyDockPCEncounterChoice (detail:EncounterDetail) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
     | Repair -> {(playState |> repairBoat) with Encounters=None} |> PlayState |> Some
-    | QueryQuest ->
-        let encounter = 
-            detail.Location
-            |> createQuestQueryEncounterDetail playState
-            |> PCEncounter
-            |> Some
-        {playState with Encounters = encounter}|> PlayState |> Some
+    | QueryQuest -> playState |> queryQuest detail.Location |> PlayState |> Some
+    | CompleteQuest ->  playState |> completeQuest |> PlayState |> Some
     | _ -> {playState with Encounters=None} |> PlayState |> Some
     
 
@@ -57,14 +71,36 @@ let private applyStormEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVi
     else
         updatedPlayState |> DeadState |> Some
 
-let private applyQueryQuestEncounterChoice (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
-    {playState with Encounters = None}|> PlayState |> Some
+let private acceptQuest (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
+    let playerLocation, turn, boatProperties = 
+        playState 
+        |> getBoat
+
+    let _, island = 
+        playState 
+        |> getIsland location
+
+    let boatProperties' = 
+        {boatProperties with Quest = island.Quest |> Some}
+
+    let actors = 
+        playState.Actors
+        |> Map.add playerLocation {CurrentTurn = turn; Detail = boatProperties' |> Boat}
+
+    //TODO: generate new quest for island.
+
+    {playState with Encounters = None; Actors = actors}
+
+let private applyQueryQuestEncounterChoice (detail:EncounterDetail) (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
+    match detail |> getEncounterResponse with
+    | Confirm -> playState |> acceptQuest location |> PlayState |> Some
+    | _ -> {playState with Encounters = None}|> PlayState |> Some
 
 let private applyPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState<_>) : GameState<_> option =
     match details.Type with
     | RanIntoStorm             -> applyStormEncounterChoice sumLocationsFunc setVisibleFunc details.Location true None playState
     | DockedWithIsland         -> applyDockPCEncounterChoice details playState
-    | EncounterType.QueryQuest -> applyQueryQuestEncounterChoice details.Location playState
+    | EncounterType.QueryQuest -> applyQueryQuestEncounterChoice details details.Location playState
 
 let private applyNPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (head:EncounterDetail) (tail:EncounterDetail list) (playState:PlayState<_>): GameState<_> option =
     let nextEncounter =

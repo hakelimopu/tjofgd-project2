@@ -21,7 +21,7 @@ let createQuestQueryEncounterDetail (playState:PlayState<_>) (location:CellLocat
 
     {Location=location;
     Title="Need a job?";
-    Type=DockedWithIsland;
+    Type=EncounterType.QueryQuest;
     Message=["Could you deliver this"; island'.Name |> sprintf "parcel to %s?"; (quest.Reward / 1.0<currency>) |> sprintf "The pay is $%.2f"];
     Choices=choices;
     CurrentChoice=0} 

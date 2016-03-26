@@ -28,11 +28,19 @@ let mapViewCells =
 
 let private renderStats (state:PlayState<_>) (grid:CellMap<RenderCell>):CellMap<RenderCell> =
     let _, _, boatProps = state |> getBoat
+    let questText = 
+        if boatProps.Quest.IsSome then 
+            let quest = boatProps.Quest |> Option.get
+            let _,island = state |> getIsland quest.Destination
+            island.Name
+        else 
+            ""
     grid
     |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Black RenderCellColor.Black ("          ")
     |> writeText {Column=StatsViewX;Row=StatsViewY} RenderCellColor.Brown RenderCellColor.Black (sprintf "Hull:%2i/%2i" (boatProps.Hull/1<health>) (boatProps.MaximumHull/1<health>))
     |> writeText {Column=StatsViewX;Row=(StatsViewY+1<cell>)} RenderCellColor.Black RenderCellColor.Black ("          ")
     |> writeText {Column=StatsViewX;Row=(StatsViewY+1<cell>)} RenderCellColor.BrightYellow RenderCellColor.Black (sprintf "$%9.2f" (boatProps.Wallet/1.0<currency>))
+    |> writeText {Column=StatsViewX;Row=(StatsViewY+2<cell>)} RenderCellColor.White RenderCellColor.Black (sprintf "%s" questText)
 
 let private renderFolder (sumLocationsFunc:SumLocationsFunc) (playerLocation:CellLocation) (state:PlayState<CellMap<RenderCell>>) (renderGrid:CellMap<RenderCell>) (renderLocation:CellLocation) (mapDelta:CellLocation) :CellMap<RenderCell> =
     let mapLocation = playerLocation |> sumLocationsFunc mapDelta

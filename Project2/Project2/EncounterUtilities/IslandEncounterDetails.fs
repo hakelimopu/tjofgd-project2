@@ -12,12 +12,19 @@ let private ``can accept quest?`` (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
     boatProperties.Quest.IsNone
 
+let private ``is quest complete?`` (location:CellLocation) (playState:PlayState<_>) :bool =
+    let boatProperties = playState |> getBoatProperties
+    match boatProperties.Quest with
+    | Some quest -> quest.Destination = location
+    | _          -> false
+
 let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
 
     let choices = 
-        [({Text="Cast Off!";   Response=Cancel},    ``always include choice``);
-         ({Text="Repair Ship"; Response=Repair},    ``can the ship repair?``);
-         ({Text="Need work!";  Response=QueryQuest},``can accept quest?``)]
+        [({Text="Cast Off!";   Response=Cancel},        ``always include choice``);
+         ({Text="Repair Ship"; Response=Repair},        ``can the ship repair?``);
+         ({Text="Need work!";  Response=QueryQuest},    ``can accept quest?``);
+         ({Text="Delivery!";   Response=CompleteQuest}, ``is quest complete?`` location)]
         |> List.filter (filterChoice playState)
         |> List.map fst
 

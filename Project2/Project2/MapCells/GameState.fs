@@ -44,6 +44,7 @@ type EncounterReponse =
     | Cancel
     | Repair
     | QueryQuest
+    | CompleteQuest
 
 type EncounterChoice =
     {Response:EncounterReponse;

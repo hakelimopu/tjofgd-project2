@@ -91,8 +91,8 @@
     <Compile Include="Render.fs" />
     <Compile Include="EncounterUtilities\EncounterDetailUtilities.fs" />
     <Compile Include="EncounterUtilities\StormEncounterDetails.fs" />
-    <Compile Include="EncounterUtilities\IslandEncounterDetails.fs" />
     <Compile Include="EncounterUtilities\NPCEncounterUtilities.fs" />
+    <Compile Include="EncounterUtilities\IslandEncounterDetails.fs" />
     <Compile Include="EncounterUtilities\QueryQuestEncounterDetails.fs" />
     <Compile Include="ActorUpdate\ActorUtilities.fs" />
     <Compile Include="ActorUpdate\StormUpdate.fs" />
