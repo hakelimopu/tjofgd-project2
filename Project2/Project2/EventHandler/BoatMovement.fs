@@ -72,24 +72,5 @@ let moveBoat (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc)
             |> PlayState
             |> Some
 
-let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
-    let moveBoatFunc = moveBoat sumLocationsFunc setVisibleFunc worldSize random
-
-    match keyboardEvent.Keysym.Scancode with
-    | SDLKeyboard.ScanCode.F4     -> None
-
-    | SDLKeyboard.ScanCode.KeyPad4
-    | SDLKeyboard.ScanCode.Left   -> state |> moveBoatFunc {Column= -1<cell>; Row=  0<cell>}
-
-    | SDLKeyboard.ScanCode.KeyPad6
-    | SDLKeyboard.ScanCode.Right  -> state |> moveBoatFunc {Column=  1<cell>; Row=  0<cell>}
-
-    | SDLKeyboard.ScanCode.KeyPad8
-    | SDLKeyboard.ScanCode.Up     -> state |> moveBoatFunc {Column=  0<cell>; Row= -1<cell>}
-
-    | SDLKeyboard.ScanCode.KeyPad2
-    | SDLKeyboard.ScanCode.Down   -> state |> moveBoatFunc {Column=  0<cell>; Row=  1<cell>}
-
-    | _                           -> state |> PlayState |> Some
 
 

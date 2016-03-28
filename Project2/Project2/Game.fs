@@ -11,6 +11,7 @@ open MapCreate
 open Render
 open Random
 open IdleHandler
+open GridRenderer
 
 
 let runGame (randomFunc:RandomFunc) = 

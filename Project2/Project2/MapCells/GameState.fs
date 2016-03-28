@@ -6,33 +6,6 @@ open MapCell
 open MapTerrain
 open MapObject
 
-let private OutOfBoundsRenderCell = {Character=0xB0uy; Foreground=RenderCellColor.DarkGray; Background=RenderCellColor.Blue}
-let private UnexploredRenderCell =  {Character=0x3Fuy; Foreground=RenderCellColor.Black;    Background=RenderCellColor.DarkGray}
-
-let private TerrainRenderCells = 
-    [(MapTerrain.Water       , {Character=0x7Euy; Foreground=RenderCellColor.Blue ; Background=RenderCellColor.BrightBlue });
-     (MapTerrain.ShallowWater, {Character=0x20uy; Foreground=RenderCellColor.Blue ; Background=RenderCellColor.BrightBlue });
-     (MapTerrain.Island      , {Character=0x1Euy; Foreground=RenderCellColor.Green; Background=RenderCellColor.BrightBlue });
-     (MapTerrain.DeepWater   , {Character=0xF7uy; Foreground=RenderCellColor.Blue ; Background=RenderCellColor.BrightBlue })]
-    |> Map.ofSeq
-
-let private getActorRenderCell (detail:MapObject option) =
-    match detail with
-    | IsBoat        -> {Character=0xF1uy; Foreground=RenderCellColor.Brown       ; Background=RenderCellColor.BrightBlue }
-    | IsStorm       -> {Character=0xF2uy; Foreground=RenderCellColor.BrightYellow; Background=RenderCellColor.BrightBlue }
-    | IsPirate      -> {Character=0xF1uy; Foreground=RenderCellColor.Black       ; Background=RenderCellColor.BrightBlue }
-    | IsMerfolk     -> {Character=0x02uy; Foreground=RenderCellColor.Magenta     ; Background=RenderCellColor.BrightBlue }
-    | IsSeaMonster  -> {Character=0xEBuy; Foreground=RenderCellColor.DarkGray    ; Background=RenderCellColor.BrightBlue }
-    | IsIsland      -> {Character=0x1Euy; Foreground=RenderCellColor.Green       ; Background=RenderCellColor.BrightBlue }
-    | IsNothing     -> {Character=0x00uy; Foreground=RenderCellColor.Black       ; Background=RenderCellColor.Black      }
-
-let renderCellForMapCell (actor:MapObject option) (mapCell:MapCell option) :RenderCell =
-    match actor, mapCell with
-    | Some _, Some x when     x.Visible -> actor |> getActorRenderCell
-    | Some _, Some x when not x.Visible -> UnexploredRenderCell
-    | None  , Some x when     x.Visible -> TerrainRenderCells.[mapCell.Value.Terrain]
-    | None  , Some x when not x.Visible -> UnexploredRenderCell
-    | _, _                              -> OutOfBoundsRenderCell
 
 type EncounterType =
     | RanIntoStorm
@@ -57,6 +30,22 @@ type EncounterDetail =
      Message:string list;
      Choices:EncounterChoice list;
      CurrentChoice:int}
+
+type MoveCommand =
+    | North
+    | East
+    | South
+    | West
+
+type MenuCommand =
+    | Next
+    | Previous
+    | Select
+
+type CommandType =
+    | Quit
+    | Move of MoveCommand
+    | Menu of MenuCommand
 
 let getEncounterResponse (detail:EncounterDetail) :EncounterReponse =
     let choiceArray = 
