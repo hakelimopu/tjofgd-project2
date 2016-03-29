@@ -37,7 +37,7 @@ let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocati
     |> freeMovementKeyboardTable.TryFind
     |> handleFreeMovementCommand sumLocationsFunc setVisibleFunc worldSize random state
 
-let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
+let internal handleKeyDownEventPlayStatePCEncounter (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.KeyPad8
     | SDLKeyboard.ScanCode.Down   -> {state with Encounters=(nextEncounterChoice state.Encounters)} |> PlayState |> Some
@@ -46,15 +46,15 @@ let internal handleKeyDownEventPlayStatePCEncounter  (sumLocationsFunc:SumLocati
     | SDLKeyboard.ScanCode.Up     -> {state with Encounters=(previousEncounterChoice state.Encounters)} |> PlayState |> Some
 
     | SDLKeyboard.ScanCode.KeyPadEnter
-    | SDLKeyboard.ScanCode.Return -> state |> applyEncounterChoice sumLocationsFunc setVisibleFunc
+    | SDLKeyboard.ScanCode.Return -> state |> applyEncounterChoice random sumLocationsFunc setVisibleFunc
 
     | _                           -> state |> PlayState |> Some
 
-let internal handleKeyDownEventPlayStateNPCEncounters  (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
+let internal handleKeyDownEventPlayStateNPCEncounters (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     match keyboardEvent.Keysym.Scancode with
     | SDLKeyboard.ScanCode.Down -> {state with Encounters=(nextEncounterChoice state.Encounters)} |> PlayState |> Some
     | SDLKeyboard.ScanCode.Up -> {state with Encounters=(previousEncounterChoice state.Encounters)} |> PlayState |> Some
-    | SDLKeyboard.ScanCode.Return -> state |> applyEncounterChoice sumLocationsFunc setVisibleFunc
+    | SDLKeyboard.ScanCode.Return -> state |> applyEncounterChoice random sumLocationsFunc setVisibleFunc
     | _ -> state |> PlayState |> Some
 
 let private handleKeyDownEventDeadState (createFunc:unit->GameState<_>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:GameState<_>) :GameState<_> option =

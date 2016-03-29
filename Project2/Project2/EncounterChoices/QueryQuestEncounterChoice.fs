@@ -3,30 +3,48 @@
 open CellLocation
 open GameState
 open MapObject
+open MapCreate
+open Random
 
-let private acceptQuest (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
+let private acceptQuest (randomFunc:RandomFunc) (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
     let playerLocation, turn, boatProperties = 
         playState 
         |> getBoat
 
-    let _, island = 
+    let islandTurn, island = 
         playState 
         |> getIsland location
 
     let boatProperties' = 
         {boatProperties with Quest = island.Quest |> Some}
 
+    let islands,_ = 
+        playState.Actors
+        |> Map.partition (fun k v -> 
+            match Some v with 
+            | IsIsland -> k <> location
+            | _ -> false)
+
+    let location' =
+        islands
+        |> Map.toSeq
+        |> Seq.map (fun (k,v)->k)
+        |> Seq.minBy (fun e->NextInt |> randomFunc |> getInt)
+
+    let quest' = generateQuest randomFunc location'
+
+    let island' = {island with Quest = quest'}
+
     let actors = 
         playState.Actors
         |> Map.add playerLocation {CurrentTurn = turn; Detail = boatProperties' |> Boat}
-
-    //TODO: generate new quest for island.
+        |> Map.add location {CurrentTurn = islandTurn; Detail = island' |> Island}
 
     {playState with Encounters = None; Actors = actors}
 
-let internal applyQueryQuestEncounterChoice (detail:EncounterDetail) (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
+let internal applyQueryQuestEncounterChoice (randomFunc:RandomFunc) (detail:EncounterDetail) (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
-    | Confirm -> playState |> acceptQuest location |> PlayState |> Some
+    | Confirm -> playState |> acceptQuest randomFunc location |> PlayState |> Some
     | _ -> {playState with Encounters = None}|> PlayState |> Some
 
 

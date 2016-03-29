@@ -52,7 +52,9 @@ type MerfolkProperties =
 type IslandProperties = 
     {Name:string;
      Visits:int;
-     Quest:QuestDetails}
+     Quest:QuestDetails;
+     RepairCost:float<currency/health>;
+     RepairCostIncrease:float<currency/health>}
 
 type MapObjectDetail =
     | Boat of BoatProperties

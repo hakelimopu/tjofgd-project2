@@ -11,6 +11,7 @@ type EncounterType =
     | RanIntoStorm
     | DockedWithIsland
     | QueryQuest
+    | QueryRepair
 
 type EncounterReponse =
     | Confirm

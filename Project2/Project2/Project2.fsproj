@@ -94,6 +94,7 @@
     <Compile Include="EncounterUtilities\NPCEncounterUtilities.fs" />
     <Compile Include="EncounterUtilities\IslandEncounterDetails.fs" />
     <Compile Include="EncounterUtilities\QueryQuestEncounterDetails.fs" />
+    <Compile Include="EncounterUtilities\QueryRepairEncounterDetails.fs" />
     <Compile Include="ActorUpdate\ActorUtilities.fs" />
     <Compile Include="ActorUpdate\StormUpdate.fs" />
     <Compile Include="ActorUpdate\PirateUpdate.fs" />
@@ -104,6 +105,7 @@
     <Compile Include="EncounterChoices\StormEncounterChoice.fs" />
     <Compile Include="EncounterChoices\IslandEncounterChoice.fs" />
     <Compile Include="EncounterChoices\QueryQuestEncounterChoice.fs" />
+    <Compile Include="EncounterChoices\QueryRepairEncounterChoice.fs" />
     <Compile Include="EncounterChoices\EncounterChoice.fs" />
     <Compile Include="EventHandler\QuitEvent.fs" />
     <Compile Include="EventHandler\ActorUpdate.fs" />

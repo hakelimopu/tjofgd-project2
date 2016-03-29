@@ -3,10 +3,16 @@
 open CellLocation
 open GameState
 open EncounterDetailUtilities
+open MapObject
 
-let private ``can the ship repair?`` (playState:PlayState<_>) :bool =
+let private ``can the ship repair?`` (location:CellLocation) (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
-    boatProperties.Hull < boatProperties.MaximumHull
+    let damage = boatProperties.MaximumHull - boatProperties.Hull
+    if damage > 0<health> then
+        let _, island = getIsland location playState
+        boatProperties.Wallet >= island.RepairCost * 1.0<health>
+    else
+        false
 
 let private ``can accept quest?`` (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
@@ -22,7 +28,7 @@ let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation)
 
     let choices = 
         [({Text="Cast Off!";   Response=Cancel},        ``always include choice``);
-         ({Text="Repair Ship"; Response=Repair},        ``can the ship repair?``);
+         ({Text="Repair Ship"; Response=Repair},        ``can the ship repair?`` location);
          ({Text="Need work!";  Response=QueryQuest},    ``can accept quest?``);
          ({Text="Delivery!";   Response=CompleteQuest}, ``is quest complete?`` location)]
         |> List.filter (filterChoice playState)

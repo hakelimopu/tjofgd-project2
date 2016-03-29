@@ -4,12 +4,15 @@ open GameState
 open CellLocation
 open QueryQuestEncounterDetails
 open MapObject
+open QueryRepairEncounterDetails
 
-
-let private repairBoat (playState:PlayState<_>) : PlayState<_> =
-    let location, turns, boatProps = playState |> getBoat
-    let repairedBoat = {playState.Actors.[location] with Detail = ({boatProps with Hull=boatProps.MaximumHull} |> Boat); CurrentTurn=turns + (((boatProps.MaximumHull-boatProps.Hull)|> float) * 1.0<turn>)}
-    {playState with Actors = (playState.Actors |> Map.add location repairedBoat)}
+let private queryRepair (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
+    let encounter = 
+        location
+        |> createQueryRepairEncounterDetail playState
+        |> PCEncounter
+        |> Some
+    {playState with Encounters = encounter}
 
 let private queryQuest (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
     let encounter = 
@@ -35,7 +38,7 @@ let private completeQuest (playState:PlayState<_>) : PlayState<_> =
 
 let internal applyIslandPCEncounterChoice (detail:EncounterDetail) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
-    | Repair -> {(playState |> repairBoat) with Encounters=None} |> PlayState |> Some
+    | Repair -> playState |> queryRepair detail.Location |> PlayState |> Some
     | QueryQuest -> playState |> queryQuest detail.Location |> PlayState |> Some
     | CompleteQuest ->  playState |> completeQuest |> PlayState |> Some
     | _ -> {playState with Encounters=None} |> PlayState |> Some

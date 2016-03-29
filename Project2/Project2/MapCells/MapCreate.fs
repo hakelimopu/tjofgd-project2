@@ -94,7 +94,7 @@ let generateIslands (sumLocationsFunc:SumLocationsFunc) (checkLocationsFunc:Chec
 
 
 let worldObjects =
-    [(MapObjectDetail.Boat {Hull=10<health>;MaximumHull=10<health>;GenerateNextStorm=5.0<turn>;Wallet=0.0<currency>;Quest=None},1);
+    [(MapObjectDetail.Boat {Hull=10<health>;MaximumHull=10<health>;GenerateNextStorm=5.0<turn>;Wallet=10.0<currency>;Quest=None},1);
      (MapObjectDetail.Storm {Damage=1<health>},200);
      (MapObjectDetail.Pirate {Hull=5<health>;Attitude=PirateAttitude.Neutral},100);
      (MapObjectDetail.SeaMonster {Health=5<health>;Attitude=SeaMonsterAttitude.Neutral},25);
@@ -158,7 +158,12 @@ let generateWorldObjects
 
 let generateIslandObject (name:string) (random:RandomFunc) :MapObject =
     {CurrentTurn=0.0<turn>;
-    Detail=Island {Visits=0;Name=name;Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}}}
+    Detail=
+        {Visits=0;
+        Name=name;
+        RepairCost = 1.0<currency/health> * (((NextFloat |> random |> getFloat) * 2.5) + 0.5);
+        RepairCostIncrease = 0.01<currency/health> * (((NextFloat |> random |> getFloat) * 5.0) + 1.0);
+        Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}} |> Island}
 
 
 let generateIslandObjects (names:string list) (random:RandomFunc) (map:CellMap<MapCell>) (originalActors:CellMap<MapObject>) : CellMap<MapObject> =
@@ -171,6 +176,9 @@ let generateIslandObjects (names:string list) (random:RandomFunc) (map:CellMap<M
     ((originalActors,names), map)
     ||> Map.fold folder
     |> fst
+
+let generateQuest (random:RandomFunc) (location:CellLocation) :QuestDetails =
+    {Destination=location;Reward=(NextFloat |> random |> getFloat) * 4.0<currency> + 1.0<currency>}
 
 let generateQuests (random:RandomFunc) (originalActors:CellMap<MapObject>) : CellMap<MapObject> =
     let islandFinder (location:CellLocation) (actor:MapObject) : bool=
@@ -193,7 +201,7 @@ let generateQuests (random:RandomFunc) (originalActors:CellMap<MapObject>) : Cel
             |> Seq.filter (fun e->e <> location)
             |> Seq.sortBy (fun e->NextInt |> random |> getInt)
             |> Seq.head
-        let quest = {Destination=chosenLocation;Reward=(((1,5) |> IntRange |> random |> getInt) |> float) * 1.0<currency>}
+        let quest = chosenLocation |> generateQuest random
         let modifiedDetail =
             match actor.Detail with
             | Island props -> {props with Quest=quest} |> Island
