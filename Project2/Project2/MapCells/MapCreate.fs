@@ -94,7 +94,7 @@ let generateIslands (sumLocationsFunc:SumLocationsFunc) (checkLocationsFunc:Chec
 
 
 let worldObjects =
-    [(MapObjectDetail.Boat {Hull=10<health>;MaximumHull=10<health>;GenerateNextStorm=5.0<turn>;Wallet=10.0<currency>;Quest=None},1);
+    [(MapObjectDetail.Boat {Hull=10<health>;MaximumHull=10<health>;GenerateNextStorm=5.0<turn>;Wallet=0.0<currency>;Quest=None},1);
      (MapObjectDetail.Storm {Damage=1<health>},200);
      (MapObjectDetail.Pirate {Hull=5<health>;Attitude=PirateAttitude.Neutral},100);
      (MapObjectDetail.SeaMonster {Health=5<health>;Attitude=SeaMonsterAttitude.Neutral},25);

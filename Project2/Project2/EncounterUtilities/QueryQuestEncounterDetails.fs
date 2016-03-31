@@ -8,10 +8,8 @@ open MapObject
 let createQuestQueryEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
 
     let choices = 
-        [({Text="No problem!"; Response=Confirm}, ``always include choice``);
-         ({Text="No thanks!";  Response=Cancel},  ``always include choice``)]
-        |> List.filter (filterChoice playState)
-        |> List.map fst
+        [{Text="No problem!"; Response=Confirm};
+         {Text="No thanks!";  Response=Cancel}]
 
     let _, island =  getIsland location playState
 

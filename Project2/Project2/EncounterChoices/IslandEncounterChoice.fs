@@ -36,10 +36,22 @@ let private completeQuest (playState:PlayState<_>) : PlayState<_> =
 
     {playState with Encounters=None; Actors = actors}
 
+let private incrementIslandVisit (location:CellLocation) (playState:PlayState<_>) :PlayState<_> =
+    let turn, island = getIsland location playState
+
+    let island' =
+        {island with Visits = island.Visits + 1}
+
+    let actors' = 
+        playState.Actors
+        |> Map.add location {CurrentTurn = turn; Detail = island' |> Island}
+
+    {playState with Actors = actors'}
+
 let internal applyIslandPCEncounterChoice (detail:EncounterDetail) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
-    | Repair -> playState |> queryRepair detail.Location |> PlayState |> Some
-    | QueryQuest -> playState |> queryQuest detail.Location |> PlayState |> Some
-    | CompleteQuest ->  playState |> completeQuest |> PlayState |> Some
-    | _ -> {playState with Encounters=None} |> PlayState |> Some
+    | Repair        -> playState |> queryRepair detail.Location |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | QueryQuest    -> playState |> queryQuest  detail.Location |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | CompleteQuest -> playState |> completeQuest               |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | _             -> {playState with Encounters=None}         |> incrementIslandVisit detail.Location |> PlayState |> Some
     

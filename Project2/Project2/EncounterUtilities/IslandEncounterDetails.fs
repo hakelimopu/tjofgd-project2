@@ -39,6 +39,9 @@ let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation)
     {Location=location;
     Title="Island!";
     Type=DockedWithIsland;
-    Message=[island.Name |> sprintf "You docked at %s!";"What would you like to do?"];
+    Message=
+        [island.Name |> sprintf "You docked at %s!";
+        island.Visits |> sprintf "Prior visits: %d";
+        "What would you like to do?"];
     Choices=choices;
     CurrentChoice=0} 

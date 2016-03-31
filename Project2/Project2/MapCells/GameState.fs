@@ -75,10 +75,10 @@ type PlayState<'TRender> =
      Actors:CellMap<MapObject>;
      MapGrid:CellMap<MapCell>}
 
-let (|FreeMovement|HasPCEncounter|HasNPCEncounters|) (playState:PlayState<_>) =
+let (|FreeMovement|HasEncounter|) (playState:PlayState<_>) =
     match playState.Encounters with
-    | Some (PCEncounter _)   -> HasPCEncounter
-    | Some (NPCEncounters _) -> HasNPCEncounters
+    | Some (PCEncounter _)   -> HasEncounter
+    | Some (NPCEncounters _) -> HasEncounter
     | None                   -> FreeMovement
 
 type GameState<'TRender> = 
