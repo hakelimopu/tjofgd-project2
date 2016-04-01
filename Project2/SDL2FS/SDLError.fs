@@ -1,27 +1,28 @@
-﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
-module SDLError
+﻿namespace SDL
 
 #nowarn "9"
 
 open System.Runtime.InteropServices
 open System
-open SDLUtility
 
-module private SDLErrorNative = 
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern void SDL_ClearError()
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-    extern IntPtr SDL_GetError()
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
-    extern int SDL_SetError(IntPtr fmt)
+[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module Error = 
 
-let set (errorString:string) =
-    errorString
-    |> SDLUtility.withUtf8String (fun ptr -> SDLErrorNative.SDL_SetError(ptr) |> ignore)
+    module private SDLErrorNative = 
+        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+        extern void SDL_ClearError()
+        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+        extern IntPtr SDL_GetError()
+        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
+        extern int SDL_SetError(IntPtr fmt)
 
-let get () =
-    SDLErrorNative.SDL_GetError()
-    |> intPtrToStringUtf8
+    let set (errorString:string) =
+        errorString
+        |> SDL.Utility.withUtf8String (fun ptr -> SDLErrorNative.SDL_SetError(ptr) |> ignore)
 
-let clear () =
-    SDLErrorNative.SDL_ClearError()
+    let get () =
+        SDLErrorNative.SDL_GetError()
+        |> SDL.Utility.intPtrToStringUtf8
+
+    let clear () =
+        SDLErrorNative.SDL_ClearError()

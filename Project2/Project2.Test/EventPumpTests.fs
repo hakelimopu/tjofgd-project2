@@ -3,7 +3,7 @@ module EventPumpTests
 
 open Xunit
 open EventPump
-open SDLEvent
+open SDL.Event
 
 [<Fact>]
 let ``eventPump poll event, handle to None`` () =

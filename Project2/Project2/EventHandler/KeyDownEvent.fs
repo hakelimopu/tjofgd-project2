@@ -33,23 +33,23 @@ let internal handleFreeMovementCommand (sumLocationsFunc:SumLocationsFunc) (setV
 
 let private freeMovementKeyboardTable =
     [
-    (SDLKeyboard.ScanCode.F4,      CommandType.Quit);//TODO: get rid of me!
-    (SDLKeyboard.ScanCode.KeyPad4, CommandType.Move West);
-    (SDLKeyboard.ScanCode.Left,    CommandType.Move West);
-    (SDLKeyboard.ScanCode.KeyPad6, CommandType.Move East);
-    (SDLKeyboard.ScanCode.Right,   CommandType.Move East);
-    (SDLKeyboard.ScanCode.KeyPad2, CommandType.Move South);
-    (SDLKeyboard.ScanCode.Down,    CommandType.Move South);
-    (SDLKeyboard.ScanCode.KeyPad8, CommandType.Move North);
-    (SDLKeyboard.ScanCode.Up,      CommandType.Move North)]
+    (SDL.Keyboard.ScanCode.F4,      CommandType.Quit);//TODO: get rid of me!
+    (SDL.Keyboard.ScanCode.KeyPad4, CommandType.Move West);
+    (SDL.Keyboard.ScanCode.Left,    CommandType.Move West);
+    (SDL.Keyboard.ScanCode.KeyPad6, CommandType.Move East);
+    (SDL.Keyboard.ScanCode.Right,   CommandType.Move East);
+    (SDL.Keyboard.ScanCode.KeyPad2, CommandType.Move South);
+    (SDL.Keyboard.ScanCode.Down,    CommandType.Move South);
+    (SDL.Keyboard.ScanCode.KeyPad8, CommandType.Move North);
+    (SDL.Keyboard.ScanCode.Up,      CommandType.Move North)]
     |> Map.ofSeq
 
 let private encounterKeyboardTable =
-    [(SDLKeyboard.ScanCode.Space,  CommandType.Menu Select);
-    (SDLKeyboard.ScanCode.KeyPad2, CommandType.Menu Next);
-    (SDLKeyboard.ScanCode.Down,    CommandType.Menu Next);
-    (SDLKeyboard.ScanCode.KeyPad8, CommandType.Menu Previous);
-    (SDLKeyboard.ScanCode.Up,      CommandType.Menu Previous)]
+    [(SDL.Keyboard.ScanCode.Space,  CommandType.Menu Select);
+    (SDL.Keyboard.ScanCode.KeyPad2, CommandType.Menu Next);
+    (SDL.Keyboard.ScanCode.Down,    CommandType.Menu Next);
+    (SDL.Keyboard.ScanCode.KeyPad8, CommandType.Menu Previous);
+    (SDL.Keyboard.ScanCode.Up,      CommandType.Menu Previous)]
     |> Map.ofSeq
 
 let internal handlePCEncounterCommand (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (state:PlayState<_>)  (command:CommandType option):GameState<_> option =
@@ -59,28 +59,28 @@ let internal handlePCEncounterCommand (sumLocationsFunc:SumLocationsFunc) (setVi
     | Some (CommandType.Menu Select)  -> state |> applyEncounterChoice random sumLocationsFunc setVisibleFunc
     | _                               -> state |> PlayState |> Some
 
-let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
+let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     keyboardEvent.Keysym.Scancode
     |> freeMovementKeyboardTable.TryFind
     |> handleFreeMovementCommand sumLocationsFunc setVisibleFunc worldSize random state
 
-let internal handleKeyDownEventPlayStateEncounter (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
+let internal handleKeyDownEventPlayStateEncounter (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     keyboardEvent.Keysym.Scancode
     |> encounterKeyboardTable.TryFind
     |> handlePCEncounterCommand sumLocationsFunc setVisibleFunc random state
 
-let private handleKeyDownEventDeadState (createFunc:unit->GameState<_>) (keyboardEvent:SDLEvent.KeyboardEvent) (state:GameState<_>) :GameState<_> option =
+let private handleKeyDownEventDeadState (createFunc:unit->GameState<_>) (keyboardEvent:SDL.Event.KeyboardEvent) (state:GameState<_>) :GameState<_> option =
     match keyboardEvent.Keysym.Scancode with
-    | SDLKeyboard.ScanCode.F2 -> createFunc() |> Some
+    | SDL.Keyboard.ScanCode.F2 -> createFunc() |> Some
     | _ -> state |> Some
 
-let private handleKeyDownEventPlayState (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
+let private handleKeyDownEventPlayState (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     (keyboardEvent, state)
     ||> match state with
         | FreeMovement     -> handleKeyDownEventPlayStateFreeMovement  sumLocationsFunc setVisibleFunc worldSize random
         | HasEncounter   -> handleKeyDownEventPlayStateEncounter   sumLocationsFunc setVisibleFunc random
 
-let internal handleKeyDownEvent (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (createFunc:unit->GameState<_>) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDLEvent.KeyboardEvent) (state:GameState<_>) :GameState<_> option =
+let internal handleKeyDownEvent (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (createFunc:unit->GameState<_>) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:GameState<_>) :GameState<_> option =
     match state with
     | PlayState x -> 
         x |> handleKeyDownEventPlayState sumLocationsFunc setVisibleFunc worldSize random keyboardEvent

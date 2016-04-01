@@ -1,15 +1,16 @@
-﻿[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
-module SDLRWops
+﻿namespace SDL
 
 open System
 open System.Runtime.InteropServices
 
 #nowarn "9"
 
-type RWops = IntPtr
+[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
+module RWops = 
+    type RWops = IntPtr
 
-module internal SDLRWopsNative =
-    [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
-    extern RWops SDL_RWFromFile(IntPtr file, string mode)
+    module internal SDLRWopsNative =
+        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
+        extern RWops SDL_RWFromFile(IntPtr file, string mode)
     
 

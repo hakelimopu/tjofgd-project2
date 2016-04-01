@@ -2,7 +2,7 @@
 
 open GameState
 
-let internal handleQuitEvent (quitEvent:SDLEvent.QuitEvent) (state:GameState<_>) :GameState<_> option =
+let internal handleQuitEvent (quitEvent:SDL.Event.QuitEvent) (state:GameState<_>) :GameState<_> option =
     None
 
 

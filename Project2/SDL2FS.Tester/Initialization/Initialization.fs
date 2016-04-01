@@ -4,20 +4,20 @@ open System
 open SDL
 
 let initChoices = 
-    [(Init.Audio,          "Audio",          "[A]udio",          ConsoleKey.A);
-     (Init.Events,         "Events",         "[E]vents",         ConsoleKey.E);
-     (Init.GameController, "GameController", "[G]ameController", ConsoleKey.G);
-     (Init.Haptic,         "Haptic",         "[H]aptic",         ConsoleKey.H);
-     (Init.Joystick,       "Joystick",       "[J]oystick",       ConsoleKey.J);
-     (Init.Timer,          "Timer",          "[T]imer",          ConsoleKey.T);
-     (Init.Video,          "Video",          "[V]ideo",          ConsoleKey.V)]
+    [(Init.Init.Audio,          "Audio",          "[A]udio",          ConsoleKey.A);
+     (Init.Init.Events,         "Events",         "[E]vents",         ConsoleKey.E);
+     (Init.Init.GameController, "GameController", "[G]ameController", ConsoleKey.G);
+     (Init.Init.Haptic,         "Haptic",         "[H]aptic",         ConsoleKey.H);
+     (Init.Init.Joystick,       "Joystick",       "[J]oystick",       ConsoleKey.J);
+     (Init.Init.Timer,          "Timer",          "[T]imer",          ConsoleKey.T);
+     (Init.Init.Video,          "Video",          "[V]ideo",          ConsoleKey.V)]
 
 
-let rec chooseFlags (initial:Set<Init>) :Set<Init> =
+let rec chooseFlags (initial:Set<Init.Init>) :Set<Init.Init> =
     ["";"Choose Initialization Flags:";""]
     |> Console.writeLines
 
-    let processChoice (keys:Set<ConsoleKey>,keyMap:Map<ConsoleKey,Init>) (flag:Init,_,caption:string,key:ConsoleKey) :Set<ConsoleKey> * Map<ConsoleKey,Init>=
+    let processChoice (keys:Set<ConsoleKey>,keyMap:Map<ConsoleKey,Init.Init>) (flag:Init.Init,_,caption:string,key:ConsoleKey) :Set<ConsoleKey> * Map<ConsoleKey,Init.Init>=
         System.Console.Write caption
         if initial.Contains flag then
             System.Console.WriteLine "(on)"
@@ -26,7 +26,7 @@ let rec chooseFlags (initial:Set<Init>) :Set<Init> =
         (keys.Add(key), keyMap |> Map.add key flag)
 
     let keys, keyMap = 
-        ((Set.empty<ConsoleKey>, Map.empty<ConsoleKey,Init>),initChoices)
+        ((Set.empty<ConsoleKey>, Map.empty<ConsoleKey,Init.Init>),initChoices)
         ||> List.fold processChoice
 
     Console.WriteLine("[D]one")
@@ -44,8 +44,8 @@ let rec chooseFlags (initial:Set<Init>) :Set<Init> =
     else
         initial
 
-let showInitFlags (system:SDL.System) :unit=
-    let processChoice (flag:Init,name:string,_,_) :unit =
+let showInitFlags (system:SDL.Init.System) :unit=
+    let processChoice (flag:Init.Init,name:string,_,_) :unit =
         Console.Write name
         if system.wasInit flag then
             Console.WriteLine "-on"
@@ -58,15 +58,15 @@ let showInitFlags (system:SDL.System) :unit=
 
 let rec initMenu (returnMenu:unit->unit) :unit =
     let thisMenu () :unit= returnMenu |> initMenu
-    let chosenFlags = Set.empty<Init> |> chooseFlags
-    let flagAccumulator (acc:Init) (item:Init) :Init = acc ||| item
+    let chosenFlags = Set.empty<Init.Init> |> chooseFlags
+    let flagAccumulator (acc:Init.Init) (item:Init.Init) :Init.Init = acc ||| item
     let flags = 
-        (Init.None,chosenFlags)
+        (Init.Init.None,chosenFlags)
         ||> Set.fold flagAccumulator
     let run () = 
         ["";"Initialization Results:";""]
         |> Console.writeLines
-        use system = new SDL.System(flags)
+        use system = new SDL.Init.System(flags)
         system
         |> showInitFlags
     run()

@@ -1,31 +1,31 @@
 ﻿module Render
 
 open GameState
-open SDLUtility
-open SDLGeometry
-open SDLPixel
+open SDL
+open SDL.Geometry
+open SDL.Pixel
 open CellLocation
 open RenderCell
 
 
 type Sprite =
-    {Surface: SDLSurface.Surface;
-     Bounds:  SDLGeometry.Rectangle}
+    {Surface: SDL.Surface.Surface;
+     Bounds:  Rectangle}
 
-let createSprite (surface:SDLSurface.Surface) (bounds:SDLGeometry.Rectangle) :Sprite =
+let createSprite (surface:SDL.Surface.Surface) (bounds:Rectangle) :Sprite =
     {Surface=surface;
      Bounds=bounds}
 
-let blitSprite (dst:SDLGeometry.Point) (dstSurface:SDLSurface.Surface) (sprite:Sprite) :bool=
+let blitSprite (dst:Point) (dstSurface:SDL.Surface.Surface) (sprite:Sprite) :bool=
     dstSurface
-    |> SDLSurface.blit (Some sprite.Bounds) sprite.Surface (Some {X=dst.X;Y=dst.Y;Width=sprite.Bounds.Width;Height=sprite.Bounds.Height})
+    |> SDL.Surface.blit (Some sprite.Bounds) sprite.Surface (Some {X=dst.X;Y=dst.Y;Width=sprite.Bounds.Width;Height=sprite.Bounds.Height})
 
 type RenderingContext =
-    {Renderer:    SDLRender.Renderer;
-     Texture:     SDLTexture.Texture;
-     Surface:     SDLSurface.Surface;
+    {Renderer:    SDL.Render.Renderer;
+     Texture:     SDL.Texture.Texture;
+     Surface:     SDL.Surface.Surface;
      Sprites:     Map<byte,Sprite>;
-     WorkSurface: SDLSurface.Surface}
+     WorkSurface: SDL.Surface.Surface}
 
 
 let draw (context:RenderingContext) (state:GameState<_>) :unit =
@@ -51,15 +51,15 @@ let draw (context:RenderingContext) (state:GameState<_>) :unit =
         |> Map.ofSeq
 
     context.Renderer 
-    |> SDLRender.setDrawColor (255uy,0uy,255uy,255uy) 
+    |> SDL.Render.setDrawColor (255uy,0uy,255uy,255uy) 
     |> ignore
 
     context.Renderer 
-    |> SDLRender.clear 
+    |> SDL.Render.clear 
     |> ignore
 
     context.Surface
-    |> SDLSurface.fillRect None {Red=255uy;Green=0uy;Blue=255uy;Alpha=255uy}
+    |> SDL.Surface.fillRect None {Red=255uy;Green=0uy;Blue=255uy;Alpha=255uy}
     |> ignore
 
     let renderCell (location:CellLocation) (cell:RenderCell) :unit =
@@ -68,12 +68,10 @@ let draw (context:RenderingContext) (state:GameState<_>) :unit =
         let sprite = context.Sprites.[cell.Character]
 
         context.WorkSurface
-        |> SDLSurface.fillRect None foreground
-        |> ignore
+        |>* SDL.Surface.fillRect None foreground
 
         sprite
-        |> blitSprite {X=0<px>;Y=0<px>} context.WorkSurface
-        |> ignore
+        |>* blitSprite {X=0<px>;Y=0<px>} context.WorkSurface
 
         let dstRect = 
             {X      = location.Column * pixelsPerColumn;
@@ -83,12 +81,10 @@ let draw (context:RenderingContext) (state:GameState<_>) :unit =
             |> Some
 
         context.Surface
-        |> SDLSurface.fillRect dstRect background
-        |> ignore
+        |>* SDL.Surface.fillRect dstRect background
 
         context.Surface
-        |> SDLSurface.blit (Some {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>}) context.WorkSurface dstRect
-        |> ignore
+        |>* SDL.Surface.blit (Some {X=0<px>;Y=0<px>;Width=8<px>;Height=8<px>}) context.WorkSurface dstRect
 
     let renderPlayState (state:PlayState<CellMap<RenderCell>>) = 
         state.RenderData
@@ -101,12 +97,10 @@ let draw (context:RenderingContext) (state:GameState<_>) :unit =
         state |> renderPlayState
 
     context.Texture
-    |> SDLTexture.update None context.Surface
-    |> ignore
+    |>* SDL.Texture.update None context.Surface
 
     context.Renderer 
-    |> SDLRender.copy context.Texture None None 
-    |> ignore
+    |>* SDL.Render.copy context.Texture None None 
 
     context.Renderer 
-    |> SDLRender.present 
+    |> SDL.Render.present 

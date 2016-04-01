@@ -1,8 +1,8 @@
 ﻿module Game
 
-open SDLUtility
-open SDLGeometry
-open SDLPixel
+open SDL
+open SDL.Geometry
+open SDL.Pixel
 open GameState
 open CellLocation
 open RenderCell
@@ -15,37 +15,35 @@ open GridRenderer
 
 
 let runGame (randomFunc:RandomFunc) = 
-    //SDL setup
-    
-    use system = new SDL.System(SDL.Init.Video ||| SDL.Init.Events)
+    use system = new SDL.Init.System(SDL.Init.Init.Video ||| SDL.Init.Init.Events)
 
-    use mainWindow = SDLWindow.create "Splorr!! Island Interloper" 100<px> 100<px> 640<px> 480<px> 0u
+    use mainWindow = SDL.Window.create "Splorr!! Island Interloper" 100<px> 100<px> 640<px> 480<px> 0u
 
-    use mainRenderer = SDLRender.create mainWindow -1 SDLRender.Flags.Accelerated
+    use mainRenderer = SDL.Render.create mainWindow -1 SDL.Render.Flags.Accelerated
 
-    use surface = SDLSurface.createRGB (320<px>,240<px>,32<bit/px>) (0x00FF0000u,0x0000FF00u,0x000000FFu,0x00000000u)
+    use surface = SDL.Surface.createRGB (320<px>,240<px>,32<bit/px>) (0x00FF0000u,0x0000FF00u,0x000000FFu,0x00000000u)
 
-    use workSurface = SDLSurface.createRGB (8<px>,8<px>,32<bit/px>) (0x00FF0000u,0x0000FF00u,0x000000FFu,0x00000000u)
+    use workSurface = SDL.Surface.createRGB (8<px>,8<px>,32<bit/px>) (0x00FF0000u,0x0000FF00u,0x000000FFu,0x00000000u)
 
     workSurface
-    |> SDLSurface.setColorKey (Some {Red=0uy;Green=0uy;Blue=0uy;Alpha=0uy})
+    |> SDL.Surface.setColorKey (Some {Red=0uy;Green=0uy;Blue=0uy;Alpha=0uy})
     |> ignore
 
-    use bitmap = SDLSurface.loadBmp SDLPixel.RGB888Format "Content/romfont8x8.bmp"
+    use bitmap = SDL.Surface.loadBmp SDL.Pixel.RGB888Format "Content/romfont8x8.bmp"
 
     bitmap
-    |> SDLSurface.setColorKey (Some {Red=255uy;Green=255uy;Blue=255uy;Alpha=0uy})
+    |> SDL.Surface.setColorKey (Some {Red=255uy;Green=255uy;Blue=255uy;Alpha=0uy})
     |> ignore
 
-    use mainTexture = mainRenderer |> SDLTexture.create SDLPixel.RGB888Format SDLTexture.Access.Streaming (320<px>,240<px>)
+    use mainTexture = mainRenderer |> SDL.Texture.create SDL.Pixel.RGB888Format SDL.Texture.Access.Streaming (320<px>,240<px>)
 
-    mainRenderer |> SDLRender.setLogicalSize (320<px>,240<px>) |> ignore
+    mainRenderer |> SDL.Render.setLogicalSize (320<px>,240<px>) |> ignore
 
     //graphics setup
 
     let sprites = 
         [0uy..255uy]
-        |> Seq.map(fun index-> (index, (Render.createSprite bitmap {X=8<px>*((index |> int) % 16);Y=8<px>*((index |> int) / 16);Width=8<px>;Height=8<px>})))
+        |> Seq.map(fun index-> (index, (Render.createSprite bitmap {X=8<px>*((index |> int) % 16); Y=8<px>*((index |> int) / 16);Width=8<px>;Height=8<px>})))
         |> Map.ofSeq
     
     //game setup
@@ -70,7 +68,7 @@ let runGame (randomFunc:RandomFunc) =
     let eventHandler = EventHandler.handleEvent<CellMap<RenderCell>> (gridRenderer vectorToLocationFunc) sumLocationsFunc setVisibleFunc createFunc Constants.WorldSize randomFunc
 
     EventPump.eventPump 
-        SDLEvent.pollEvent
+        SDL.Event.pollEvent
         renderFunc 
         eventHandler 
         (createFunc())
