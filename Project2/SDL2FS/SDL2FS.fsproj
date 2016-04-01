@@ -72,22 +72,24 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="SDLUtility.fs" />
-    <Compile Include="SDLGeometry.fs" />
-    <Compile Include="SDLHints.fs" />
-    <Compile Include="SDL.fs" />
-    <Compile Include="SDLVersion.fs" />
-    <Compile Include="SDLError.fs" />
-    <Compile Include="SDLKeyboard.fs" />
-    <Compile Include="SDLMouse.fs" />
-    <Compile Include="SDLEvent.fs" />
-    <Compile Include="SDLCursor.fs" />
-    <Compile Include="SDLWindow.fs" />
-    <Compile Include="SDLPixel.fs" />
-    <Compile Include="SDLRWops.fs" />
-    <Compile Include="SDLSurface.fs" />
-    <Compile Include="SDLTexture.fs" />
-    <Compile Include="SDLRender.fs" />
+    <Compile Include="Utility.fs" />
+    <Compile Include="Geometry.fs" />
+    <Compile Include="Hints.fs" />
+    <Compile Include="Log.fs" />
+    <Compile Include="Clipboard.fs" />
+    <Compile Include="Init.fs" />
+    <Compile Include="Version.fs" />
+    <Compile Include="Error.fs" />
+    <Compile Include="Keyboard.fs" />
+    <Compile Include="Mouse.fs" />
+    <Compile Include="Event.fs" />
+    <Compile Include="Cursor.fs" />
+    <Compile Include="Window.fs" />
+    <Compile Include="Pixel.fs" />
+    <Compile Include="RWops.fs" />
+    <Compile Include="Surface.fs" />
+    <Compile Include="Texture.fs" />
+    <Compile Include="Render.fs" />
     <Content Include="README-SDL.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

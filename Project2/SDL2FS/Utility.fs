@@ -20,6 +20,10 @@ module Operators =
 [<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
 module Utility = 
 
+    module internal SDLUtilityNative =
+        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
+        extern void SDL_free(IntPtr mem);
+
     let private withString (encoder:string->byte[]) (func:IntPtr->'T) (text:string) =
         let bytes = encoder(text)
         let pinnedArray = GCHandle.Alloc(bytes, GCHandleType.Pinned)

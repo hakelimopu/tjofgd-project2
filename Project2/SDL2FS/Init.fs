@@ -5,7 +5,7 @@ open System
 
 [<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
 module Init = 
-    type private MainFunction = nativeint * IntPtr -> nativeint
+    type MainFunction = nativeint * IntPtr -> nativeint
 
     module private SDLInitNative =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -21,7 +21,7 @@ module Init =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern void SDL_SetMainReady()
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern void SDL_WinRTRunApp(MainFunction mainFunction,IntPtr reserved)//TODO
+        extern void SDL_WinRTRunApp(MainFunction mainFunction,IntPtr reserved)
 
     [<Flags>]
     type Init =
@@ -48,6 +48,8 @@ module Init =
             member this.Dispose() =
                 SDLInitNative.SDL_Quit()
 
-    //NOTE: Untested
     let setMainReady () =
         SDLInitNative.SDL_SetMainReady()
+
+    let winRTRunApp (mainFunction:MainFunction) =
+        SDLInitNative.SDL_WinRTRunApp(mainFunction, IntPtr.Zero)

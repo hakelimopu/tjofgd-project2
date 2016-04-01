@@ -13,6 +13,7 @@ open Random
 open IdleHandler
 open GridRenderer
 
+let logOutputFunction = SDL.Log.OutputFunction(fun a b c d->System.Console.WriteLine("YEP!"))
 
 let runGame (randomFunc:RandomFunc) = 
     use system = new SDL.Init.System(SDL.Init.Init.Video ||| SDL.Init.Init.Events)
