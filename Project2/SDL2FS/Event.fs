@@ -426,7 +426,7 @@ module Event =
 
     type internal SDL_EventFilter = delegate of nativeint * nativeptr<SDL_Event> -> int
 
-    module private SDLEventNative =
+    module private Native =
         //pump
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern void SDL_PumpEvents()
@@ -827,12 +827,12 @@ module Event =
         let mutable event = new SDL_Event()
         let result = 
             match timeout with
-            | None -> SDLEventNative.SDL_WaitEvent(&&event) = 1 
-            | Some x -> SDLEventNative.SDL_WaitEventTimeout(&&event,x/1<ms>) = 1
+            | None -> Native.SDL_WaitEvent(&&event) = 1 
+            | Some x -> Native.SDL_WaitEventTimeout(&&event,x/1<ms>) = 1
         convertEvent (result,event)
     
     let pollEvent () =
         let mutable event = new SDL_Event()
-        let result = SDLEventNative.SDL_PollEvent(&&event) = 1
+        let result = Native.SDL_PollEvent(&&event) = 1
         convertEvent (result,event)
 

@@ -23,7 +23,7 @@ module Texture =
 
     type Texture = SDL.Utility.Pointer
 
-    module private SDLTextureNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_CreateTexture(IntPtr renderer, uint32 format, int access, int w, int h)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -55,12 +55,12 @@ module Texture =
 
 
     let create format (access: Access) (w: int<px>,h: int<px>) (renderer:SDL.Utility.Pointer) =
-        let ptr = SDLTextureNative.SDL_CreateTexture(renderer.Pointer,format,access |> int,w / 1<px>,h / 1<px>)
-        new SDL.Utility.Pointer(ptr, SDLTextureNative.SDL_DestroyTexture)
+        let ptr = Native.SDL_CreateTexture(renderer.Pointer,format,access |> int,w / 1<px>,h / 1<px>)
+        new SDL.Utility.Pointer(ptr, Native.SDL_DestroyTexture)
 
     let fromSurface (renderer:SDL.Utility.Pointer) surface =
-        let ptr = SDLTextureNative.SDL_CreateTextureFromSurface(renderer.Pointer,surface)
-        new SDL.Utility.Pointer(ptr, SDLTextureNative.SDL_DestroyTexture)
+        let ptr = Native.SDL_CreateTextureFromSurface(renderer.Pointer,surface)
+        new SDL.Utility.Pointer(ptr, Native.SDL_DestroyTexture)
 
     let update (dstrect:SDL.Geometry.Rectangle option) (src:SDL.Surface.Surface) (texture:Texture) : bool =
         dstrect
@@ -69,4 +69,4 @@ module Texture =
                 src.Pointer
                 |> NativePtr.ofNativeInt<SDL.Surface.SDL_Surface>
                 |> NativePtr.read
-            0 = SDLTextureNative.SDL_UpdateTexture(texture.Pointer,rectptr,surf.pixels,surf.pitch)) 
+            0 = Native.SDL_UpdateTexture(texture.Pointer,rectptr,surf.pixels,surf.pitch)) 

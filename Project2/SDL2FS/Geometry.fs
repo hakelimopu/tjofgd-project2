@@ -25,7 +25,7 @@ module Geometry =
             val mutable h :int
         end
 
-    module private SDLRectNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern int SDL_HasIntersection(SDL_Rect* A, SDL_Rect* B)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -91,18 +91,18 @@ module Geometry =
         let mutable r1 = a |> rectangleToSDL_Rect
         let mutable r2 = b |> rectangleToSDL_Rect
         let mutable r3 = new SDL_Rect()
-        0 <> SDLRectNative.SDL_HasIntersection(&&r1,&&r2)
+        0 <> Native.SDL_HasIntersection(&&r1,&&r2)
 
     let intersect (a:Rectangle) (b:Rectangle): Rectangle =
         let mutable r1 = a |> rectangleToSDL_Rect
         let mutable r2 = b |> rectangleToSDL_Rect
         let mutable r3 = new SDL_Rect()
-        SDLRectNative.SDL_IntersectRect(&&r1,&&r2,&&r3) |> ignore
+        Native.SDL_IntersectRect(&&r1,&&r2,&&r3) |> ignore
         sdl_RectToRectangle(r3)
 
     let union (a:Rectangle) (b:Rectangle): Rectangle =
         let mutable r1 = a |> rectangleToSDL_Rect
         let mutable r2 = b |> rectangleToSDL_Rect
         let mutable r3 = new SDL_Rect()
-        SDLRectNative.SDL_UnionRect(&&r1,&&r2,&&r3) |> ignore
+        Native.SDL_UnionRect(&&r1,&&r2,&&r3) |> ignore
         sdl_RectToRectangle(r3)

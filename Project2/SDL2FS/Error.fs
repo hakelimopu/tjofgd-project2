@@ -8,7 +8,7 @@ open System
 [<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
 module Error = 
 
-    module private SDLErrorNative = 
+    module private Native = 
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern void SDL_ClearError()
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -18,11 +18,11 @@ module Error =
 
     let set (errorString:string) =
         errorString
-        |> SDL.Utility.withUtf8String (fun ptr -> SDLErrorNative.SDL_SetError(ptr) |> ignore)
+        |> SDL.Utility.withUtf8String (fun ptr -> Native.SDL_SetError(ptr) |> ignore)
 
     let get () =
-        SDLErrorNative.SDL_GetError()
+        Native.SDL_GetError()
         |> SDL.Utility.intPtrToStringUtf8
 
     let clear () =
-        SDLErrorNative.SDL_ClearError()
+        Native.SDL_ClearError()

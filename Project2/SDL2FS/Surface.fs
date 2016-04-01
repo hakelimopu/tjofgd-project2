@@ -29,7 +29,7 @@ module Surface =
 
     type Surface = SDL.Utility.Pointer
 
-    module private SDLSurfaceNative =
+    module private Native =
         //Creating RGB surfaces
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_CreateRGBSurface(uint32 flags, int width, int height, int depth, uint32 Rmask, uint32 Gmask, uint32 Bmask, uint32 Amask)
@@ -122,8 +122,8 @@ module Surface =
 
 
     let createRGB (width:int<px>,height:int<px>,depth:int<bit/px>) (rmask:uint32,gmask:uint32,bmask:uint32,amask:uint32) :Surface=
-        let ptr = SDLSurfaceNative.SDL_CreateRGBSurface(0u,width/1<px>,height/1<px>,depth/1<bit/px>,rmask,gmask,bmask,amask)
-        new SDL.Utility.Pointer(ptr, SDLSurfaceNative.SDL_FreeSurface)
+        let ptr = Native.SDL_CreateRGBSurface(0u,width/1<px>,height/1<px>,depth/1<bit/px>,rmask,gmask,bmask,amask)
+        new SDL.Utility.Pointer(ptr, Native.SDL_FreeSurface)
 
     let private getFormat (surface:Surface) :IntPtr =
         let sdlSurface = 
@@ -134,33 +134,33 @@ module Surface =
 
     let fillRect (rect:SDL.Geometry.Rectangle option) (color:SDL.Pixel.Color) (surface:Surface) :bool =
         let format = surface |> getFormat
-        SDL.Geometry.withSDLRectPointer (fun r->0 = SDLSurfaceNative.SDL_FillRect(surface.Pointer, r, color |> SDL.Pixel.mapColor format)) rect
+        SDL.Geometry.withSDLRectPointer (fun r->0 = Native.SDL_FillRect(surface.Pointer, r, color |> SDL.Pixel.mapColor format)) rect
 
     let loadBmp (pixelFormat: uint32) (fileName:string) : Surface =
-        let bitmapSurface = SDLSurfaceNative.SDL_LoadBMP_RW(SDL.Utility.withUtf8String (fun ptr->SDL.RWops.SDLRWopsNative.SDL_RWFromFile(ptr,"rb")) fileName, 1)
-        let convertedSurface = SDLSurfaceNative.SDL_ConvertSurfaceFormat(bitmapSurface,pixelFormat,0u)
-        SDLSurfaceNative.SDL_FreeSurface bitmapSurface
-        new SDL.Utility.Pointer(convertedSurface, SDLSurfaceNative.SDL_FreeSurface)
+        let bitmapSurface = Native.SDL_LoadBMP_RW(SDL.Utility.withUtf8String (fun ptr->SDL.RWops.Native.SDL_RWFromFile(ptr,"rb")) fileName, 1)
+        let convertedSurface = Native.SDL_ConvertSurfaceFormat(bitmapSurface,pixelFormat,0u)
+        Native.SDL_FreeSurface bitmapSurface
+        new SDL.Utility.Pointer(convertedSurface, Native.SDL_FreeSurface)
 
     let saveBmp (fileName:string) (surface:Surface) :bool =
-        0 = SDLSurfaceNative.SDL_SaveBMP_RW(surface.Pointer, SDL.Utility.withUtf8String (fun ptr->SDL.RWops.SDLRWopsNative.SDL_RWFromFile(ptr,"wb")) fileName, 1)
+        0 = Native.SDL_SaveBMP_RW(surface.Pointer, SDL.Utility.withUtf8String (fun ptr->SDL.RWops.Native.SDL_RWFromFile(ptr,"wb")) fileName, 1)
 
     let upperBlit (srcrect:SDL.Geometry.Rectangle option) (src:Surface) (dstrect:SDL.Geometry.Rectangle option) (dst:Surface) =
-        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_UpperBlit(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
+        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = Native.SDL_UpperBlit(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
 
     let blit = upperBlit
 
     let lowerBlit (srcrect:SDL.Geometry.Rectangle option) (src:Surface) (dstrect:SDL.Geometry.Rectangle option) (dst:Surface) =
-        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_LowerBlit(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
+        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = Native.SDL_LowerBlit(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
 
     let upperBlitScaled (srcrect:SDL.Geometry.Rectangle option) (src:Surface) (dstrect:SDL.Geometry.Rectangle option) (dst:Surface) =
-        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_UpperBlitScaled(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
+        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = Native.SDL_UpperBlitScaled(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
 
     let lowerBlitScaled (srcrect:SDL.Geometry.Rectangle option) (src:Surface) (dstrect:SDL.Geometry.Rectangle option) (dst:Surface) =
-        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_LowerBlitScaled(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
+        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = Native.SDL_LowerBlitScaled(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
 
     let softStretch (srcrect:SDL.Geometry.Rectangle option) (src:Surface) (dstrect:SDL.Geometry.Rectangle option) (dst:Surface) =
-        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = SDLSurfaceNative.SDL_SoftStretch(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
+        SDL.Geometry.withSDLRectPointer (fun srcptr -> SDL.Geometry.withSDLRectPointer (fun dstptr -> 0 = Native.SDL_SoftStretch(src.Pointer,srcptr,dst.Pointer,dstptr)) dstrect) srcrect
 
     let setColorKey (color:SDL.Pixel.Color option) (surface:Surface) =
         let fmt = 
@@ -169,11 +169,11 @@ module Surface =
             if color.IsSome then SDL.Pixel.mapColor fmt color.Value else 0u
         let flag = 
             if color.IsSome then 1 else 0
-        0 = SDLSurfaceNative.SDL_SetColorKey(surface.Pointer, flag, key)
+        0 = Native.SDL_SetColorKey(surface.Pointer, flag, key)
 
     let getColorKey (surface:Surface) :SDL.Pixel.Color option =
         let mutable key: uint32 = 0u
-        match SDLSurfaceNative.SDL_GetColorKey(surface.Pointer,&&key) with
+        match Native.SDL_GetColorKey(surface.Pointer,&&key) with
         | 0 ->
             let fmt = 
                 (surface |> getFormat)
@@ -181,26 +181,26 @@ module Surface =
         | _ -> None
 
     let lockBind (surface:Surface) (func: unit -> unit) :bool =
-        if 0 = SDLSurfaceNative.SDL_LockSurface surface.Pointer then
+        if 0 = Native.SDL_LockSurface surface.Pointer then
             func()
-            SDLSurfaceNative.SDL_UnlockSurface surface.Pointer
+            Native.SDL_UnlockSurface surface.Pointer
             true
         else
             false
 
     let setRLE (surface:Surface) (flag:bool) :bool =
-        0 = SDLSurfaceNative.SDL_SetSurfaceRLE(surface.Pointer,(if flag then 1 else 0))
+        0 = Native.SDL_SetSurfaceRLE(surface.Pointer,(if flag then 1 else 0))
 
 
     let setModulation (color:SDL.Pixel.Color) (surface:Surface) :bool = 
-        (0 = SDLSurfaceNative.SDL_SetSurfaceColorMod(surface.Pointer, color.Red, color.Green, color.Blue)) && (0 = SDLSurfaceNative.SDL_SetSurfaceAlphaMod(surface.Pointer, color.Alpha))
+        (0 = Native.SDL_SetSurfaceColorMod(surface.Pointer, color.Red, color.Green, color.Blue)) && (0 = Native.SDL_SetSurfaceAlphaMod(surface.Pointer, color.Alpha))
     
     let getModulation (surface:Surface) :SDL.Pixel.Color option =
         let mutable r : uint8 = 0uy
         let mutable g : uint8 = 0uy
         let mutable b : uint8 = 0uy
         let mutable a : uint8 = 0uy
-        let result = SDLSurfaceNative.SDL_GetSurfaceColorMod(surface.Pointer,&&r,&&g,&&b), SDLSurfaceNative.SDL_GetSurfaceAlphaMod(surface.Pointer,&&a)
+        let result = Native.SDL_GetSurfaceColorMod(surface.Pointer,&&r,&&g,&&b), Native.SDL_GetSurfaceAlphaMod(surface.Pointer,&&a)
         match result with
         | (0,0) -> {Red=r;Green=g;Blue=b;Alpha=a} |> Some
         | _ -> None

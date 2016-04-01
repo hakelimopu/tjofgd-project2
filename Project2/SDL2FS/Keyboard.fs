@@ -268,7 +268,7 @@ module Keyboard =
         | Mode = 0x4000
         | Reserved = 0x8000
 
-    module private SDLKeyboardNative =
+    module private Native =
         //keyboard focus
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_GetKeyboardFocus()
@@ -314,7 +314,7 @@ module Keyboard =
         extern int SDL_IsScreenKeyboardShown(IntPtr window)
 
     let getFocus () :IntPtr =
-        SDLKeyboardNative.SDL_GetKeyboardFocus()
+        Native.SDL_GetKeyboardFocus()
 
     let private scanCodes = 
         [ScanCode.A;
@@ -560,7 +560,7 @@ module Keyboard =
 
     let getState () : Map<ScanCode,bool> =
         let kbState = 
-            SDLKeyboardNative.SDL_GetKeyboardState(IntPtr.Zero)
+            Native.SDL_GetKeyboardState(IntPtr.Zero)
             |> NativePtr.ofNativeInt<uint8>
         let getStatus (code:ScanCode) :bool=
             NativePtr.add kbState (code |> int)
@@ -571,27 +571,27 @@ module Keyboard =
         |> Map.ofSeq
 
     let getModifierState () : KeyModifier =
-        SDLKeyboardNative.SDL_GetModState()
+        Native.SDL_GetModState()
         |> enum<KeyModifier>
 
     let setModifierState (state:KeyModifier) :unit =
-        SDLKeyboardNative.SDL_SetModState(state|>int)
+        Native.SDL_SetModState(state|>int)
 
     let startTextInput () :unit =
-        SDLKeyboardNative.SDL_StartTextInput()
+        Native.SDL_StartTextInput()
 
     let isTextInputActive (): bool = 
-        0 <> SDLKeyboardNative.SDL_IsTextInputActive()
+        0 <> Native.SDL_IsTextInputActive()
 
     let stopTextInput () :unit =
-        SDLKeyboardNative.SDL_StopTextInput()
+        Native.SDL_StopTextInput()
 
     let setTextInputRectangle (rectangle: SDL.Geometry.Rectangle option) :unit = 
         rectangle
-        |> SDL.Geometry.withSDLRectPointer (fun rect->SDLKeyboardNative.SDL_SetTextInputRect(rect))
+        |> SDL.Geometry.withSDLRectPointer (fun rect->Native.SDL_SetTextInputRect(rect))
 
     let hasScreenKeyboardSupport () :bool =    
-        0 <> SDLKeyboardNative.SDL_HasScreenKeyboardSupport()
+        0 <> Native.SDL_HasScreenKeyboardSupport()
 
     let isScreenKeyboardShown (window:IntPtr) :bool =
-        0 <> SDLKeyboardNative.SDL_IsScreenKeyboardShown(window)
+        0 <> Native.SDL_IsScreenKeyboardShown(window)

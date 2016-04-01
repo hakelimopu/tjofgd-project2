@@ -33,7 +33,7 @@ module Mouse =
         | Normal  = 0
         | Flipped = 1
 
-    module internal SDLMouseNative = 
+    module internal Native = 
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_GetMouseFocus()//TODO
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -68,35 +68,35 @@ module Mouse =
     let getMouseState () :MouseState =
         let mutable x:int = 0
         let mutable y:int = 0
-        let buttons = SDLMouseNative.SDL_GetMouseState(&&x,&&y)
+        let buttons = Native.SDL_GetMouseState(&&x,&&y)
         {Position = {X = x * 1<px>;Y = y * 1<px>};Buttons = buttons |> toButtonSet}
 
     let getGlobalMouseState () :MouseState =
         let mutable x:int = 0
         let mutable y:int = 0
-        let buttons = SDLMouseNative.SDL_GetGlobalMouseState(&&x,&&y)
+        let buttons = Native.SDL_GetGlobalMouseState(&&x,&&y)
         {Position = {X = x * 1<px>;Y = y * 1<px>};Buttons = buttons |> toButtonSet}
 
     let getRelativeMouseState () :MouseState =
         let mutable x:int = 0
         let mutable y:int = 0
-        let buttons = SDLMouseNative.SDL_GetRelativeMouseState(&&x,&&y)
+        let buttons = Native.SDL_GetRelativeMouseState(&&x,&&y)
         {Position = {X = x * 1<px>;Y = y * 1<px>};Buttons = buttons |> toButtonSet}
 
     let warpMouseInWindow (window:SDL.Utility.Pointer) (xy:SDL.Geometry.Point) :unit =
-        SDLMouseNative.SDL_WarpMouseInWindow(window.Pointer,xy.X / 1<px>,xy.Y / 1<px>)
+        Native.SDL_WarpMouseInWindow(window.Pointer,xy.X / 1<px>,xy.Y / 1<px>)
 
     let warpMouseInCurrentWindow (xy:SDL.Geometry.Point) :unit =
-        SDLMouseNative.SDL_WarpMouseInWindow(IntPtr.Zero,xy.X / 1<px>,xy.Y / 1<px>)
+        Native.SDL_WarpMouseInWindow(IntPtr.Zero,xy.X / 1<px>,xy.Y / 1<px>)
 
     let warpMouseGlobal (xy:SDL.Geometry.Point) :bool =
-        0 = SDLMouseNative.SDL_WarpMouseGlobal(xy.X / 1<px>,xy.Y / 1<px>)
+        0 = Native.SDL_WarpMouseGlobal(xy.X / 1<px>,xy.Y / 1<px>)
 
     let setRelativeMouseMode (flag:bool) :bool = 
-        0 = SDLMouseNative.SDL_SetRelativeMouseMode(if flag then 1 else 0)
+        0 = Native.SDL_SetRelativeMouseMode(if flag then 1 else 0)
 
     let getRelativeMouseMove () :bool =
-        0 <> SDLMouseNative.SDL_GetRelativeMouseMode()
+        0 <> Native.SDL_GetRelativeMouseMode()
 
     let captureMouse (flag:bool) : bool =
-        0 = SDLMouseNative.SDL_CaptureMouse(if flag then 1 else 0)
+        0 = Native.SDL_CaptureMouse(if flag then 1 else 0)

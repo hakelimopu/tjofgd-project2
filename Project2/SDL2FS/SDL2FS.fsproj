@@ -90,6 +90,7 @@
     <Compile Include="Surface.fs" />
     <Compile Include="Texture.fs" />
     <Compile Include="Render.fs" />
+    <Compile Include="Platform.fs" />
     <Content Include="README-SDL.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -23,7 +23,7 @@ module Cursor =
         | No=10 
         | Hand=11     
 
-    module internal SDLCursorNative = 
+    module internal Native = 
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern SDL_Cursor SDL_CreateCursor(uint8 * data,uint8 * mask,int w, int h, int hot_x,int hot_y)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]

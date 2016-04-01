@@ -20,7 +20,7 @@ module Operators =
 [<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
 module Utility = 
 
-    module internal SDLUtilityNative =
+    module internal Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern void SDL_free(IntPtr mem);
 

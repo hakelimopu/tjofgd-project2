@@ -139,7 +139,7 @@ module Pixel =
             val next: IntPtr;//SDL_PixelFormat*
         end
 
-    module private SDLPixelNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_GetPixelFormatName(uint32 formatEnum)
 
@@ -193,7 +193,7 @@ module Pixel =
         AMask: uint32}
 
     let formatEnumName (format:uint32) :string = 
-        SDLPixelNative.SDL_GetPixelFormatName(format)
+        Native.SDL_GetPixelFormatName(format)
         |> SDL.Utility.intPtrToStringUtf8
 
     let formatEnumToMasks (formatEnum: uint32) : (int<bit/px>*uint32*uint32*uint32*uint32) option =
@@ -202,28 +202,28 @@ module Pixel =
         let mutable gmask=0u
         let mutable bmask=0u
         let mutable amask=0u
-        if SDLPixelNative.SDL_PixelFormatEnumToMasks(formatEnum,&&bpp,&&rmask,&&gmask,&&bmask,&&amask) <> 0 then
+        if Native.SDL_PixelFormatEnumToMasks(formatEnum,&&bpp,&&rmask,&&gmask,&&bmask,&&amask) <> 0 then
             Some (bpp*1<bit/px>,rmask,gmask,bmask,amask)
         else
             None
 
     let masksToFormatEnum (bpp:int<bit/px>,rmask:uint32,gmask:uint32,bmask:uint32,amask:uint32) :uint32 =
-        SDLPixelNative.SDL_MasksToPixelFormatEnum(bpp/1<bit/px>,rmask,gmask,bmask,amask)
+        Native.SDL_MasksToPixelFormatEnum(bpp/1<bit/px>,rmask,gmask,bmask,amask)
 
     let alloc (formatEnum: uint32) :PixelFormat =
-        SDLPixelNative.SDL_AllocFormat formatEnum
+        Native.SDL_AllocFormat formatEnum
 
     let free format =
-        SDLPixelNative.SDL_FreeFormat format
+        Native.SDL_FreeFormat format
 
     let allocPalette colorCount =
-        SDLPixelNative.SDL_AllocPalette(colorCount)
+        Native.SDL_AllocPalette(colorCount)
 
     let freePalette palette =
-        SDLPixelNative.SDL_FreePalette(palette)
+        Native.SDL_FreePalette(palette)
 
     let setPalette palette format =
-        0 = SDLPixelNative.SDL_SetPixelFormatPalette(format,palette)
+        0 = Native.SDL_SetPixelFormatPalette(format,palette)
 
     let setPaletteColor index (color:Color) palette =
         let mutable c = new SDL_Color()
@@ -231,7 +231,7 @@ module Pixel =
         c.g <- color.Green
         c.b <- color.Blue
         c.a <- color.Alpha
-        0 = SDLPixelNative.SDL_SetPaletteColors(palette,&&c,index,1)
+        0 = Native.SDL_SetPaletteColors(palette,&&c,index,1)
 
     let getPaletteColorCount (palette:IntPtr) : int=
         if palette=IntPtr.Zero then
@@ -260,12 +260,12 @@ module Pixel =
             Some {Red=color.r;Green=color.g;Blue=color.b;Alpha=color.a}
     
     let mapColor (format:PixelFormat) (color: Color) :uint32 = 
-        SDLPixelNative.SDL_MapRGBA(format,color.Red,color.Green,color.Blue,color.Alpha)
+        Native.SDL_MapRGBA(format,color.Red,color.Green,color.Blue,color.Alpha)
 
     let getColor (format:PixelFormat) (value:uint32) :Color =
         let mutable r=0uy
         let mutable g=0uy
         let mutable b=0uy
         let mutable a=0uy
-        SDLPixelNative.SDL_GetRGBA(value,format,&&r,&&g,&&b,&&a)
+        Native.SDL_GetRGBA(value,format,&&r,&&g,&&b,&&a)
         {Red=r;Green=g;Blue=b;Alpha=a}

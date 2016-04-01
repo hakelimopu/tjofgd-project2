@@ -7,7 +7,7 @@ open System
 module Init = 
     type MainFunction = nativeint * IntPtr -> nativeint
 
-    module private SDLInitNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern int SDL_Init(uint32 flags)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -37,19 +37,19 @@ module Init =
 
     type System(flags:Init) =
         do
-            SDLInitNative.SDL_Init(flags |> uint32) |> ignore
+            Native.SDL_Init(flags |> uint32) |> ignore
         member this.initSubSystem (flags: Init) :bool =
-            0 = SDLInitNative.SDL_InitSubSystem(flags |> uint32)
+            0 = Native.SDL_InitSubSystem(flags |> uint32)
         member this.quitSubSystem (flags: Init) :unit =
-            SDLInitNative.SDL_QuitSubSystem(flags |> uint32)
+            Native.SDL_QuitSubSystem(flags |> uint32)
         member this.wasInit (flags:Init) :bool =
-            flags = (SDLInitNative.SDL_WasInit(flags |> uint32) |> int |> enum<Init>)
+            flags = (Native.SDL_WasInit(flags |> uint32) |> int |> enum<Init>)
         interface IDisposable with
             member this.Dispose() =
-                SDLInitNative.SDL_Quit()
+                Native.SDL_Quit()
 
     let setMainReady () =
-        SDLInitNative.SDL_SetMainReady()
+        Native.SDL_SetMainReady()
 
     let winRTRunApp (mainFunction:MainFunction) =
-        SDLInitNative.SDL_WinRTRunApp(mainFunction, IntPtr.Zero)
+        Native.SDL_WinRTRunApp(mainFunction, IntPtr.Zero)

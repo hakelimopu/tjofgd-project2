@@ -5,7 +5,7 @@ open System
 
 module Clipboard =
         
-    module private SDLClipboardNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern int SDL_SetClipboardText(IntPtr text);
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -15,20 +15,20 @@ module Clipboard =
 
     let setText (text:string) :bool =
         text
-        |> SDL.Utility.withUtf8String(fun ptr->SDLClipboardNative.SDL_SetClipboardText(ptr))
+        |> SDL.Utility.withUtf8String(fun ptr->Native.SDL_SetClipboardText(ptr))
         <> 0
 
     let getText () :string =
-        let ptr = SDLClipboardNative.SDL_GetClipboardText()
+        let ptr = Native.SDL_GetClipboardText()
         let text = 
             ptr
             |> SDL.Utility.intPtrToStringUtf8
         if ptr<>IntPtr.Zero then
-            SDL.Utility.SDLUtilityNative.SDL_free(ptr)
+            SDL.Utility.Native.SDL_free(ptr)
         else
             ()
         text
 
     let hasText () :bool =
-        SDLClipboardNative.SDL_HasClipboardText()
+        Native.SDL_HasClipboardText()
         <> 0

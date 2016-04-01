@@ -26,7 +26,7 @@ module Render =
 
     type Renderer = SDL.Utility.Pointer
                                            
-    module private SDLRenderNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_CreateRenderer(IntPtr window, int index, uint32 flags)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -109,21 +109,21 @@ module Render =
         extern int SDL_GL_UnbindTexture(IntPtr texture)
 
     let create (window:SDL.Window.Window) (index:int) (flags:Flags) :Renderer =
-        let ptr = SDLRenderNative.SDL_CreateRenderer(window.Pointer, index, flags |> uint32)
-        new SDL.Utility.Pointer(ptr,SDLRenderNative.SDL_DestroyRenderer)
+        let ptr = Native.SDL_CreateRenderer(window.Pointer, index, flags |> uint32)
+        new SDL.Utility.Pointer(ptr,Native.SDL_DestroyRenderer)
 
     let clear (renderer:Renderer) :bool =
-        0 = SDLRenderNative.SDL_RenderClear(renderer.Pointer)
+        0 = Native.SDL_RenderClear(renderer.Pointer)
 
     let present (renderer:Renderer) :unit =
-        SDLRenderNative.SDL_RenderPresent(renderer.Pointer)
+        Native.SDL_RenderPresent(renderer.Pointer)
 
     let setDrawColor (r, g, b, a) (renderer:Renderer) =
-        0 = SDLRenderNative.SDL_SetRenderDrawColor(renderer.Pointer,r,g,b,a)
+        0 = Native.SDL_SetRenderDrawColor(renderer.Pointer,r,g,b,a)
 
     let setLogicalSize (w:int<px>,h:int<px>) (renderer:Renderer) =
-        0 = SDLRenderNative.SDL_RenderSetLogicalSize(renderer.Pointer,w |> int,h |> int)
+        0 = Native.SDL_RenderSetLogicalSize(renderer.Pointer,w |> int,h |> int)
 
     let copy (texture:SDL.Texture.Texture) (srcrect:SDL.Geometry.Rectangle option) (dstrect:SDL.Geometry.Rectangle option) (renderer:Renderer) =
-        SDL.Geometry.withSDLRectPointer(fun src -> SDL.Geometry.withSDLRectPointer(fun dst -> 0 = SDLRenderNative.SDL_RenderCopy(renderer.Pointer,texture.Pointer,src,dst)) dstrect) srcrect
+        SDL.Geometry.withSDLRectPointer(fun src -> SDL.Geometry.withSDLRectPointer(fun dst -> 0 = Native.SDL_RenderCopy(renderer.Pointer,texture.Pointer,src,dst)) dstrect) srcrect
     

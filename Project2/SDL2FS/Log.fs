@@ -38,7 +38,7 @@ module Log =
 
     type OutputFunction = delegate of nativeint * nativeint * nativeint * nativeint -> unit
 
-    module private SDLLogNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern void SDL_Log([<MarshalAs(UnmanagedType.LPStr)>]string fmt)    
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -69,47 +69,47 @@ module Log =
         extern void SDL_LogSetOutputFunction(OutputFunction callback, IntPtr userdata);
 
     let setOutputFunction (callback:OutputFunction) :unit =
-        SDLLogNative.SDL_LogSetOutputFunction(callback, IntPtr.Zero)
+        Native.SDL_LogSetOutputFunction(callback, IntPtr.Zero)
 
     let getOutputFunction () :OutputFunction =
         let mutable callback:OutputFunction = OutputFunction(fun a b c d -> ())
         let mutable ptr:IntPtr = IntPtr.Zero
-        SDLLogNative.SDL_LogGetOutputFunction(&callback,&&ptr)
+        Native.SDL_LogGetOutputFunction(&callback,&&ptr)
         callback
 
     let log (message:string) :unit =
-        SDLLogNative.SDL_Log message
+        Native.SDL_Log message
 
     let getPriority (category:int) :Priority =
-        SDLLogNative.SDL_LogGetPriority (category)
+        Native.SDL_LogGetPriority (category)
 
     let setAllPriority (priority:Priority) :unit =
-        SDLLogNative.SDL_LogSetAllPriority(priority)
+        Native.SDL_LogSetAllPriority(priority)
 
     let setPriority (priority:Priority) (category:int) :unit =
-        SDLLogNative.SDL_LogSetPriority (category, priority)
+        Native.SDL_LogSetPriority (category, priority)
 
     let resetPriorities () =
-        SDLLogNative.SDL_LogResetPriorities()
+        Native.SDL_LogResetPriorities()
 
     let verbose (category:int) (message:string) :unit =
-        SDLLogNative.SDL_LogVerbose (category, message)
+        Native.SDL_LogVerbose (category, message)
 
     let debug (category:int) (message:string) :unit =
-        SDLLogNative.SDL_LogDebug (category, message)
+        Native.SDL_LogDebug (category, message)
 
     let error (category:int) (message:string) :unit =
-        SDLLogNative.SDL_LogError (category, message)
+        Native.SDL_LogError (category, message)
 
     let info (category:int) (message:string) :unit =
-        SDLLogNative.SDL_LogInfo (category, message)
+        Native.SDL_LogInfo (category, message)
 
     let warn (category:int) (message:string) :unit =
-        SDLLogNative.SDL_LogWarn (category, message)
+        Native.SDL_LogWarn (category, message)
 
     let critical (category:int) (message:string) :unit =
-        SDLLogNative.SDL_LogCritical (category, message)
+        Native.SDL_LogCritical (category, message)
 
     let message (priority:Priority) (category:int) (message:string) :unit =
-        SDLLogNative.SDL_LogMessage (category, priority, message)
+        Native.SDL_LogMessage (category, priority, message)
 

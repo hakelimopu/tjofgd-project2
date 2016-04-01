@@ -43,7 +43,7 @@ module Window =
 
     type Window = SDL.Utility.Pointer
 
-    module private SDLWindowNative =
+    module private Native =
         //create and destroy
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_CreateWindow(IntPtr title, int x, int y, int w, int h, uint32 flags)
@@ -209,76 +209,76 @@ module Window =
     let create (title:string) (x:int<px>) (y:int<px>) (w:int<px>) (h:int<px>) (flags:uint32) :Window =
         let ptr = 
             title
-            |> SDL.Utility.withUtf8String (fun ptr -> SDLWindowNative.SDL_CreateWindow(ptr, x /1<px>, y /1<px>, w /1<px>, h /1<px>, flags))
-        new SDL.Utility.Pointer(ptr, SDLWindowNative.SDL_DestroyWindow)
+            |> SDL.Utility.withUtf8String (fun ptr -> Native.SDL_CreateWindow(ptr, x /1<px>, y /1<px>, w /1<px>, h /1<px>, flags))
+        new SDL.Utility.Pointer(ptr, Native.SDL_DestroyWindow)
 
     let hide (window:Window) =
-        SDLWindowNative.SDL_HideWindow window.Pointer
+        Native.SDL_HideWindow window.Pointer
 
     let show (window:Window) =
-        SDLWindowNative.SDL_ShowWindow window.Pointer
+        Native.SDL_ShowWindow window.Pointer
 
     let minimize (window:Window) =
-        SDLWindowNative.SDL_MinimizeWindow window.Pointer
+        Native.SDL_MinimizeWindow window.Pointer
 
     let maximize (window:Window) =
-        SDLWindowNative.SDL_MaximizeWindow window.Pointer
+        Native.SDL_MaximizeWindow window.Pointer
 
     let raise (window:Window) =
-        SDLWindowNative.SDL_RaiseWindow window.Pointer
+        Native.SDL_RaiseWindow window.Pointer
 
     let restore (window:Window) =
-        SDLWindowNative.SDL_RestoreWindow window.Pointer
+        Native.SDL_RestoreWindow window.Pointer
 
     let setTitle (text:string) (window:Window) =
         text
-        |> SDL.Utility.withUtf8String (fun ptr -> SDLWindowNative.SDL_SetWindowTitle(window.Pointer, ptr))
+        |> SDL.Utility.withUtf8String (fun ptr -> Native.SDL_SetWindowTitle(window.Pointer, ptr))
 
     let getTitle (window:Window) :string =
-        SDLWindowNative.SDL_GetWindowTitle window.Pointer
+        Native.SDL_GetWindowTitle window.Pointer
         |> SDL.Utility.intPtrToStringUtf8
 
     let setSize (w:int<px>,h:int<px>) (window:Window) =
-        SDLWindowNative.SDL_SetWindowSize(window.Pointer, w/1<px>, h/1<px>)
+        Native.SDL_SetWindowSize(window.Pointer, w/1<px>, h/1<px>)
 
     let getSize (window:Window) :int<px> * int<px> =
         let mutable x = 0
         let mutable y = 0
-        SDLWindowNative.SDL_GetWindowSize (window.Pointer, &&x, &&y)
+        Native.SDL_GetWindowSize (window.Pointer, &&x, &&y)
         (x * 1<px>, y * 1<px>)
 
     let setPosition (x:int<px>,y:int<px>) (window:Window) =
-        SDLWindowNative.SDL_SetWindowPosition(window.Pointer, x/1<px>, y/1<px>)
+        Native.SDL_SetWindowPosition(window.Pointer, x/1<px>, y/1<px>)
 
     let getPosition (window:Window) :int<px> * int<px> =
         let mutable x = 0
         let mutable y = 0
-        SDLWindowNative.SDL_GetWindowPosition (window.Pointer, &&x, &&y)
+        Native.SDL_GetWindowPosition (window.Pointer, &&x, &&y)
         (x * 1<px>, y * 1<px>)
 
     let setBrightness (brightness:float) (window:Window) =
-        SDLWindowNative.SDL_SetWindowBrightness(window.Pointer, brightness)
+        Native.SDL_SetWindowBrightness(window.Pointer, brightness)
 
     let getBrightness (window:Window) :float =
-        SDLWindowNative.SDL_GetWindowBrightness(window.Pointer)
+        Native.SDL_GetWindowBrightness(window.Pointer)
 
     let setBordered (bordered:bool) (window:Window) =
-        SDLWindowNative.SDL_SetWindowBordered(window.Pointer, if bordered then 1 else 0)
+        Native.SDL_SetWindowBordered(window.Pointer, if bordered then 1 else 0)
 
     let setMaximumSize (w:int<px>,h:int<px>) (window:Window) =
-        SDLWindowNative.SDL_SetWindowMaximumSize(window.Pointer, w/1<px>, h/1<px>)
+        Native.SDL_SetWindowMaximumSize(window.Pointer, w/1<px>, h/1<px>)
 
     let getMaximumSize (window:Window) :int<px> * int<px> =
         let mutable x = 0
         let mutable y = 0
-        SDLWindowNative.SDL_GetWindowMaximumSize (window.Pointer, &&x, &&y)
+        Native.SDL_GetWindowMaximumSize (window.Pointer, &&x, &&y)
         (x * 1<px>, y * 1<px>)
 
     let setMinimumSize (w:int<px>,h:int<px>) (window:Window) =
-        SDLWindowNative.SDL_SetWindowMinimumSize(window.Pointer, w/1<px>, h/1<px>)
+        Native.SDL_SetWindowMinimumSize(window.Pointer, w/1<px>, h/1<px>)
 
     let getMinimumSize (window:Window) :int<px> * int<px> =
         let mutable x = 0
         let mutable y = 0
-        SDLWindowNative.SDL_GetWindowMinimumSize (window.Pointer, &&x, &&y)
+        Native.SDL_GetWindowMinimumSize (window.Pointer, &&x, &&y)
         (x * 1<px>, y * 1<px>)

@@ -61,7 +61,7 @@ module Hints =
 
     type SDL_HintCallback = IntPtr * IntPtr * IntPtr * IntPtr -> unit
 
-    module private SDLHintsNative =
+    module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern int SDL_SetHintWithPriority(IntPtr name, IntPtr value, Priority priority);
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -77,7 +77,7 @@ module Hints =
 
     let set (name:string) (value:string) :bool =
         let valuePtrHandler (namePtr:IntPtr) (valuePtr:IntPtr) =
-            SDLHintsNative.SDL_SetHint(namePtr,valuePtr)
+            Native.SDL_SetHint(namePtr,valuePtr)
             <> 0
 
         let namePtrHandler (value:string) (namePtr:IntPtr) =
@@ -90,7 +90,7 @@ module Hints =
 
     let setWithPriority (name:string) (value:string) (priority:Priority):bool =
         let valuePtrHandler (namePtr:IntPtr) (valuePtr:IntPtr) =
-            SDLHintsNative.SDL_SetHintWithPriority(namePtr, valuePtr, priority)
+            Native.SDL_SetHintWithPriority(namePtr, valuePtr, priority)
             <> 0
 
         let namePtrHandler (value:string) (namePtr:IntPtr) =
@@ -102,14 +102,14 @@ module Hints =
 
     let get (name:string) :string =
         let namePtrHandler (namePtr:IntPtr) =
-            SDLHintsNative.SDL_GetHint(namePtr)
+            Native.SDL_GetHint(namePtr)
             |> SDL.Utility.intPtrToStringAscii
 
         name 
         |> SDL.Utility.withAsciiString namePtrHandler
 
     let clear () =
-        SDLHintsNative.SDL_ClearHints()
+        Native.SDL_ClearHints()
 
     let addCallback (name:string) (callback:string->string->string->unit) : IntPtr * IntPtr * IntPtr * IntPtr -> unit=
         let wrappedCallback (callback:string->string->string->unit) (userDataPtr:IntPtr, namePtr:IntPtr, oldValuePtr:IntPtr, newValuePtr:IntPtr) : unit =
@@ -129,7 +129,7 @@ module Hints =
 
         let namePtrHandler (namePtr:IntPtr) =
             let result = wrappedCallback callback
-            SDLHintsNative.SDL_AddHintCallback(namePtr, result, IntPtr.Zero)
+            Native.SDL_AddHintCallback(namePtr, result, IntPtr.Zero)
             result
 
         name 
@@ -137,7 +137,7 @@ module Hints =
 
     let removeCallback (name:string) (callback:IntPtr * IntPtr * IntPtr * IntPtr -> unit) :unit =
         let namePtrHandler (namePtr:IntPtr) =
-            SDLHintsNative.SDL_DelHintCallback(namePtr,callback,IntPtr.Zero)
+            Native.SDL_DelHintCallback(namePtr,callback,IntPtr.Zero)
 
         name 
         |> SDL.Utility.withAsciiString namePtrHandler
