@@ -98,6 +98,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="packages.config" />
+    <Compile Include="Video.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
