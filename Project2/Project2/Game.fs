@@ -18,7 +18,7 @@ let logOutputFunction = SDL.Log.OutputFunction(fun a b c d->System.Console.Write
 let runGame (randomFunc:RandomFunc) = 
     use system = new SDL.Init.System(SDL.Init.Init.Video ||| SDL.Init.Init.Events)
 
-    use mainWindow = SDL.Window.create "Splorr!! Island Interloper" 100<px> 100<px> 640<px> 480<px> 0u
+    use mainWindow = SDL.Window.create "Splorr!! Island Interloper" (100<px>,100<px>) (640<px>,480<px>) 0u
 
     use mainRenderer = SDL.Render.create mainWindow -1 SDL.Render.Flags.Accelerated
 

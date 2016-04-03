@@ -1,11 +1,59 @@
 ﻿namespace SDL
 
+#nowarn "9"
+
 open System.Runtime.InteropServices
 open System
 open SDL
+open Microsoft.FSharp.NativeInterop
 
 [<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute>]
 module Window = 
+
+    type GLattr =
+        | RedSize                 = 0
+        | GreenSize               = 1
+        | BlueSize                = 2
+        | AlphaSize               = 3
+        | BufferSize              = 4
+        | DoubleBuffer            = 5
+        | DepthSize               = 6
+        | StencilSize             = 7
+        | AccumRedSize            = 8
+        | AccumGreenSize          = 9
+        | AccumBlueSize           = 10
+        | AccumAlphaSize          = 11
+        | Stereo                  = 12
+        | MultiSampleBuffers      = 13
+        | MultiSampleSamples      = 14
+        | AcceleratedVisual       = 15
+        | RetainedBacking         = 16
+        | ContextMajorVersion     = 17
+        | ContextMinorVersion     = 18
+        | ContextEgl              = 19
+        | ContextFlags            = 20
+        | ContextProfileMask      = 21
+        | ShareWithCurrentContext = 22
+        | FrameBufferSRGBCapable  = 23
+        | ContextReleaseBehavior  = 24
+
+    [<Flags>]
+    type GLProfile = 
+        | Core           = 0x0001
+        | Compatibility  = 0x0002
+        | ES             = 0x0004
+
+    [<Flags>]
+    type GLFlag = 
+        | Debug             = 0x0001
+        | ForwardCompatible = 0x0002
+        | RobustAccess      = 0x0004
+        | ResetIsolation    = 0x0008
+
+    [<Flags>]
+    type GLReleaseFlag = 
+        | None   = 0x0000
+        | Flush  = 0x0001
 
     type Flags = 
         | FullScreen         = 0x00000001
@@ -52,39 +100,7 @@ module Window =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern void SDL_DestroyWindow(IntPtr window)
 
-        //video drivers
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_GetNumVideoDrivers()
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern IntPtr SDL_GetVideoDriver(int index)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern IntPtr SDL_GetCurrentVideoDriver()
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_VideoInit(IntPtr driver_name)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern void SDL_VideoQuit()
-
-        //displays
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_GetNumVideoDisplays()
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern IntPtr SDL_GetDisplayName(int displayIndex)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_GetDisplayBounds(int displayIndex, IntPtr rect)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_GetDisplayDPI(int displayIndex, IntPtr ddpi, IntPtr hdpi, IntPtr vdpi)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-
         //display modes
-        extern int SDL_GetNumDisplayModes(int displayIndex)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_GetDisplayMode(int displayIndex, int modeIndex,IntPtr mode)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_GetDesktopDisplayMode(int displayIndex, IntPtr mode)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern int SDL_GetCurrentDisplayMode(int displayIndex, IntPtr mode)
-        [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern IntPtr SDL_GetClosestDisplayMode(int displayIndex, IntPtr mode, IntPtr closest)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern int SDL_GetWindowDisplayIndex(IntPtr window)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -206,11 +222,14 @@ module Window =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_GetWindowFromID(uint32 id)
 
-    let create (title:string) (x:int<px>) (y:int<px>) (w:int<px>) (h:int<px>) (flags:uint32) :Window =
+    let create (title:string) (x:int<px>,y:int<px>) (w:int<px>,h:int<px>) (flags:uint32) :Window =
         let ptr = 
             title
             |> SDL.Utility.withUtf8String (fun ptr -> Native.SDL_CreateWindow(ptr, x /1<px>, y /1<px>, w /1<px>, h /1<px>, flags))
         new SDL.Utility.Pointer(ptr, Native.SDL_DestroyWindow)
+
+    let createFrom (data:IntPtr) :Window =
+        new SDL.Utility.Pointer(Native.SDL_CreateWindowFrom(data),Native.SDL_DestroyWindow)
 
     let hide (window:Window) =
         Native.SDL_HideWindow window.Pointer
@@ -282,3 +301,68 @@ module Window =
         let mutable y = 0
         Native.SDL_GetWindowMinimumSize (window.Pointer, &&x, &&y)
         (x * 1<px>, y * 1<px>)
+
+    let getGrab (window:Window) :bool =
+        Native.SDL_GetWindowGrab(window.Pointer)
+        <> 0
+
+    let setGrab (grab:bool) (window:Window) =
+        Native.SDL_SetWindowGrab(window.Pointer,if grab then 1 else 0)
+
+    let getGrabbedWindow () : Window =
+        new SDL.Utility.Pointer(Native.SDL_GetGrabbedWindow(), fun x->())
+
+    let setData (name:string) (data:IntPtr) (window:Window) : IntPtr =
+        name
+        |> SDL.Utility.withAsciiString(fun ptr->Native.SDL_SetWindowData(window.Pointer,ptr,data))
+
+    let getData (name:string) (window:Window) :IntPtr =
+        name
+        |> SDL.Utility.withAsciiString(fun ptr->Native.SDL_GetWindowData(window.Pointer,ptr))
+
+    let getPixelFormat (window:Window) :uint32 =
+        Native.SDL_GetWindowPixelFormat(window.Pointer)
+
+    let getId (window:Window) :uint32 =
+        Native.SDL_GetWindowID(window.Pointer)
+
+    let getFlags (window:Window) :uint32 =
+        Native.SDL_GetWindowFlags(window.Pointer)
+
+    let updateSurface (window:Window) :unit =
+        Native.SDL_UpdateWindowSurface(window.Pointer)
+        |> ignore
+
+    let getSurface (window:Window) :SDL.Utility.Pointer =
+        new SDL.Utility.Pointer(Native.SDL_GetWindowSurface(window.Pointer), fun e->())
+
+    let fromId (id:uint32) :Window =
+        new SDL.Utility.Pointer(Native.SDL_GetWindowFromID(id), fun e->())
+
+    let getDisplayIndex (window:Window) :int =
+        Native.SDL_GetWindowDisplayIndex(window.Pointer)
+
+    let getDisplayMode (window:Window) :SDL.Video.DisplayMode =
+        let mutable mode = new SDL.Video.SDL_DisplayMode()
+
+        Native.SDL_GetWindowDisplayMode(window.Pointer, ((&&mode) |> NativePtr.toNativeInt ))
+        |> ignore
+
+        mode
+        |> SDL.Video.SDL_DisplayModeToDisplayMode
+
+    let setDisplayMode (window:Window) (mode:SDL.Video.DisplayMode) :unit =
+        let mutable mode' = mode |> Video.DisplayModeToSDL_DisplayMode
+        let ptr = 
+            &&mode'
+            |> NativePtr.toNativeInt
+
+        Native.SDL_SetWindowDisplayMode(window.Pointer, ptr)
+        |> ignore
+
+    let setFullscreen (flags:uint32) (window:Window) =
+        Native.SDL_SetWindowFullscreen(window.Pointer,flags)
+        |> ignore
+
+    let setWindowIcon (icon:SDL.Utility.Pointer) (window:Window) =
+        Native.SDL_SetWindowIcon(window.Pointer,icon.Pointer)

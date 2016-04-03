@@ -12,6 +12,13 @@ open SDL.Surface
 module Render = 
 
     [<Flags>]
+    type BlendMode =
+        | None  = 0x00000000
+        | Blend = 0x00000001
+        | Add   = 0x00000002
+        | Mod   = 0x00000004
+
+    [<Flags>]
     type Flags = 
         | Software      = 0x00000001
         | Accelerated   = 0x00000002
@@ -108,7 +115,7 @@ module Render =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern int SDL_GL_UnbindTexture(IntPtr texture)
 
-    let create (window:SDL.Window.Window) (index:int) (flags:Flags) :Renderer =
+    let create (window:SDL.Utility.Pointer) (index:int) (flags:Flags) :Renderer =
         let ptr = Native.SDL_CreateRenderer(window.Pointer, index, flags |> uint32)
         new SDL.Utility.Pointer(ptr,Native.SDL_DestroyRenderer)
 
