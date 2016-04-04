@@ -32,6 +32,26 @@ module Render =
         | Vertical = 0x00000002
 
     type Renderer = SDL.Utility.Pointer
+
+    [<StructLayout(LayoutKind.Sequential)>]
+    type private SDL_RendererInfo =
+        struct
+            [<MarshalAs(UnmanagedType.LPStr)>]
+            val mutable name:string
+            val mutable flags:uint32
+            val mutable num_texture_formats:uint32
+            [<MarshalAs(UnmanagedType.ByValArray, SizeConst=16, ArraySubType = UnmanagedType.U4 )>]
+            val mutable texture_formats:uint32[]
+            val mutable max_texture_width:int
+            val mutable max_texture_height:int
+        end
+
+     type RendererInfo =
+         {Name:string;
+         Flags:Flags;
+         TextureFormats:seq<uint32>;
+         MaximumTextureWidth:int<px>;
+         MaximumTextureHeight:int<px>}
                                            
     module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -55,7 +75,7 @@ module Render =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern int SDL_CreateWindowAndRenderer(int width, int height, uint32 window_flags, IntPtr window, IntPtr renderer)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
-        extern IntPtr SDL_CreateSoftwareRenderer(Surface surface)
+        extern IntPtr SDL_CreateSoftwareRenderer(IntPtr surface)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern IntPtr SDL_GetRenderer(IntPtr  window)
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
@@ -119,6 +139,10 @@ module Render =
         let ptr = Native.SDL_CreateRenderer(window.Pointer, index, flags |> uint32)
         new SDL.Utility.Pointer(ptr,Native.SDL_DestroyRenderer)
 
+    let createSoftware (surface:Surface) (index:int) (flags:Flags) :Renderer =
+        let ptr = Native.SDL_CreateSoftwareRenderer(surface.Pointer)
+        new SDL.Utility.Pointer(ptr,Native.SDL_DestroyRenderer)
+
     let clear (renderer:Renderer) :bool =
         0 = Native.SDL_RenderClear(renderer.Pointer)
 
@@ -133,4 +157,5 @@ module Render =
 
     let copy (texture:SDL.Texture.Texture) (srcrect:SDL.Geometry.Rectangle option) (dstrect:SDL.Geometry.Rectangle option) (renderer:Renderer) =
         SDL.Geometry.withSDLRectPointer(fun src -> SDL.Geometry.withSDLRectPointer(fun dst -> 0 = Native.SDL_RenderCopy(renderer.Pointer,texture.Pointer,src,dst)) dstrect) srcrect
+
     

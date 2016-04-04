@@ -93,6 +93,7 @@
     <Compile Include="Texture.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Platform.fs" />
+    <Compile Include="ScreenSaver.fs" />
     <Content Include="README-SDL.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

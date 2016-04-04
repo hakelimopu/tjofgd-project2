@@ -67,24 +67,30 @@ let randomLocation (worldSize:CellLocation) (random:RandomFunc) :CellLocation =
 
 
 let generateIslands (sumLocationsFunc:SumLocationsFunc) (checkLocationsFunc:CheckLocationsFunc) (setTerrainFunc:SetTerrainFunc) (worldSize:CellLocation) (random:RandomFunc) (map:CellMap<MapCell>) :CellMap<MapCell> * CellLocation list =
-    let islandGenerator (worldSize:CellLocation) (locations:Set<CellLocation>) : (Set<CellLocation> * Set<CellLocation>) option=
-        if locations |> Seq.isEmpty then
-            None
+    let rec islandGenerator (worldSize:CellLocation) (current:Set<CellLocation>) (locations:Set<CellLocation>) : Set<CellLocation> =
+        if locations |> Set.isEmpty then
+            current
         else
             let location = 
                 (worldSize, random)
                 ||> randomLocation
 
             if locations.Contains location then
-                Some ([location] |> Set.ofSeq, locations |> Set.filter (checkLocationsFunc location))
+                ((current   |> Set.add location),
+                 (locations |> Set.filter (checkLocationsFunc location)))
+                ||> islandGenerator worldSize 
             else
-                Some (Set.empty<CellLocation>, locations)
+                islandGenerator worldSize current locations
+
+    let start = System.DateTime.Now
 
     let islandLocations =
         Constants.mapLocations
-        |> Seq.unfold (islandGenerator worldSize)
-        |> Seq.reduce Set.union
-        |> List.ofSeq
+        |> islandGenerator worldSize Set.empty
+        |> Set.toList
+
+    let elapsed = System.DateTime.Now - start
+    elapsed.ToString() |> sprintf "Time taken to generate islands: %s" |> SDL.Log.log
 
     let islandPlacer map location =
         map
