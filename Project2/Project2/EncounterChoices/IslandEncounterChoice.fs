@@ -42,7 +42,7 @@ let private incrementIslandVisit (location:CellLocation) (playState:PlayState<_>
     let turn, island = getIsland location playState
 
     let island' =
-        {island with Visits = island.Visits + 1}
+        {island with Visits = if island.Visits.IsSome then (island.Visits.Value + 1) |> Some else Some 1}
 
     let actors' = 
         playState.Actors

@@ -299,7 +299,7 @@ let ``updateStormActor strike boat`` () =
          Title="Storm!";
          Type=RanIntoStorm;
          Message=["You have run into a storm;";"it has damaged your boat!"];
-         Choices=[{Text="OK";Response=Confirm}];
+         Choices=[{Text="OK";Response=Common Confirm}];
          CurrentChoice=0}]
         |> NPCEncounters
         |> Some

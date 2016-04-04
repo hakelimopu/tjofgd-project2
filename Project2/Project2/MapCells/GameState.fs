@@ -7,24 +7,37 @@ open MapTerrain
 open MapObject
 
 
+type QueryEncounterType =
+    | Quest
+    | Repair
+
+type TradeEncounterSubtype =
+    | BuyOrSell
+    | Buy
+    | Sell
+
+type TradeEncounterType =
+    | Equipment of TradeEncounterSubtype
+
 type EncounterType =
     | RanIntoStorm
     | DockedWithIsland
-    | QueryQuest
-    | QueryRepair
-    | BuySellEquipment
-    | BuyEquipment
-    | SellEquipment
+    | Query of QueryEncounterType
+    | Trade of TradeEncounterType
+
+type CommonEncounterResponse =
+    | Confirm //also used for yes, ok
+    | Cancel  //also used for no
+
+type QuestEncounterResponse =
+    | Query
+    | Complete
 
 type EncounterReponse =
-    | Confirm
-    | Cancel
+    | Common of CommonEncounterResponse
     | Repair
-    | QueryQuest
-    | CompleteQuest
-    | BuySellEquipment
-    | SellEquipment
-    | BuyEquipment
+    | Quest of QuestEncounterResponse
+    | Trade of TradeEncounterType
 
 type EncounterChoice =
     {Response:EncounterReponse;

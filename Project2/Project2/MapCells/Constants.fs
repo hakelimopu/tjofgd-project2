@@ -3,7 +3,7 @@
 open CellLocation
 open MapTerrain
 
-let WorldSize = {Column=256<cell>;Row=256<cell>}
+let WorldSize = {Column=240<cell>;Row=240<cell>}
 let IslandDistance = 20<cell>
 
 let mapLocations = 

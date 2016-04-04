@@ -1,0 +1,9 @@
+﻿36-37
+
+Changed island visits to int option
+Refactored encounter types and encounter results
+Changed worldsize to 240x240 (so that world map fits on screen!)
+Attempted and failed to speed up world creation
+Added more SDL calls
+
+

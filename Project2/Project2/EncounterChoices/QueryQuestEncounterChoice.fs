@@ -44,7 +44,7 @@ let private acceptQuest (randomFunc:RandomFunc) (location:CellLocation) (playSta
 
 let internal applyQueryQuestEncounterChoice (randomFunc:RandomFunc) (detail:EncounterDetail) (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
-    | Confirm -> playState |> acceptQuest randomFunc location |> PlayState |> Some
+    | Common Confirm -> playState |> acceptQuest randomFunc location |> PlayState |> Some
     | _ -> {playState with Encounters = None}|> PlayState |> Some
 
 

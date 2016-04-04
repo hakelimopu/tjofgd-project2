@@ -24,5 +24,5 @@ let private applyRepairs (location:CellLocation) (playState:PlayState<_>)  : Gam
 
 let internal applyQueryRepairEncounterChoice (randomFunc:RandomFunc) (detail:EncounterDetail) (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
-    | Confirm -> (location, playState) ||> applyRepairs
+    | Common Confirm -> (location, playState) ||> applyRepairs
     | _       -> {playState with Encounters = None}|> PlayState |> Some

@@ -71,7 +71,7 @@ type MerfolkProperties =
 //give a name!
 type IslandProperties = 
     {Name:string;
-     Visits:int;
+     Visits:int option;
      Quest:QuestDetails;
      EquipmentPrices:Map<EquipmentType,float<currency>>;
      RepairCost:float<currency/health>;

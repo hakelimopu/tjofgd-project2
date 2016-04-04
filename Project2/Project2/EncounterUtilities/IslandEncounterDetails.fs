@@ -31,11 +31,11 @@ let private ``is quest complete?`` (location:CellLocation) (playState:PlayState<
 let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
 
     let choices = 
-        [({Text="Cast Off!";          Response=Cancel},           ``always include choice``);
+        [({Text="Cast Off!";          Response=Common Cancel},           ``always include choice``);
          ({Text="Repair Ship";        Response=Repair},           ``can the ship repair?`` location);
-         ({Text="Buy/Sell Equipment"; Response=BuySellEquipment}, ``can buy or sell equipment?`` location);
-         ({Text="Need work!";         Response=QueryQuest},       ``can accept quest?``);
-         ({Text="Delivery!";          Response=CompleteQuest},    ``is quest complete?`` location)]
+         ({Text="Buy/Sell Equipment"; Response=EncounterReponse.Trade (Equipment BuyOrSell)}, ``can buy or sell equipment?`` location);
+         ({Text="Need work!";         Response=EncounterReponse.Quest Query},       ``can accept quest?``);
+         ({Text="Delivery!";          Response=EncounterReponse.Quest Complete},    ``is quest complete?`` location)]
         |> List.filter (filterChoice playState)
         |> List.map fst
 
@@ -46,7 +46,7 @@ let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation)
     Type=DockedWithIsland;
     Message=
         [island.Name |> sprintf "You docked at %s!";
-        island.Visits |> sprintf "Prior visits: %d";
+        (if island.Visits.IsSome then island.Visits.Value else 0) |> sprintf "Prior visits: %d";
         "What would you like to do?"];
     Choices=choices;
     CurrentChoice=0} 

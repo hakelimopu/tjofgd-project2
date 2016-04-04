@@ -123,6 +123,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="packages.config" />
+    <Content Include="DevLog.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

@@ -20,9 +20,9 @@ let internal ``can sell equipment?`` (playState:PlayState<_>) :bool =
 
 let createBuySellEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
     let choices = 
-        [({Text="Never Mind!";    Response=Cancel},        ``always include choice``);
-         ({Text="Buy Equipment";  Response=BuyEquipment},  ``can buy equipment?`` location);
-         ({Text="Sell Equipment"; Response=SellEquipment}, ``can sell equipment?``)]
+        [({Text="Never Mind!";    Response=Common Cancel},        ``always include choice``);
+         ({Text="Buy Equipment";  Response=EncounterReponse.Trade (Equipment Buy)},  ``can buy equipment?`` location);
+         ({Text="Sell Equipment"; Response=EncounterReponse.Trade (Equipment Sell)}, ``can sell equipment?``)]
         |> List.filter (filterChoice playState)
         |> List.map fst
 
@@ -34,7 +34,7 @@ let createBuySellEncounterDetail (playState:PlayState<_>) (location:CellLocation
 
     {Location=location;
     Title="Buy/Sell Equipment";
-    Type=EncounterType.BuySellEquipment;
+    Type=EncounterType.Trade (Equipment BuyOrSell);
     Message=["What would you like to do?"];
     Choices=choices;
     CurrentChoice=0} 

@@ -32,12 +32,12 @@ let createQueryRepairEncounterDetail (playState:PlayState<_>) (location:CellLoca
     let repairCost, maximumDamageRepaired, totalCost = getRepairDetails location playState
 
     let choices = 
-        [{Text="Yes, please!"; Response=Confirm};
-         {Text="No, thanks!";  Response=Cancel}]
+        [{Text="Yes, please!"; Response=Common Confirm};
+         {Text="No, thanks!";  Response=Common Cancel}]
 
     {Location=location;
     Title="Repair Ship";
-    Type=EncounterType.QueryRepair;
+    Type=EncounterType.Query QueryEncounterType.Repair;
     Message=[sprintf "Repair costs $%.2f @ hull" (repairCost * 1.0<health/currency>);
         sprintf "You can repair %d" (maximumDamageRepaired / 1.0<health> |> int);
         sprintf "Total cost: $%.2f" (totalCost / 1.0<currency>)];

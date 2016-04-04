@@ -179,7 +179,7 @@ let private generateIslandEquipmentPrices (random:RandomFunc) :Map<EquipmentType
 let generateIslandObject (name:string) (random:RandomFunc) :MapObject =
     {CurrentTurn=0.0<turn>;
     Detail=
-        {Visits=0;
+        {Visits=None;
         Name=name;
         EquipmentPrices = generateIslandEquipmentPrices random;
         RepairCost = 1.0<currency/health> * (((randomFloat random) * 2.5) + 0.5);

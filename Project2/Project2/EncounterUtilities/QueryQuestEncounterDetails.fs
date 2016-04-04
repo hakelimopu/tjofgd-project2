@@ -7,8 +7,8 @@ open MapObject
 let createQuestQueryEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
 
     let choices = 
-        [{Text="No problem!"; Response=Confirm};
-         {Text="No thanks!";  Response=Cancel}]
+        [{Text="No problem!"; Response=Common Confirm};
+         {Text="No thanks!";  Response=Common Cancel}]
 
     let _, island =  getIsland location playState
 
@@ -18,7 +18,7 @@ let createQuestQueryEncounterDetail (playState:PlayState<_>) (location:CellLocat
 
     {Location=location;
     Title="Need a job?";
-    Type=EncounterType.QueryQuest;
+    Type=EncounterType.Query QueryEncounterType.Quest;
     Message=["Could you deliver this"; island'.Name |> sprintf "parcel to %s?"; (quest.Reward / 1.0<currency>) |> sprintf "The pay is $%.2f"];
     Choices=choices;
     CurrentChoice=0} 

@@ -59,7 +59,7 @@ module Hints =
         | Normal   = 1
         | Override = 2
 
-    type SDL_HintCallback = IntPtr * IntPtr * IntPtr * IntPtr -> unit
+    type private SDL_HintCallback = IntPtr * IntPtr * IntPtr * IntPtr -> unit
 
     module private Native =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
