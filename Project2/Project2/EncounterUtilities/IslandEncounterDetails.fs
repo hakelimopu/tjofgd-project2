@@ -18,6 +18,10 @@ let private ``can accept quest?`` (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
     boatProperties.Quest.IsNone
 
+let private ``can buy or sell equipment?`` (location:CellLocation) (playState:PlayState<_>) :bool =
+    BuySellEncounterDetails.``can buy equipment?`` location playState
+    || BuySellEncounterDetails.``can sell equipment?`` playState
+
 let private ``is quest complete?`` (location:CellLocation) (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
     match boatProperties.Quest with
@@ -27,10 +31,11 @@ let private ``is quest complete?`` (location:CellLocation) (playState:PlayState<
 let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
 
     let choices = 
-        [({Text="Cast Off!";   Response=Cancel},        ``always include choice``);
-         ({Text="Repair Ship"; Response=Repair},        ``can the ship repair?`` location);
-         ({Text="Need work!";  Response=QueryQuest},    ``can accept quest?``);
-         ({Text="Delivery!";   Response=CompleteQuest}, ``is quest complete?`` location)]
+        [({Text="Cast Off!";          Response=Cancel},           ``always include choice``);
+         ({Text="Repair Ship";        Response=Repair},           ``can the ship repair?`` location);
+         ({Text="Buy/Sell Equipment"; Response=BuySellEquipment}, ``can buy or sell equipment?`` location);
+         ({Text="Need work!";         Response=QueryQuest},       ``can accept quest?``);
+         ({Text="Delivery!";          Response=CompleteQuest},    ``is quest complete?`` location)]
         |> List.filter (filterChoice playState)
         |> List.map fst
 

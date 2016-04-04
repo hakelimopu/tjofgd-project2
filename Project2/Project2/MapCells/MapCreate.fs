@@ -94,7 +94,7 @@ let generateIslands (sumLocationsFunc:SumLocationsFunc) (checkLocationsFunc:Chec
 
 
 let worldObjects =
-    [(MapObjectDetail.Boat {Hull=10<health>;MaximumHull=10<health>;GenerateNextStorm=5.0<turn>;Wallet=0.0<currency>;Quest=None},1);
+    [(MapObjectDetail.Boat {Hull=10<health>;MaximumHull=10<health>;GenerateNextStorm=5.0<turn>;Wallet=20.0<currency>;Quest=None;EquipmentCapacity=1<slot>;Equipment = Seq.empty},1);
      (MapObjectDetail.Storm {Damage=1<health>},200);
      (MapObjectDetail.Pirate {Hull=5<health>;Attitude=PirateAttitude.Neutral},100);
      (MapObjectDetail.SeaMonster {Health=5<health>;Attitude=SeaMonsterAttitude.Neutral},25);
@@ -156,11 +156,26 @@ let generateWorldObjects
      |> Seq.zip allObjects)
     ||> Seq.fold objectPlacer
 
+let private equipmentPrices =
+    [(MapObject.FishingNet,10.0<currency>,20.0<currency>);
+    (MapObject.Harpoon,25.0<currency>,50.0<currency>);
+    (MapObject.Cannon,600.0<currency>,1000.0<currency>)]
+
+
+let private generateIslandEquipmentPrices (random:RandomFunc) :Map<EquipmentType,float<currency>> =
+    let mapper (equipment:MapObject.EquipmentType,low:float<currency>,high:float<currency>) =
+        (equipment,low + (RandomParameter.NextFloat |> random |> getFloat) * (high-low))
+
+    equipmentPrices
+    |> Seq.map mapper
+    |> Map.ofSeq
+
 let generateIslandObject (name:string) (random:RandomFunc) :MapObject =
     {CurrentTurn=0.0<turn>;
     Detail=
         {Visits=0;
         Name=name;
+        EquipmentPrices = generateIslandEquipmentPrices random;
         RepairCost = 1.0<currency/health> * (((NextFloat |> random |> getFloat) * 2.5) + 0.5);
         RepairCostIncrease = 0.01<currency/health> * (((NextFloat |> random |> getFloat) * 5.0) + 1.0);
         Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}} |> Island}

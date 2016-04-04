@@ -5,15 +5,35 @@ open CellLocation
 [<Measure>] type turn
 [<Measure>] type health
 [<Measure>] type currency
+[<Measure>] type slot
 
 type QuestDetails =
     {Destination:CellLocation;
     Reward:float<currency>}
 
-//TODO: add cargo capacity, equipment capacity, quests
+type EquipmentType =
+    | FishingNet
+    | Harpoon
+    | Cannon
+
+type EquipmentDetails =
+    {Type:EquipmentType;
+    Size:int<slot>;
+    Durability:float<health>;
+    MaximumDurability:float<health>}
+
+let equipmentTemplates =
+    [(FishingNet,{Type=FishingNet;Size=1<slot>;Durability=10.0<health>;MaximumDurability=10.0<health>});
+    (Harpoon,{Type=Harpoon;Size=1<slot>;Durability=50.0<health>;MaximumDurability=50.0<health>});
+    (Cannon,{Type=Cannon;Size=1<slot>;Durability=100.0<health>;MaximumDurability=100.0<health>})]
+    |> Map.ofSeq
+
 type BoatProperties =
     {Hull:int<health>;
      MaximumHull:int<health>;
+     EquipmentCapacity:int<slot>;
+     Equipment:seq<EquipmentDetails>;
+     //cargo capacity
      Wallet:float<currency>;
      Quest:QuestDetails option;
      GenerateNextStorm:float<turn>}
@@ -53,6 +73,7 @@ type IslandProperties =
     {Name:string;
      Visits:int;
      Quest:QuestDetails;
+     EquipmentPrices:Map<EquipmentType,float<currency>>;
      RepairCost:float<currency/health>;
      RepairCostIncrease:float<currency/health>}
 

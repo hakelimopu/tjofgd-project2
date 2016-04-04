@@ -5,22 +5,24 @@ open CellLocation
 open QueryQuestEncounterDetails
 open MapObject
 open QueryRepairEncounterDetails
+open BuySellEncounterDetails
+
+let private generateEncounterDetail (encounterDetailGenerator:PlayState<_>->CellLocation->EncounterDetail) (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
+    let encounter = 
+        location
+        |> encounterDetailGenerator playState
+        |> PCEncounter
+        |> Some
+    {playState with Encounters = encounter}
 
 let private queryRepair (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
-    let encounter = 
-        location
-        |> createQueryRepairEncounterDetail playState
-        |> PCEncounter
-        |> Some
-    {playState with Encounters = encounter}
+    generateEncounterDetail createQueryRepairEncounterDetail location playState
 
 let private queryQuest (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
-    let encounter = 
-        location
-        |> createQuestQueryEncounterDetail playState
-        |> PCEncounter
-        |> Some
-    {playState with Encounters = encounter}
+    generateEncounterDetail createQuestQueryEncounterDetail location playState
+
+let private buySellEquipment  (location:CellLocation) (playState:PlayState<_>) : PlayState<_> =
+    generateEncounterDetail createBuySellEncounterDetail location playState
 
 let private completeQuest (playState:PlayState<_>) : PlayState<_> =
     let location, turn, boatProperties = getBoat playState
@@ -50,8 +52,9 @@ let private incrementIslandVisit (location:CellLocation) (playState:PlayState<_>
 
 let internal applyIslandPCEncounterChoice (detail:EncounterDetail) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
-    | Repair        -> playState |> queryRepair detail.Location |> incrementIslandVisit detail.Location |> PlayState |> Some
-    | QueryQuest    -> playState |> queryQuest  detail.Location |> incrementIslandVisit detail.Location |> PlayState |> Some
-    | CompleteQuest -> playState |> completeQuest               |> incrementIslandVisit detail.Location |> PlayState |> Some
-    | _             -> {playState with Encounters=None}         |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | Repair           -> playState |> queryRepair detail.Location      |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | QueryQuest       -> playState |> queryQuest  detail.Location      |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | CompleteQuest    -> playState |> completeQuest                    |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | BuySellEquipment -> playState |> buySellEquipment detail.Location |> incrementIslandVisit detail.Location |> PlayState |> Some
+    | _                -> {playState with Encounters=None}              |> incrementIslandVisit detail.Location |> PlayState |> Some
     

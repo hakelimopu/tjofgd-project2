@@ -2,7 +2,6 @@
 
 open GameState
 open CellLocation
-open EncounterDetailUtilities
 open MapObject
 
 let createQuestQueryEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =

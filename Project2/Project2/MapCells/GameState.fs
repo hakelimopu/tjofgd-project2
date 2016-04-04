@@ -12,6 +12,9 @@ type EncounterType =
     | DockedWithIsland
     | QueryQuest
     | QueryRepair
+    | BuySellEquipment
+    | BuyEquipment
+    | SellEquipment
 
 type EncounterReponse =
     | Confirm
@@ -19,6 +22,9 @@ type EncounterReponse =
     | Repair
     | QueryQuest
     | CompleteQuest
+    | BuySellEquipment
+    | SellEquipment
+    | BuyEquipment
 
 type EncounterChoice =
     {Response:EncounterReponse;

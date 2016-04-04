@@ -11,6 +11,7 @@ open StormEncounterChoice
 open IslandEncounterChoice
 open QueryQuestEncounterChoice
 open QueryRepairEncounterChoice
+open BuySellEncounterChoice
 
 let private applyPCEncounterChoice (randomFunc:RandomFunc) (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState<_>) : GameState<_> option =
     match details.Type with
@@ -18,6 +19,7 @@ let private applyPCEncounterChoice (randomFunc:RandomFunc) (sumLocationsFunc:Sum
     | DockedWithIsland         -> applyIslandPCEncounterChoice details playState
     | EncounterType.QueryQuest -> applyQueryQuestEncounterChoice randomFunc details details.Location playState
     | EncounterType.QueryRepair -> applyQueryRepairEncounterChoice randomFunc details details.Location playState
+    | EncounterType.BuySellEquipment -> applyBuySellEquipmentEncounterChoice randomFunc details details.Location playState
 
 let private applyNPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (head:EncounterDetail) (tail:EncounterDetail list) (playState:PlayState<_>): GameState<_> option =
     let nextEncounter =

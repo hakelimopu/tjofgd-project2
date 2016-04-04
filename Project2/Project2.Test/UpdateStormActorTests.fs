@@ -270,7 +270,9 @@ let ``updateStormActor strike boat`` () =
          MaximumHull = 10<health>;
          Wallet = 0.0<currency>;
          Quest = None;
-         GenerateNextStorm = 5.0<turn>}
+         GenerateNextStorm = 5.0<turn>;
+         EquipmentCapacity=1<slot>;
+         Equipment=Seq.empty}
 
     let otherStormTurn = 1.0<turn>
 
