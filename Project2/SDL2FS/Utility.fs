@@ -29,12 +29,21 @@ module Utility =
         [<DllImport(@"SDL2.dll", CallingConvention = CallingConvention.Cdecl)>]
         extern void SDL_free(IntPtr mem);
 
-    let private withString (encoder:string->byte[]) (func:IntPtr->'T) (text:string) =
+    let private allocString (encoder:string->byte[]) (text:string) =
         let bytes = encoder(text)
         let pinnedArray = GCHandle.Alloc(bytes, GCHandleType.Pinned)
+        pinnedArray
+
+    let private withString (encoder:string->byte[]) (func:IntPtr->'T) (text:string) =
+        let pinnedArray =
+            (encoder,text)
+            ||> allocString
         let result = pinnedArray.AddrOfPinnedObject() |> func
         pinnedArray.Free()
         result
+
+    let internal allocUtf8String (text:string) =
+        allocString Encoding.UTF8.GetBytes text
 
     let internal withUtf8String (func:IntPtr->'T) (text:string) =
         withString Encoding.UTF8.GetBytes func text
