@@ -164,7 +164,7 @@ let private equipmentPrices =
 
 let private generateIslandEquipmentPrices (random:RandomFunc) :Map<EquipmentType,float<currency>> =
     let mapper (equipment:MapObject.EquipmentType,low:float<currency>,high:float<currency>) =
-        (equipment,low + (RandomParameter.NextFloat |> random |> getFloat) * (high-low))
+        (equipment,low + (randomFloat random) * (high-low))
 
     equipmentPrices
     |> Seq.map mapper
@@ -176,8 +176,8 @@ let generateIslandObject (name:string) (random:RandomFunc) :MapObject =
         {Visits=0;
         Name=name;
         EquipmentPrices = generateIslandEquipmentPrices random;
-        RepairCost = 1.0<currency/health> * (((NextFloat |> random |> getFloat) * 2.5) + 0.5);
-        RepairCostIncrease = 0.01<currency/health> * (((NextFloat |> random |> getFloat) * 5.0) + 1.0);
+        RepairCost = 1.0<currency/health> * (((randomFloat random) * 2.5) + 0.5);
+        RepairCostIncrease = 0.01<currency/health> * (((randomFloat random) * 5.0) + 1.0);
         Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}} |> Island}
 
 

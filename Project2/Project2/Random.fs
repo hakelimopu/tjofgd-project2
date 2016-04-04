@@ -30,7 +30,17 @@ let getFloat (result:RandomResult) : float =
     | Float value -> value
     | _ -> raise WrongRandomResultType
 
-let randomIntRange (random:RandomFunc) (min:int, max:int) :int =
-    (min, max) |> IntRange |> random |> getInt
+//let randomIntRange (random:RandomFunc) (min:int, max:int) :int =
+//    (min, max) |> IntRange |> random |> getInt
 
-    
+let randomIntRange (random:RandomFunc) =
+    IntRange >> random >> getInt
+
+let randomIntMax (random:RandomFunc) =
+    MaxInt >> random >> getInt
+
+let randomInt (random:RandomFunc) =
+    NextInt |> (random >> getInt)
+
+let randomFloat (random:RandomFunc) =
+    NextFloat |> (random >> getFloat)
