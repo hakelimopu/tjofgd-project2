@@ -23,9 +23,9 @@ type EquipmentDetails =
     MaximumDurability:float<health>}
 
 let equipmentTemplates =
-    [(FishingNet,{Type=FishingNet;Size=1<slot>;Durability=10.0<health>;MaximumDurability=10.0<health>});
-    (Harpoon,{Type=Harpoon;Size=1<slot>;Durability=50.0<health>;MaximumDurability=50.0<health>});
-    (Cannon,{Type=Cannon;Size=1<slot>;Durability=100.0<health>;MaximumDurability=100.0<health>})]
+    [(FishingNet,("Fishing Net",{Type=FishingNet;Size=1<slot>;Durability=10.0<health>;MaximumDurability=10.0<health>}));
+    (Harpoon,("Harpoon",{Type=Harpoon;Size=1<slot>;Durability=50.0<health>;MaximumDurability=50.0<health>}));
+    (Cannon,("Cannon",{Type=Cannon;Size=1<slot>;Durability=100.0<health>;MaximumDurability=100.0<health>}))]
     |> Map.ofSeq
 
 type BoatProperties =

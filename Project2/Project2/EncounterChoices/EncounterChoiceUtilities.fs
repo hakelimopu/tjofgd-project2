@@ -2,6 +2,9 @@
 
 open GameState
 
+let internal clearEncounters (playState:PlayState<_>) :PlayState<_> =
+    {playState with Encounters = None}
+
 let internal nextEncounterChoice (encounter: Encounters option) :Encounters option =
     match encounter with
     | Some (PCEncounter details) ->{details with CurrentChoice= (details.CurrentChoice + 1) % (details.Choices.Length)} |> PCEncounter |> Some

@@ -33,11 +33,19 @@ type QuestEncounterResponse =
     | Query
     | Complete
 
+type PurchaseEncounterResponse =
+    | Equipment of EquipmentType
+
+type SaleEncounterResponse =
+    | Equipment of int
+
 type EncounterReponse =
     | Common of CommonEncounterResponse
     | Repair
     | Quest of QuestEncounterResponse
     | Trade of TradeEncounterType
+    | Purchase of PurchaseEncounterResponse
+    | Sale of SaleEncounterResponse
 
 type EncounterChoice =
     {Response:EncounterReponse;
@@ -116,6 +124,10 @@ let getBoat (state:PlayState<_>) : CellLocation * float<turn> * BoatProperties=
 let getBoatProperties (state:PlayState<_>) : BoatProperties =
     let _,_,props = state |> getBoat
     props
+
+let setBoatProperties (properties:BoatProperties) (state:PlayState<_>) : PlayState<_> =
+    let location, turn, _ = state |> getBoat
+    {state with Actors = state.Actors |> Map.add location {CurrentTurn = turn; Detail = properties |> Boat}}
 
 let getBoatLocation (state:PlayState<_>) : CellLocation =
     let location,_,_ = state |> getBoat

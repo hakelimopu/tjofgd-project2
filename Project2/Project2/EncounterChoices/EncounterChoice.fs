@@ -11,16 +11,18 @@ open StormEncounterChoice
 open IslandEncounterChoice
 open QueryQuestEncounterChoice
 open QueryRepairEncounterChoice
-open BuySellEncounterChoice
+open BuySellEquipmentEncounterChoice
 
 let private applyPCEncounterChoice (randomFunc:RandomFunc) (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState<_>) : GameState<_> option =
     match details.Type with
-    | RanIntoStorm             -> applyStormEncounterChoice sumLocationsFunc setVisibleFunc details.Location true None playState
-    | DockedWithIsland         -> applyIslandPCEncounterChoice details playState
-    | EncounterType.Query QueryEncounterType.Quest -> applyQueryQuestEncounterChoice randomFunc details details.Location playState
+    | RanIntoStorm                                  -> applyStormEncounterChoice sumLocationsFunc setVisibleFunc details.Location true None playState
+    | DockedWithIsland                              -> applyIslandPCEncounterChoice details playState
+    | EncounterType.Query QueryEncounterType.Quest  -> applyQueryQuestEncounterChoice randomFunc details details.Location playState
     | EncounterType.Query QueryEncounterType.Repair -> applyQueryRepairEncounterChoice randomFunc details details.Location playState
-    | EncounterType.Trade (Equipment BuyOrSell) -> applyBuySellEquipmentEncounterChoice randomFunc details details.Location playState
-    | _ -> playState |> PlayState |> Some
+    | EncounterType.Trade (TradeEncounterType.Equipment BuyOrSell)     -> applyBuySellEquipmentEncounterChoice randomFunc details details.Location playState
+    | EncounterType.Trade (TradeEncounterType.Equipment Buy)           -> applyBuyEquipmentEncounterChoice randomFunc details details.Location playState
+    | EncounterType.Trade (TradeEncounterType.Equipment Sell)          -> applySellEquipmentEncounterChoice randomFunc details details.Location playState
+    | _                                             -> playState |> PlayState |> Some
 
 let private applyNPCEncounterChoice (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (head:EncounterDetail) (tail:EncounterDetail list) (playState:PlayState<_>): GameState<_> option =
     let nextEncounter =

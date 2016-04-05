@@ -92,7 +92,7 @@
     <Compile Include="EncounterUtilities\EncounterDetailUtilities.fs" />
     <Compile Include="EncounterUtilities\StormEncounterDetails.fs" />
     <Compile Include="EncounterUtilities\NPCEncounterUtilities.fs" />
-    <Compile Include="EncounterUtilities\BuySellEncounterDetails.fs" />
+    <Compile Include="EncounterUtilities\BuySellEquipmentEncounterDetails.fs" />
     <Compile Include="EncounterUtilities\IslandEncounterDetails.fs" />
     <Compile Include="EncounterUtilities\QueryQuestEncounterDetails.fs" />
     <Compile Include="EncounterUtilities\QueryRepairEncounterDetails.fs" />
@@ -107,7 +107,7 @@
     <Compile Include="EncounterChoices\IslandEncounterChoice.fs" />
     <Compile Include="EncounterChoices\QueryQuestEncounterChoice.fs" />
     <Compile Include="EncounterChoices\QueryRepairEncounterChoice.fs" />
-    <Compile Include="EncounterChoices\BuySellEncounterChoice.fs" />
+    <Compile Include="EncounterChoices\BuySellEquipmentEncounterChoice.fs" />
     <Compile Include="EncounterChoices\EncounterChoice.fs" />
     <Compile Include="EventHandler\QuitEvent.fs" />
     <Compile Include="EventHandler\ActorUpdate.fs" />

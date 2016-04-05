@@ -19,8 +19,8 @@ let private ``can accept quest?`` (playState:PlayState<_>) :bool =
     boatProperties.Quest.IsNone
 
 let private ``can buy or sell equipment?`` (location:CellLocation) (playState:PlayState<_>) :bool =
-    BuySellEncounterDetails.``can buy equipment?`` location playState
-    || BuySellEncounterDetails.``can sell equipment?`` playState
+    BuySellEquipmentEncounterDetails.``can buy equipment?`` location playState
+    || BuySellEquipmentEncounterDetails.``can sell equipment?`` playState
 
 let private ``is quest complete?`` (location:CellLocation) (playState:PlayState<_>) :bool =
     let boatProperties = playState |> getBoatProperties
@@ -33,7 +33,7 @@ let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation)
     let choices = 
         [({Text="Cast Off!";          Response=Common Cancel},           ``always include choice``);
          ({Text="Repair Ship";        Response=Repair},           ``can the ship repair?`` location);
-         ({Text="Buy/Sell Equipment"; Response=EncounterReponse.Trade (Equipment BuyOrSell)}, ``can buy or sell equipment?`` location);
+         ({Text="Buy/Sell Equipment"; Response=EncounterReponse.Trade (TradeEncounterType.Equipment BuyOrSell)}, ``can buy or sell equipment?`` location);
          ({Text="Need work!";         Response=EncounterReponse.Quest Query},       ``can accept quest?``);
          ({Text="Delivery!";          Response=EncounterReponse.Quest Complete},    ``is quest complete?`` location)]
         |> List.filter (filterChoice playState)
