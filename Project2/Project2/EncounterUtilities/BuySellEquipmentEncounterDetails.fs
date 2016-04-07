@@ -66,10 +66,25 @@ let createSellEquipmentEncounterDetail (playState:PlayState<_>) (location:CellLo
 
     let _, island =  getIsland location playState
 
+    let boatProperties = getBoatProperties playState
+
+    let choices' =
+        ((choices,0), boatProperties.Equipment)
+        ||> Seq.fold(fun (choices,index) equipment -> 
+            let equipmentType = equipment.Type
+            let name = 
+                equipmentTemplates.[equipmentType]
+                |> fst
+            let basePrice = island.EquipmentPrices.[equipmentType]
+            let fraction = equipment.Durability / equipment.MaximumDurability
+            let fairMarketValue = basePrice * fraction / 2.0 
+            ([{Text = (name, fairMarketValue) ||> sprintf "%s($%.2f)"; Response = Sale (Equipment index)}] @ choices,index+1))
+        |> fst
+
     {Location=location;
     Title="Sell Equipment";
     Type=EncounterType.Trade (TradeEncounterType.Equipment Sell);
     Message=["What would you like to sell?"];
-    Choices=choices;
+    Choices=choices';
     CurrentChoice=0} 
 

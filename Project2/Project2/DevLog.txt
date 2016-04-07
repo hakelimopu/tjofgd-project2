@@ -1,7 +1,13 @@
 ﻿Next Steps:
 
-Sell equipment
-Main menu
+Game Menu
+-quit/confirm quit
+-save/load
+Boat Menu
+Island Menu
+Mini Map
+Game Controller
+Fishing?
 
 
 

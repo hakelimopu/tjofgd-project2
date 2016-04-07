@@ -19,11 +19,15 @@ type TradeEncounterSubtype =
 type TradeEncounterType =
     | Equipment of TradeEncounterSubtype
 
+type MenuType =
+    | Main
+
 type EncounterType =
     | RanIntoStorm
     | DockedWithIsland
     | Query of QueryEncounterType
     | Trade of TradeEncounterType
+    | Menu of MenuType
 
 type CommonEncounterResponse =
     | Confirm //also used for yes, ok

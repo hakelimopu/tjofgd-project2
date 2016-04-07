@@ -8,7 +8,7 @@ open MapCell
 open Random
 open EncounterChoiceUtilities
 open EncounterChoice
-
+open MainMenuEncounterDetails
 //allowed controls:
 //Up    (Controller Up)
 //Down  (Controller Down)
@@ -24,16 +24,16 @@ open EncounterChoice
 let internal handleFreeMovementCommand (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (state:PlayState<_>) (command:CommandType option) :GameState<_> option =
     let moveBoatFunc = moveBoat sumLocationsFunc setVisibleFunc worldSize random
     match command with
-    | Some CommandType.Quit         -> None
-    | Some (CommandType.Move West)  -> state |> moveBoatFunc {Column= -1<cell>; Row=  0<cell>}
-    | Some (CommandType.Move East)  -> state |> moveBoatFunc {Column=  1<cell>; Row=  0<cell>}
-    | Some (CommandType.Move North) -> state |> moveBoatFunc {Column=  0<cell>; Row= -1<cell>}
-    | Some (CommandType.Move South) -> state |> moveBoatFunc {Column=  0<cell>; Row=  1<cell>}
-    | _                             -> state |> PlayState |> Some
+    | Some (CommandType.Menu Select) -> {state with Encounters = createMainMenuEncounterDetail state |> PCEncounter |> Some} |> PlayState |> Some
+    | Some (CommandType.Move West)   -> state |> moveBoatFunc {Column= -1<cell>; Row=  0<cell>}
+    | Some (CommandType.Move East)   -> state |> moveBoatFunc {Column=  1<cell>; Row=  0<cell>}
+    | Some (CommandType.Move North)  -> state |> moveBoatFunc {Column=  0<cell>; Row= -1<cell>}
+    | Some (CommandType.Move South)  -> state |> moveBoatFunc {Column=  0<cell>; Row=  1<cell>}
+    | _                              -> state |> PlayState |> Some
 
 let private freeMovementKeyboardTable =
     [
-    (SDL.Keyboard.ScanCode.F4,      CommandType.Quit);//TODO: get rid of me!
+    (SDL.Keyboard.ScanCode.F10,     CommandType.Menu Select);
     (SDL.Keyboard.ScanCode.KeyPad4, CommandType.Move West);
     (SDL.Keyboard.ScanCode.Left,    CommandType.Move West);
     (SDL.Keyboard.ScanCode.KeyPad6, CommandType.Move East);
