@@ -1,8 +1,8 @@
 ﻿Next Steps:
 
 Game Menu
--quit/confirm quit
--save/load
+-confirm quit
+-save/load asks for file name (and prolly need to be more robust!)
 Boat Menu
 Island Menu
 Mini Map

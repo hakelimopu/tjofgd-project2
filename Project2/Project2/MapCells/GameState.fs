@@ -21,6 +21,9 @@ type TradeEncounterType =
 
 type MenuType =
     | Main
+    | Game
+    | Boat
+    | Island
 
 type EncounterType =
     | RanIntoStorm
@@ -43,6 +46,12 @@ type PurchaseEncounterResponse =
 type SaleEncounterResponse =
     | Equipment of int
 
+type GameCommandType =
+    | New
+    | Load
+    | Save
+    | Quit
+
 type EncounterReponse =
     | Common of CommonEncounterResponse
     | Repair
@@ -50,6 +59,8 @@ type EncounterReponse =
     | Trade of TradeEncounterType
     | Purchase of PurchaseEncounterResponse
     | Sale of SaleEncounterResponse
+    | Menu of MenuType
+    | GameCommand of GameCommandType
 
 type EncounterChoice =
     {Response:EncounterReponse;
@@ -119,7 +130,7 @@ type GameState<'TRender> =
 let getBoat (state:PlayState<_>) : CellLocation * float<turn> * BoatProperties=
     let picker location cell = 
         match cell.Detail with
-        | Boat boatProps -> (location,cell.CurrentTurn,boatProps) |> Some
+        | MapObject.Boat boatProps -> (location,cell.CurrentTurn,boatProps) |> Some
         | _              -> None
 
     state.Actors
@@ -131,7 +142,7 @@ let getBoatProperties (state:PlayState<_>) : BoatProperties =
 
 let setBoatProperties (properties:BoatProperties) (state:PlayState<_>) : PlayState<_> =
     let location, turn, _ = state |> getBoat
-    {state with Actors = state.Actors |> Map.add location {CurrentTurn = turn; Detail = properties |> Boat}}
+    {state with Actors = state.Actors |> Map.add location {CurrentTurn = turn; Detail = properties |> MapObject.Boat}}
 
 let getBoatLocation (state:PlayState<_>) : CellLocation =
     let location,_,_ = state |> getBoat
@@ -142,7 +153,7 @@ let getCurrency (state:PlayState<_>) : float<currency> =
 
 let setCurrency (amount:float<currency>) (state:PlayState<_>) :PlayState<_> =
     let where,turn,props = state |> getBoat
-    {state with Actors = state.Actors |> Map.add where {CurrentTurn=turn;Detail={props with Wallet=amount} |> Boat}}
+    {state with Actors = state.Actors |> Map.add where {CurrentTurn=turn;Detail={props with Wallet=amount} |> MapObject.Boat}}
 
 let getStorm (location:CellLocation) (state:PlayState<_>) : float<turn> * StormProperties =
     let storm = state.Actors.[location]
@@ -156,7 +167,7 @@ let getIsland (location:CellLocation) (state:PlayState<_>) : float<turn> * Islan
     let island = state.Actors.[location]
     (island.CurrentTurn,
         match island.Detail with
-        | Island props -> props
+        | MapObject.Island props -> props
         | _ -> raise (new System.NotImplementedException()))
 
 let updateVisibleFlags (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (state:PlayState<_>) :Map<CellLocation,MapCell> =

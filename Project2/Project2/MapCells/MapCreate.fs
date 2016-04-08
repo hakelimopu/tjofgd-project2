@@ -184,7 +184,7 @@ let generateIslandObject (name:string) (random:RandomFunc) :MapObject =
         EquipmentPrices = generateIslandEquipmentPrices random;
         RepairCost = 1.0<currency/health> * (((randomFloat random) * 2.5) + 0.5);
         RepairCostIncrease = 0.01<currency/health> * (((randomFloat random) * 5.0) + 1.0);
-        Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}} |> Island}
+        Quest={Destination={Column=0<cell>;Row=0<cell>};Reward=0.0<currency>}} |> MapObject.Island}
 
 
 let generateIslandObjects (names:string list) (random:RandomFunc) (map:CellMap<MapCell>) (originalActors:CellMap<MapObject>) : CellMap<MapObject> =
@@ -225,7 +225,7 @@ let generateQuests (random:RandomFunc) (originalActors:CellMap<MapObject>) : Cel
         let quest = chosenLocation |> generateQuest random
         let modifiedDetail =
             match actor.Detail with
-            | Island props -> {props with Quest=quest} |> Island
+            | MapObject.Island props -> {props with Quest=quest} |> MapObject.Island
             | _            -> raise(new System.NotImplementedException())
         actors
         |> Map.add location {actor with Detail = modifiedDetail}

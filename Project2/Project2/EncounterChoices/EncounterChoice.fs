@@ -10,12 +10,14 @@ open QueryQuestEncounterChoice
 open QueryRepairEncounterChoice
 open BuySellEquipmentEncounterChoice
 open MainMenuEncounterChoice
+open GameMenuEncounterChoice
 
 let private applyPCEncounterChoice (randomFunc:RandomFunc) (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (details:EncounterDetail) (playState:PlayState<_>) : GameState<_> option =
     match details.Type with
     | RanIntoStorm                                  -> applyStormEncounterChoice sumLocationsFunc setVisibleFunc details.Location true None playState
     | DockedWithIsland                              -> applyIslandPCEncounterChoice details playState
     | EncounterType.Menu Main                       -> applyMainMenuPCEncounterChoice details playState
+    | EncounterType.Menu Game                       -> applyGameMenuPCEncounterChoice details playState
     | EncounterType.Query QueryEncounterType.Quest  -> applyQueryQuestEncounterChoice randomFunc details details.Location playState
     | EncounterType.Query QueryEncounterType.Repair -> applyQueryRepairEncounterChoice randomFunc details details.Location playState
     | EncounterType.Trade (TradeEncounterType.Equipment BuyOrSell)     -> applyBuySellEquipmentEncounterChoice randomFunc details details.Location playState

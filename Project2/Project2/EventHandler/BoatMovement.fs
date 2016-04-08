@@ -55,7 +55,7 @@ let moveBoat (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc)
             let updatedActors = 
                 state.Actors
                 |> setObject playerLocation None
-                |> setObject nextLocation ({CurrentTurn = updatedBoatTurn;Detail = Boat updateBoatProperties} |> Some)
+                |> setObject nextLocation ({CurrentTurn = updatedBoatTurn;Detail = MapObject.Boat updateBoatProperties} |> Some)
 
             let stateWithUpdatedActors = 
                 {state with 
