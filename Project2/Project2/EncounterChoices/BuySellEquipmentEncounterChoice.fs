@@ -15,8 +15,8 @@ let private sellEquipment (location:CellLocation) (playState:PlayState<_>): Play
 
 let internal applyBuySellEquipmentEncounterChoice (randomFunc:RandomFunc) (detail:EncounterDetail) (location:CellLocation) (playState:PlayState<_>) : GameState<_> option = 
     match detail |> getEncounterResponse with
-    | EncounterReponse.Trade (TradeEncounterType.Equipment Buy)  -> playState |> buyEquipment detail.Location |> PlayState |> Some
-    | EncounterReponse.Trade (TradeEncounterType.Equipment Sell) -> playState |> sellEquipment detail.Location |> PlayState |> Some
+    | EncounterResponse.Trade (TradeEncounterType.Equipment Buy)  -> playState |> buyEquipment detail.Location |> PlayState |> Some
+    | EncounterResponse.Trade (TradeEncounterType.Equipment Sell) -> playState |> sellEquipment detail.Location |> PlayState |> Some
     | _                                       -> {playState with Encounters = None}|> PlayState |> Some
 
 let purchaseEquipment (location:CellLocation) (equipmentType:EquipmentType) (playState:PlayState<_>) : PlayState<_> =

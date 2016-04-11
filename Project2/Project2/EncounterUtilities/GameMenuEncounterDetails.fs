@@ -9,7 +9,7 @@ let createGameMenuEncounterDetail (playState:PlayState<_>) :EncounterDetail =
         {Text="Save...";    Response=GameCommand Save};
         {Text="Load...";    Response=GameCommand Load};
         {Text="New";        Response=GameCommand New};
-        {Text="Options..."; Response=Common Cancel}]
+        {Text="Options..."; Response=EncounterResponse.Menu Options}]
 
     let location = getBoatLocation playState
 

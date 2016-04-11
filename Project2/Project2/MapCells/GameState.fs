@@ -24,6 +24,7 @@ type MenuType =
     | Game
     | Boat
     | Island
+    | Options
 
 type EncounterType =
     | RanIntoStorm
@@ -52,7 +53,7 @@ type GameCommandType =
     | Save
     | Quit
 
-type EncounterReponse =
+type EncounterResponse =
     | Common of CommonEncounterResponse
     | Repair
     | Quest of QuestEncounterResponse
@@ -63,7 +64,7 @@ type EncounterReponse =
     | GameCommand of GameCommandType
 
 type EncounterChoice =
-    {Response:EncounterReponse;
+    {Response:EncounterResponse;
      Text:string}
 
 type EncounterDetail =
@@ -73,6 +74,9 @@ type EncounterDetail =
      Message:string list;
      Choices:EncounterChoice list;
      CurrentChoice:int}
+     //number of choices in list at one time
+     //index for top of choice list
+
 
 type MoveCommand =
     | North
@@ -90,7 +94,7 @@ type CommandType =
     | Move of MoveCommand
     | Menu of MenuCommand
 
-let getEncounterResponse (detail:EncounterDetail) :EncounterReponse =
+let getEncounterResponse (detail:EncounterDetail) :EncounterResponse =
     let choiceArray = 
         detail.Choices
         |> Array.ofList

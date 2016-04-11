@@ -52,11 +52,11 @@ let private encounterKeyboardTable =
     (SDL.Keyboard.ScanCode.Up,      CommandType.Menu Previous)]
     |> Map.ofSeq
 
-let internal handlePCEncounterCommand (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (state:PlayState<_>)  (command:CommandType option):GameState<_> option =
+let internal handlePCEncounterCommand (createFunc:unit->GameState<_>) (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (state:PlayState<_>)  (command:CommandType option):GameState<_> option =
     match command with
     | Some (CommandType.Menu Next)    -> {state with Encounters=(nextEncounterChoice state.Encounters)} |> PlayState |> Some
     | Some (CommandType.Menu Previous)-> {state with Encounters=(previousEncounterChoice state.Encounters)} |> PlayState |> Some
-    | Some (CommandType.Menu Select)  -> state |> applyEncounterChoice random sumLocationsFunc setVisibleFunc
+    | Some (CommandType.Menu Select)  -> state |> applyEncounterChoice createFunc random sumLocationsFunc setVisibleFunc
     | _                               -> state |> PlayState |> Some
 
 let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
@@ -64,26 +64,26 @@ let internal handleKeyDownEventPlayStateFreeMovement (sumLocationsFunc:SumLocati
     |> freeMovementKeyboardTable.TryFind
     |> handleFreeMovementCommand sumLocationsFunc setVisibleFunc worldSize random state
 
-let internal handleKeyDownEventPlayStateEncounter (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
+let internal handleKeyDownEventPlayStateEncounter (createFunc:unit->GameState<_>) (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:CellLocation->CellMap<MapCell>->CellMap<MapCell>) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     keyboardEvent.Keysym.Scancode
     |> encounterKeyboardTable.TryFind
-    |> handlePCEncounterCommand sumLocationsFunc setVisibleFunc random state
+    |> handlePCEncounterCommand createFunc sumLocationsFunc setVisibleFunc random state
 
 let private handleKeyDownEventDeadState (createFunc:unit->GameState<_>) (keyboardEvent:SDL.Event.KeyboardEvent) (state:GameState<_>) :GameState<_> option =
     match keyboardEvent.Keysym.Scancode with
     | SDL.Keyboard.ScanCode.F2 -> createFunc() |> Some
     | _ -> state |> Some
 
-let private handleKeyDownEventPlayState (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
+let private handleKeyDownEventPlayState (createFunc:unit->GameState<_>) (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:PlayState<_>) :GameState<_> option =
     (keyboardEvent, state)
     ||> match state with
         | FreeMovement     -> handleKeyDownEventPlayStateFreeMovement  sumLocationsFunc setVisibleFunc worldSize random
-        | HasEncounter   -> handleKeyDownEventPlayStateEncounter   sumLocationsFunc setVisibleFunc random
+        | HasEncounter   -> handleKeyDownEventPlayStateEncounter  createFunc sumLocationsFunc setVisibleFunc random
 
 let internal handleKeyDownEvent (sumLocationsFunc:SumLocationsFunc) (setVisibleFunc:SetVisibleFunc) (createFunc:unit->GameState<_>) (worldSize:CellLocation) (random:RandomFunc) (keyboardEvent:SDL.Event.KeyboardEvent) (state:GameState<_>) :GameState<_> option =
     match state with
     | PlayState x -> 
-        x |> handleKeyDownEventPlayState sumLocationsFunc setVisibleFunc worldSize random keyboardEvent
+        x |> handleKeyDownEventPlayState createFunc sumLocationsFunc setVisibleFunc worldSize random keyboardEvent
     | _ -> 
         state |> handleKeyDownEventDeadState createFunc keyboardEvent
 

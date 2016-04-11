@@ -8,9 +8,9 @@ open EncounterDetailUtilities
 let createMainMenuEncounterDetail (playState:PlayState<_>) :EncounterDetail =
     let choices = 
         [{Text="Resume";    Response=Common Cancel};
-        {Text="Boat...";    Response=EncounterReponse.Menu MenuType.Boat};
-        {Text="Islands..."; Response=EncounterReponse.Menu MenuType.Island};
-        {Text="Game...";    Response=EncounterReponse.Menu MenuType.Game}]
+        {Text="Boat...";    Response=EncounterResponse.Menu MenuType.Boat};
+        {Text="Islands..."; Response=EncounterResponse.Menu MenuType.Island};
+        {Text="Game...";    Response=EncounterResponse.Menu MenuType.Game}]
 
     let location = getBoatLocation playState
 

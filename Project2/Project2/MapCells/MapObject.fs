@@ -36,6 +36,7 @@ type BoatProperties =
      //cargo capacity
      Wallet:float<currency>;
      Quest:QuestDetails option;
+     BoundFor:CellLocation option;
      GenerateNextStorm:float<turn>}
 
 type StormProperties = 

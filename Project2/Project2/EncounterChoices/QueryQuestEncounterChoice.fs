@@ -16,7 +16,7 @@ let private acceptQuest (randomFunc:RandomFunc) (location:CellLocation) (playSta
         |> getIsland location
 
     let boatProperties' = 
-        {boatProperties with Quest = island.Quest |> Some}
+        {boatProperties with Quest = island.Quest |> Some; BoundFor = location |> Some}
 
     let islands,_ = 
         playState.Actors

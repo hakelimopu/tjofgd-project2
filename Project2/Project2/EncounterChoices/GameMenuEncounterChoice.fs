@@ -3,9 +3,8 @@
 open GameState
 open EncounterChoiceUtilities
 open System.Runtime.Serialization.Formatters.Binary
-open System.Runtime.Serialization
 open System.IO
-open RenderCell
+open OptionsMenuEncounterDetails
 
 let saveGame (playState: PlayState<_>) : PlayState<_> =
     let playState':PlayState<unit> =
@@ -24,11 +23,16 @@ let loadGame  (playState: PlayState<_>):PlayState<_> =
         formatter.Deserialize(stream) :?> PlayState<unit>
     {playState with Actors = loadedPlayState.Actors; Encounters = loadedPlayState.Encounters; MapGrid = loadedPlayState.MapGrid}
 
-let applyGameMenuPCEncounterChoice (detail:EncounterDetail) (playState: PlayState<_>) : GameState<_> option =
+let openOptionsMenu  (playState: PlayState<_>) :PlayState<_> =
+    {playState with Encounters = createOptionsMenuEncounterDetail playState |> PCEncounter |> Some}
+
+let applyGameMenuPCEncounterChoice (createFunc:unit->GameState<_>) (detail:EncounterDetail) (playState: PlayState<_>) : GameState<_> option =
     match detail |> getEncounterResponse with
-    | GameCommand Save -> playState |> saveGame |> PlayState |> Some
-    | GameCommand Load -> loadGame playState |> PlayState |> Some
+    | GameCommand Save                 -> playState |> saveGame |> PlayState |> Some
+    | GameCommand Load                 -> loadGame playState |> PlayState |> Some
+    | GameCommand New                  ->  createFunc() |> Some
+    | EncounterResponse.Menu Options   -> playState |> openOptionsMenu |> PlayState |> Some
     | GameCommand GameCommandType.Quit -> None
-    | _ -> playState|> clearEncounters |> PlayState |> Some
+    | _                                -> playState|> clearEncounters |> PlayState |> Some
 
 

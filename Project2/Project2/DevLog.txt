@@ -1,10 +1,9 @@
 ﻿Next Steps:
 
+Encounter Choice Scrolling!!!!!
 Game Menu
 -confirm quit
 -save/load asks for file name (and prolly need to be more robust!)
-Boat Menu
-Island Menu
 Mini Map
 Game Controller
 Fishing?

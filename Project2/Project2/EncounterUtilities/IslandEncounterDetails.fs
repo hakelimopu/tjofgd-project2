@@ -33,9 +33,9 @@ let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation)
     let choices = 
         [({Text="Cast Off!";          Response=Common Cancel},           ``always include choice``);
          ({Text="Repair Ship";        Response=Repair},           ``can the ship repair?`` location);
-         ({Text="Buy/Sell Equipment"; Response=EncounterReponse.Trade (TradeEncounterType.Equipment BuyOrSell)}, ``can buy or sell equipment?`` location);
-         ({Text="Need work!";         Response=EncounterReponse.Quest Query},       ``can accept quest?``);
-         ({Text="Delivery!";          Response=EncounterReponse.Quest Complete},    ``is quest complete?`` location)]
+         ({Text="Buy/Sell Equipment"; Response=EncounterResponse.Trade (TradeEncounterType.Equipment BuyOrSell)}, ``can buy or sell equipment?`` location);
+         ({Text="Need work!";         Response=EncounterResponse.Quest Query},       ``can accept quest?``);
+         ({Text="Delivery!";          Response=EncounterResponse.Quest Complete},    ``is quest complete?`` location)]
         |> List.filter (filterChoice playState)
         |> List.map fst
 
