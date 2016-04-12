@@ -15,7 +15,9 @@ let ``addNPCEncounter with initial play state having no encounters`` () =
          Title="";
          Message=[];
          Choices=[];
-         CurrentChoice=0}
+         CurrentChoice=0;
+         WindowSize=10;
+         WindowIndex=0}
 
     let initialState =
         {RenderData=Map.empty;
@@ -40,7 +42,9 @@ let ``addNPCEncounter with initial play state with npc encounter`` () =
          Title="";
          Message=[];
          Choices=[];
-         CurrentChoice=0}
+         CurrentChoice=0;
+         WindowSize=10;
+         WindowIndex=0}
 
     let encounterDetail = 
         {Location={Column=0<cell>;Row=0<cell>};
@@ -48,7 +52,9 @@ let ``addNPCEncounter with initial play state with npc encounter`` () =
          Title="";
          Message=[];
          Choices=[];
-         CurrentChoice=0}
+         CurrentChoice=0;
+         WindowSize=10;
+         WindowIndex=0}
 
     let initialState =
         {RenderData=Map.empty;
@@ -73,7 +79,9 @@ let ``addNPCEncounter with initial play state with pc encounter`` () =
          Title="";
          Message=[];
          Choices=[];
-         CurrentChoice=0}
+         CurrentChoice=0;
+         WindowSize=10;
+         WindowIndex=0}
 
     let encounterDetail = 
         {Location={Column=0<cell>;Row=0<cell>};
@@ -81,7 +89,9 @@ let ``addNPCEncounter with initial play state with pc encounter`` () =
          Title="";
          Message=[];
          Choices=[];
-         CurrentChoice=0}
+         CurrentChoice=0;
+         WindowSize=10;
+         WindowIndex=0}
 
     let initialState =
         {RenderData=Map.empty;

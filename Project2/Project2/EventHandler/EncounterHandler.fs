@@ -81,7 +81,37 @@ let private renderEncounterDetail (details:EncounterDetail)  (renderGrid:CellMap
 
     let fst3 (x,y,z) = x
 
-    ((grid,choiceLocation,0),details.Choices)
+    let scrollUp = details.WindowIndex <> 0
+    let scrollDown = (details.WindowIndex + details.WindowSize) < details.Choices.Length
+    let startingIndex = details.WindowIndex + (if scrollUp then 1 else 0)
+    let choiceCount = details.WindowSize - (if scrollUp then 1 else 0) - (if scrollDown then 1 else 0)
+
+    let beginning =
+        (if scrollUp then
+            [{Response = Common Nada; Text = "..."}]
+        else
+            List.empty)
+
+    let middle = 
+        (details.Choices
+        |> List.skip startingIndex
+        |> List.take (min choiceCount (details.Choices.Length - startingIndex)))
+    
+    let ending = 
+        (if scrollDown then
+            [{Response = Common Nada; Text = "..."}]
+        else
+            List.empty)
+
+    let choices' =
+        beginning
+        @
+        middle
+        @
+        ending
+
+
+    ((grid,choiceLocation,details.WindowIndex),choices')
     ||> List.fold writeChoiceLine
     |> fst3
 

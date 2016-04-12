@@ -17,7 +17,9 @@ let ``addNPCStormEncounter with specified location`` () =
          Type=RanIntoStorm;
          Message=["You have run into a storm;";"it has damaged your boat!"];
          Choices=[{Text="OK";Response=Common Confirm}];
-         CurrentChoice=0}
+         CurrentChoice=0;
+         WindowSize=10;
+         WindowIndex=0}
 
     let initialState =
         {RenderData=Map.empty;

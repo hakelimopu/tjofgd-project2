@@ -36,6 +36,7 @@ type EncounterType =
 type CommonEncounterResponse =
     | Confirm //also used for yes, ok
     | Cancel  //also used for no
+    | Nada
 
 type QuestEncounterResponse =
     | Query
@@ -73,9 +74,9 @@ type EncounterDetail =
      Title:string;
      Message:string list;
      Choices:EncounterChoice list;
-     CurrentChoice:int}
-     //number of choices in list at one time
-     //index for top of choice list
+     CurrentChoice:int;
+     WindowSize:int;
+     WindowIndex:int}
 
 
 type MoveCommand =

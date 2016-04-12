@@ -13,6 +13,8 @@ let createOptionsMenuEncounterDetail (playState:PlayState<_>) :EncounterDetail =
     Type=EncounterType.Menu Options;
     Message=["Make your selection:"];
     Choices=choices;
-    CurrentChoice=0} 
+    CurrentChoice=0;
+    WindowSize=10;
+    WindowIndex=0} 
 
 

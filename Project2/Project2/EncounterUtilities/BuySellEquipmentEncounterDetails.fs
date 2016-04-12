@@ -31,7 +31,9 @@ let createBuySellEquipmentEncounterDetail (playState:PlayState<_>) (location:Cel
     Type=EncounterType.Trade (TradeEncounterType.Equipment BuyOrSell);
     Message=["What would you like to do?"];
     Choices=choices;
-    CurrentChoice=0} 
+    CurrentChoice=0;
+    WindowSize=10;
+    WindowIndex=0} 
 
 let createBuyEquipmentEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
     let choices = 
@@ -58,7 +60,9 @@ let createBuyEquipmentEncounterDetail (playState:PlayState<_>) (location:CellLoc
     Type=EncounterType.Trade (TradeEncounterType.Equipment Buy);
     Message=["What would you like to buy?"];
     Choices=choices';
-    CurrentChoice=0} 
+    CurrentChoice=0;
+    WindowSize=10;
+    WindowIndex=0} 
 
 let createSellEquipmentEncounterDetail (playState:PlayState<_>) (location:CellLocation) :EncounterDetail =
     let choices = 
@@ -86,5 +90,7 @@ let createSellEquipmentEncounterDetail (playState:PlayState<_>) (location:CellLo
     Type=EncounterType.Trade (TradeEncounterType.Equipment Sell);
     Message=["What would you like to sell?"];
     Choices=choices';
-    CurrentChoice=0} 
+    CurrentChoice=0;
+    WindowSize=10;
+    WindowIndex=0} 
 

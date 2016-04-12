@@ -49,4 +49,6 @@ let createIslandEncounterDetail (playState:PlayState<_>) (location:CellLocation)
         (if island.Visits.IsSome then island.Visits.Value else 0) |> sprintf "Prior visits: %d";
         "What would you like to do?"];
     Choices=choices;
-    CurrentChoice=0} 
+    CurrentChoice=0;
+    WindowSize=10;
+    WindowIndex=0} 

@@ -26,4 +26,6 @@ let createBoatMenuEncounterDetail (playState:PlayState<_>) :EncounterDetail =
     Type=EncounterType.Menu MenuType.Boat;
     Message=["Make your selection:"];
     Choices=choices;
-    CurrentChoice=0} 
+    CurrentChoice=0;
+    WindowSize=10;
+    WindowIndex=0} 

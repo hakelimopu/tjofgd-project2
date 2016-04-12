@@ -42,6 +42,8 @@ let createQueryRepairEncounterDetail (playState:PlayState<_>) (location:CellLoca
         sprintf "You can repair %d" (maximumDamageRepaired / 1.0<health> |> int);
         sprintf "Total cost: $%.2f" (totalCost / 1.0<currency>)];
     Choices=choices;
-    CurrentChoice=0} 
+    CurrentChoice=0;
+    WindowSize=10;
+    WindowIndex=0} 
 
 

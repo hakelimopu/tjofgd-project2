@@ -1,6 +1,7 @@
 ﻿Next Steps:
 
-Encounter Choice Scrolling!!!!!
+Choose from known island!!!!
+When I get a quest, set the destination island visit count to Some 0 (if it is None).
 Game Menu
 -confirm quit
 -save/load asks for file name (and prolly need to be more robust!)
